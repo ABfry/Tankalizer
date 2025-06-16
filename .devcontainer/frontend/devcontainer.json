@@ -4,7 +4,7 @@
   "service": "frontend",
   "workspaceFolder": "/app",
   "overrideCommand": true,
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "npm install",
   "postStartCommand": "npm run dev",
   "containerEnv": {
     "NODE_ENV": "development"
@@ -14,7 +14,9 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense"
       ],
       "settings": {
         "editor.formatOnSave": true,

@@ -11,7 +11,8 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "bradlc.vscode-tailwindcss"
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense"
       ],
       "settings": {
         "editor.formatOnSave": true,
