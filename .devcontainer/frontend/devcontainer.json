@@ -1,0 +1,26 @@
+{
+  "name": "Tankalizer Frontend Container",
+  "dockerComposeFile": "../../docker-compose.yaml",
+  "service": "frontend",
+  "workspaceFolder": "/app",
+  "overrideCommand": true,
+  "postCreateCommand": "npm ci",
+  "postStartCommand": "npm run dev",
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "prettier.singleQuote": true,
+        "eslint.alwaysShowStatus": true
+      }
+    }
+  }
+}
