@@ -1,13 +1,15 @@
-FROM node:20
+FROM node:20-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-COPY package-lock.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
+
+# .nextフォルダを削除
+RUN rm -rf .next
 
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
