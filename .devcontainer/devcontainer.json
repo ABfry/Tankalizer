@@ -1,0 +1,68 @@
+{
+  "name": "Tankalizer DevContainer",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "workspaceFolder": "/app",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "TZ": "Asia/Tokyo",
+    "BACKEND_URL": "http://localhost:8080",
+    "WATCHPACK_POLLING": "true",
+    "CHOKIDAR_USEPOLLING": "true"
+  },
+  "runArgs": [
+    "--name=Tankalizer",
+    "--env-file=${localWorkspaceFolder}/frontend/.env",
+    "--env-file=${localWorkspaceFolder}/backend/.env"
+  ],
+  "forwardPorts": [3000, 8080],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "eslint.alwaysShowStatus": true,
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "tasks": {
+          "version": "2.0.0",
+          "tasks": [
+            {
+              "label": "frontend",
+              "type": "shell",
+              "command": "unset PORT && npm install && npm run dev",
+              "options": { "cwd": "${workspaceFolder}/frontend" },
+              "presentation": {
+                "group": "group"
+              },
+              "runOptions": {
+                "runOn": "folderOpen"
+              }
+            },
+            {
+              "label": "backend",
+              "type": "shell",
+              "command": "npm install && npm run dev",
+              "options": { "cwd": "${workspaceFolder}/backend" },
+              "presentation": {
+                "group": "group"
+              },
+              "runOptions": {
+                "runOn": "folderOpen"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
