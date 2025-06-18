@@ -1,0 +1,39 @@
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+
+import type { IStorageService } from './iStorageService.js';
+import { streamToBuffer } from '../../utils/stream.js';
+
+export class S3StorageService implements IStorageService {
+  constructor(private s3Client: S3Client, private bucketName: string) {}
+
+  async upload(file: File, key: string): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: file,
+      ContentType: file.type,
+    });
+
+    await this.s3Client.send(command);
+    return this.getUrl(key);
+  }
+
+  async download(key: string): Promise<Buffer> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    const stream = (await this.s3Client.send(command)).Body;
+
+    if (!stream) {
+      throw new Error('ファイルが見つかりません');
+    }
+
+    return await streamToBuffer(stream);
+  }
+
+  getUrl(key: string): string {
+    return `https://${this.bucketName}.s3.${this.s3Client.config.region}.amazonaws.com/${key}`;
+  }
+}
