@@ -9,6 +9,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - /app/.next
     depends_on:
       - backend
     env_file:
@@ -16,6 +17,8 @@ services:
     environment:
       - TZ=Asia/Tokyo
       - BACKEND_URL=http://backend:8080
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
   backend:
     build:
       context: ./backend
