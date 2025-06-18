@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 
-import type { IStorageService } from './interface.js';
+import type { IStorageService } from './iStorageService.js';
 import { streamToBuffer } from '../../utils/stream.js';
 
 export class S3StorageService implements IStorageService {
