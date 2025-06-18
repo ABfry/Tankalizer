@@ -37,6 +37,7 @@ const createPostHandler: RouteHandler<typeof createPostRoute, {}> = async (c: Co
     }
     const original = originalValue;
 
+    // TODO : image、compressImageしてから送るようにしたい
     const response = await generateTanka(original, image);
 
     // gemini APIのエラー確認
