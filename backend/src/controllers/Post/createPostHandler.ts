@@ -37,7 +37,7 @@ const createPostHandler: RouteHandler<typeof createPostRoute, {}> = async (c: Co
     }
     const original = originalValue;
 
-    const response = await generateTanka(original);
+    const response = await generateTanka(original, image);
 
     // gemini APIのエラー確認
     if (response.isSuccess == false) {
