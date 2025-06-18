@@ -5,7 +5,14 @@
     "context": "."
   },
   "workspaceFolder": "/app",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+  "mounts": [
+    // ローカルのワークスペースフォルダをコンテナの/appにマウント
+    "source=${localWorkspaceFolder},target=/app,type=bind",
+    // node_modulesとnextフォルダを除外
+    "source=tankaLizer-frontend-node_modules,target=/app/frontend/node_modules,type=volume",
+    "source=tankalizer-frontend-next,target=/app/frontend/.next,type=volume",
+    "source=tankalizer-backend-node_modules,target=/app/backend/node_modules,type=volume"
+  ],
   "containerEnv": {
     "NODE_ENV": "development",
     "TZ": "Asia/Tokyo",
