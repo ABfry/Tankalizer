@@ -6,7 +6,7 @@ const printLine = (): void => {
   console.log('--------------------------------');
 };
 
-const generateTanka = async (originalText: string): Promise<any> => {
+const generateTanka = async (originalText: string, image: File | null = null): Promise<any> => {
   // Geminiで短歌生成
 
   try {
@@ -98,8 +98,13 @@ const generateTanka = async (originalText: string): Promise<any> => {
 
       入力と出力
 
-      *   **入力:** SNSの投稿内容（テキスト）
+      *   **入力:** SNSの投稿内容（テキスト）と画像（オプション）
       *   **出力:** 五七五七七の短歌（テキスト）
+
+      **画像が含まれる場合の対応:**
+      *   **画像の内容を理解し、テキストと組み合わせて短歌を生成してください。**
+      *   **画像の中の要素（人、物、風景、色彩、雰囲気など）をテキストと関連付けて詠み込んでください。**
+      *   **画像とテキストの両方の要素を活かした、より豊かな表現を目指してください。**
 
       制約条件
 
@@ -248,6 +253,25 @@ const generateTanka = async (originalText: string): Promise<any> => {
       });
     };
 
+    let contents;
+    if (image) {
+      // 画像がある場合はbase64に変換してcontentsに追加
+      const imageArrayBuffer = await image.arrayBuffer();
+      const base64ImageData = Buffer.from(imageArrayBuffer).toString('base64');
+      contents = [
+        {
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: base64ImageData,
+          },
+        },
+        { text: originalText },
+      ];
+    } else {
+      // 画像がない場合はテキストのみ
+      contents = originalText;
+    }
+
     // 生成後、型のチェック（3回まで）
     for (let i = 0; i < 3; i++) {
       printLine();
@@ -255,7 +279,8 @@ const generateTanka = async (originalText: string): Promise<any> => {
 
       let result;
       try {
-        result = await model.generateContent(originalText);
+        // 画像がある場合はマルチモーダル、ない場合はテキストのみ
+        result = await model.generateContent(contents);
       } catch (error: any) {
         console.error(error);
 
