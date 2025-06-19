@@ -7,10 +7,15 @@ export class S3StorageService implements IStorageService {
   constructor(private s3Client: S3Client, private bucketName: string) {}
 
   async upload(file: File, key: string): Promise<string> {
+    // FileをBufferに変換
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // s3を叩くコマンド
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
-      Body: file,
+      Body: buffer,
       ContentType: file.type,
     });
 
