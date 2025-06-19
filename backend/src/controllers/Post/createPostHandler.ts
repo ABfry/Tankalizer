@@ -23,41 +23,9 @@ const createPostHandler: RouteHandler<typeof createPostRoute, {}> = async (c: Co
     const user_icon = formData.get('user_icon');
 
     //console.log(image);
-
-    if (!originalValue || typeof originalValue !== 'string') {
-      console.log('originalはstringである必要があります．');
-      return c.json(
-        {
-          message: 'originalはstringである必要があります．',
-          statusCode: 400,
-          error: 'Bad Request',
-        },
-        400
-      );
-    }
-    const original = originalValue;
-
-    // TODO : image、compressImageしてから送るようにしたい
-    const response = await generateTanka(original, image);
-
-    // gemini APIのエラー確認
-    if (response.isSuccess == false) {
-      console.log(response.message);
-      return c.json(
-        {
-          message: response.message,
-          statusCode: 500,
-          error: response.message,
-        },
-        500
-      );
-    }
-
-    const tanka = JSON.stringify(response.tanka);
-    //console.log(tanka);
-
     // imageがnullならimage_pathをnullにする．
     let image_path;
+    let file: File | null = null;
     if (image == null) {
       image_path = null;
     } else {
@@ -71,7 +39,7 @@ const createPostHandler: RouteHandler<typeof createPostRoute, {}> = async (c: Co
       await compressImage(buffer)
         .then(async (resultBuffer) => {
           // BufferからFile型へ変換
-          const file = new File([resultBuffer], new_file_name, { type: 'image/jpeg' });
+          file = new File([resultBuffer], new_file_name, { type: 'image/jpeg' });
           //console.log(file);
           // アップロード
           image_path = await uploadFile(file);
@@ -88,6 +56,37 @@ const createPostHandler: RouteHandler<typeof createPostRoute, {}> = async (c: Co
           );
         });
     }
+
+    if (!originalValue || typeof originalValue !== 'string') {
+      console.log('originalはstringである必要があります．');
+      return c.json(
+        {
+          message: 'originalはstringである必要があります．',
+          statusCode: 400,
+          error: 'Bad Request',
+        },
+        400
+      );
+    }
+    const original = originalValue;
+
+    const response = await generateTanka(original, file);
+
+    // gemini APIのエラー確認
+    if (response.isSuccess == false) {
+      console.log(response.message);
+      return c.json(
+        {
+          message: response.message,
+          statusCode: 500,
+          error: response.message,
+        },
+        500
+      );
+    }
+
+    const tanka = JSON.stringify(response.tanka);
+    //console.log(tanka);
 
     // ここからDBのpostテーブルへ情報登録
     const sql = `insert into ${env.POSTS_TABLE_NAME} (original, tanka, image_path, user_name, user_icon) values (:original, :tanka, :image_path, :user_name, :user_icon)`;

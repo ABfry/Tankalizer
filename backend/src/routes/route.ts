@@ -31,6 +31,8 @@ import { sampleGeminiRoute } from './Sample/sampleGeminiRoute.js';
 import sampleGeminiHandler from '../controllers/Sample/sampleGeminiHandler.js';
 import { newsTankaRoute } from './News/newsTankaRoute.js';
 import newsTankaHandler from '../controllers/News/newsTankaHandler.js';
+import { createUserRouteV2 } from './User/createUserRouteV2.js';
+import createUserHandlerV2 from '../controllers/User/createUserHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -50,5 +52,6 @@ export default router
   .openapi(sampleS3UploadRoute, sampleS3UploadHandler)
   .openapi(sampleS3DownloadRoute, sampleS3DownloadHandler)
   .openapi(sampleGeminiRoute, sampleGeminiHandler)
-  .openapi(newsTankaRoute, newsTankaHandler);
+  .openapi(newsTankaRoute, newsTankaHandler)
+  .openapi(createUserRouteV2, createUserHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく
