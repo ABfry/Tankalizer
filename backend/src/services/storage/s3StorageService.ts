@@ -3,6 +3,8 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 import type { IStorageService } from './iStorageService.js';
 import { streamToBuffer } from '../../utils/stream.js';
 
+const CDN_URL = 'image.tankalizer.jp';
+
 export class S3StorageService implements IStorageService {
   constructor(private readonly s3Client: S3Client, private readonly bucketName: string) {}
 
@@ -39,6 +41,6 @@ export class S3StorageService implements IStorageService {
   }
 
   getUrl(key: string): string {
-    return `https://${this.bucketName}.s3.${this.s3Client.config.region}.amazonaws.com/${key}`;
+    return `https://${CDN_URL}/${key}`;
   }
 }
