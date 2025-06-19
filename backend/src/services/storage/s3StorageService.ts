@@ -4,7 +4,7 @@ import type { IStorageService } from './iStorageService.js';
 import { streamToBuffer } from '../../utils/stream.js';
 
 export class S3StorageService implements IStorageService {
-  constructor(private s3Client: S3Client, private bucketName: string) {}
+  constructor(private readonly s3Client: S3Client, private readonly bucketName: string) {}
 
   async upload(file: File, key: string): Promise<string> {
     // FileをBufferに変換
