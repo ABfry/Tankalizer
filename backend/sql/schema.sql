@@ -7,7 +7,11 @@ oauth_app ENUM('github', 'google') NOT NULL,
 connect_info VARCHAR(100) NOT NULL,
 profile_text VARCHAR(255),
 icon_url VARCHAR(255) NOT NULL,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+UNIQUE (connect_info),
+UNIQUE (icon_url)
+
 );
 
 -- posts

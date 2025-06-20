@@ -1,12 +1,13 @@
+import { type IUserService } from './iUserService.js';
 import {
-  UserRepository,
+  type IUserRepository,
   type CreateUserDTO,
   type User,
-} from '../../repositories/user/userRepository.js';
+} from '../../repositories/user/iUserRepository.js';
 
-export class UserService {
+export class UserService implements IUserService {
   // userRepositoryのインスタンスをコンストラクタで受け取る
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   /**
    * 新しいユーザーを作成するビジネスロジック

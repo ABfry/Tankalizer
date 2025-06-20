@@ -3,12 +3,14 @@ import type { Context } from 'hono';
 import { z } from 'zod';
 
 import type { createUserRouteV2 } from '../../routes/User/createUserRouteV2.js';
+import { type IUserService } from '../../services/user/iUserService.js';
+import { type IUserRepository } from '../../repositories/user/iUserRepository.js';
 import { UserService } from '../../services/user/userService.js';
 import { UserRepository } from '../../repositories/user/userRepository.js';
-import { type CreateUserDTO } from '../../repositories/user/userRepository.js';
+import { type CreateUserDTO } from '../../repositories/user/iUserRepository.js';
 
-const userRepository = new UserRepository();
-const userService = new UserService(userRepository);
+const userRepository: IUserRepository = new UserRepository();
+const userService: IUserService = new UserService(userRepository);
 
 // zod-openapiのスキーマから，TypeScriptの型を推論
 type CreateUserRequestSchema = z.infer<

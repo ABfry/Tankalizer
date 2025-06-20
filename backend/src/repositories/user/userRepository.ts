@@ -1,27 +1,8 @@
+import { type IUserRepository, type CreateUserDTO, type User } from './iUserRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
 
-// ユーザー作成時にリポジトリが受け取るデータの型
-export type CreateUserDTO = {
-  name: string;
-  oauth_app: 'github' | 'google';
-  connect_info: string;
-  profile_text?: string;
-  icon_url: string;
-};
-
-// DBから取得するユーザーデータの型
-export type User = {
-  id: string;
-  name: string;
-  oauth_app: 'github' | 'google';
-  connect_info: string;
-  profile_text: string | null;
-  icon_url: string;
-  created_at: Date;
-};
-
-export class UserRepository {
+export class UserRepository implements IUserRepository {
   /**
    * メールアドレスをもとにユーザーを1件検索する
    * @param connect_info - メールアドレス (例: taro-gh@gmail.com)

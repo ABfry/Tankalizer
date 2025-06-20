@@ -27,4 +27,9 @@ export const createUserSchema = z.object({
 // レスポンスの型
 export const createUserResponseSchema = z.object({
   message: z.string(),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    icon_url: z.string(),
+  }),
 });
