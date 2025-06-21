@@ -1,172 +1,55 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import db from '../../lib/db.js';
-import { createPostSchema } from '../../schema/Post/createPostSchema.js';
-import type { createPostRoute } from '../../routes/Post/createPostRoute.js';
-import { env } from '../../config/env.js';
-import generateTanka from '../../lib/gemini.js';
-import { sampleUploadSchema } from '../../schema/sampleS3Schema.js';
-import type { sampleS3UploadRoute } from '../../routes/sampleS3Route.js';
-import { uploadFile } from '../../lib/s3-connector.js';
-import path from 'path';
-import sharp from 'sharp';
+import type { createPostRouteV2 } from '../../routes/Post/createPostRouteV2.js';
+import { type IPostService } from '../../services/post/iPostService.js';
+import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
+import { PostService } from '../../services/post/postService.js';
+import { PostRepository } from '../../repositories/post/postRepository.js';
+import type { CreatePostDTO } from '../../services/post/iPostService.js';
 
-type createPostSchema = z.infer<typeof createPostSchema>;
+const createPostHandlerV2: RouteHandler<typeof createPostRouteV2, {}> = async (c: Context) => {
+  const postRepository: IPostRepository = new PostRepository();
+  const postService: IPostService = new PostService(postRepository);
 
-const createPostHandler: RouteHandler<typeof createPostRoute, {}> = async (c: Context) => {
   try {
-    // 受け取ったデータを各変数に格納
+    // リクエストからデータを取得
     const formData = await c.req.formData();
-    const originalValue = formData.get('original');
-    const image = (formData.get('image') as File) || null;
-    const user_name = formData.get('user_name');
-    const user_icon = formData.get('user_icon');
+    const original = formData.get('original') as string;
+    const image = (formData.get('image') as File) || null; // 画像がない場合はnull
+    const user_id = formData.get('user_id') as string;
 
-    //console.log(image);
-    // imageがnullならimage_pathをnullにする．
-    let image_path;
-    let file: File | null = null;
-    if (image == null) {
-      image_path = null;
-    } else {
-      //console.log(image);
-      // ここに圧縮処理 (jpegにしてqualityさげる．めざせ500KB)
-      // File型からbufferへ
-      const arrayBuffer = await image.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const new_file_name = 'file.jpg';
-
-      await compressImage(buffer)
-        .then(async (resultBuffer) => {
-          // BufferからFile型へ変換
-          file = new File([resultBuffer], new_file_name, { type: 'image/jpeg' });
-          //console.log(file);
-          // アップロード
-          image_path = await uploadFile(file);
-        })
-        .catch((err) => {
-          console.error('画像圧縮エラー:', err);
-          return c.json(
-            {
-              message: '画像のアップロードに失敗しました．',
-              statusCode: 500,
-              error: '画像のアップロードに失敗しました．',
-            },
-            500
-          );
-        });
-    }
-
-    if (!originalValue || typeof originalValue !== 'string') {
-      console.log('originalはstringである必要があります．');
+    // バリデーション
+    if (!original || !user_id) {
       return c.json(
-        {
-          message: 'originalはstringである必要があります．',
-          statusCode: 400,
-          error: 'Bad Request',
-        },
+        { message: 'originalとuser_idは必須です．', statusCode: 400, error: 'Bad Request' },
         400
       );
     }
-    const original = originalValue;
 
-    const response = await generateTanka(original, file);
+    // DTOにデータを詰める
+    const postDto: CreatePostDTO = {
+      original,
+      image,
+      user_id,
+    };
 
-    // gemini APIのエラー確認
-    if (response.isSuccess == false) {
-      console.log(response.message);
-      return c.json(
-        {
-          message: response.message,
-          statusCode: 500,
-          error: response.message,
-        },
-        500
-      );
-    }
+    // サービスを呼び出す
+    const result = await postService.createPost(postDto);
 
-    const tanka = JSON.stringify(response.tanka);
-    //console.log(tanka);
-
-    // ここからDBのpostテーブルへ情報登録
-    const sql = `insert into ${env.POSTS_TABLE_NAME} (original, tanka, image_path, user_name, user_icon) values (:original, :tanka, :image_path, :user_name, :user_icon)`;
-    await db.query(sql, { original, tanka, image_path, user_name, user_icon });
-
-    // レスポンス
-    console.log('投稿しました．');
+    // 成功レスポンスを返す
+    return c.json(result, 200);
+  } catch (err: any) {
+    // エラーレスポンスを返す
+    console.error('[createPostHandlerV2] エラーが発生しました．', err);
     return c.json(
       {
-        message: '投稿しました．',
-        tanka: response.tanka,
-      },
-      200
-    );
-  } catch (err) {
-    console.log('投稿に失敗しました．' + err);
-    return c.json(
-      {
-        message: '投稿に失敗しました．',
+        message: err.message || '投稿処理中に不明なエラーが発生しました．',
         statusCode: 500,
-        error: '投稿に失敗しました．',
+        error: 'Internal Server Error',
       },
       500
     );
   }
 };
 
-export default createPostHandler;
-
-// 1080pに圧縮．それでも500KB超えていたら二分探索で500KB以下にする
-async function compressImage(inputBuffer: Buffer): Promise<Buffer> {
-  let minQuality = 1;
-  let maxQuality = 100;
-  let bestQuality = maxQuality;
-  let bestBuffer: Buffer | null = null;
-  const targetFileSize = 500 * 1024; // 500KB
-
-  // jpegに変換して，それ以外何もしなくても500KB以下か?
-  const compressedJpegBuffer = await sharp(inputBuffer).jpeg().toBuffer();
-  if (compressedJpegBuffer.length <= targetFileSize) {
-    return compressedJpegBuffer;
-  }
-
-  // 1080pにして500KB以下か?
-  const compressed1080pBuffer = await sharp(inputBuffer)
-    .rotate()
-    .resize(1080, 1080, {
-      fit: 'inside',
-    })
-    .jpeg()
-    .toBuffer();
-  if (compressed1080pBuffer.length <= targetFileSize) {
-    return compressed1080pBuffer;
-  }
-
-  // 二分探索
-  while (minQuality <= maxQuality) {
-    const midQuality = Math.floor((minQuality + maxQuality) / 2);
-    const compressedBuffer = await sharp(inputBuffer)
-      .rotate()
-      .resize(1080, 1080, {
-        fit: 'inside',
-      })
-      .jpeg({ quality: midQuality })
-      .toBuffer();
-
-    // サイズがtargetFileSizeより大きければ，maxQualityを小さく
-    if (compressedBuffer.length > targetFileSize) {
-      maxQuality = midQuality - 1;
-    } else {
-      // サイズがtargetFileSizeより小さければ，一旦bestBufferとし，minQualityを大きく
-      bestBuffer = compressedBuffer;
-      bestQuality = midQuality;
-      minQuality = midQuality + 1;
-    }
-  }
-
-  if (!bestBuffer) {
-    throw new Error('画像の圧縮に失敗しました．');
-  }
-
-  return bestBuffer;
-}
+export default createPostHandlerV2;

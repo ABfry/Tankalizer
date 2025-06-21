@@ -3,7 +3,7 @@ import { z } from '@hono/zod-openapi';
 // リクエストの型
 export const createPostSchema = z.object({
   original: z.string().openapi({
-    example: 'これは投稿の原文です．今日からハッカソンの開発期間がスタートしました．',
+    example: 'これは投稿の原文です．技育博に向けてブラッシュアップを頑張りましょう．',
     description: '原文',
   }),
   image: z
@@ -14,13 +14,9 @@ export const createPostSchema = z.object({
       format: 'binary',
       description: '添付画像ファイル',
     }),
-  user_name: z.string().openapi({
-    example: 'TARO-gh',
-    description: 'Git Hubの名前',
-  }),
-  user_icon: z.string().openapi({
-    example: 'https://avatars.githubusercontent.com/u/131171129?v=4',
-    description: 'git hubのアイコンURL',
+  user_id: z.string().openapi({
+    example: '5e622fe0-4dcd-11f0-8c6b-0242ac130003',
+    description: 'ユーザーID (36文字のUUID形式)',
   }),
 });
 
