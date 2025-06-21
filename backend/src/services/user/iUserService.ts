@@ -1,5 +1,5 @@
-import type { CreateUserDTO, User } from '../../repositories/user/iUserRepository.js';
+import type { CreateUserRepoDTO, User } from '../../repositories/user/iUserRepository.js';
 
 export interface IUserService {
-  createUser(userDto: CreateUserDTO): Promise<User>;
+  createUser(userDto: CreateUserRepoDTO): Promise<User>;
 }

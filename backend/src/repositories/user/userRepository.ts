@@ -1,4 +1,4 @@
-import { type IUserRepository, type CreateUserDTO, type User } from './iUserRepository.js';
+import { type IUserRepository, type CreateUserRepoDTO, type User } from './iUserRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
 
@@ -23,7 +23,7 @@ export class UserRepository implements IUserRepository {
    * @param user - 作成するユーザーのデータ (CreateUserDTO)
    * @returns {Promise<void>}
    */
-  async create(user: CreateUserDTO): Promise<void> {
+  async create(user: CreateUserRepoDTO): Promise<void> {
     const sql = `
       INSERT INTO ${env.USERS_TABLE_NAME} 
       (name, oauth_app, connect_info, profile_text, icon_url) 

@@ -1,4 +1,4 @@
-export type CreateUserDTO = {
+export type CreateUserRepoDTO = {
   name: string;
   oauth_app: 'github' | 'google';
   connect_info: string;
@@ -18,5 +18,5 @@ export type User = {
 
 export interface IUserRepository {
   findByEmail(connect_info: string): Promise<User | null>;
-  create(user: CreateUserDTO): Promise<void>;
+  create(user: CreateUserRepoDTO): Promise<void>;
 }

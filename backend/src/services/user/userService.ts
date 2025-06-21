@@ -1,7 +1,7 @@
 import { type IUserService } from './iUserService.js';
 import {
   type IUserRepository,
-  type CreateUserDTO,
+  type CreateUserRepoDTO,
   type User,
 } from '../../repositories/user/iUserRepository.js';
 
@@ -16,7 +16,7 @@ export class UserService implements IUserService {
    * @returns {Promise<User>} 作成または取得したユーザー情報
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
-  async createUser(userDto: CreateUserDTO): Promise<User> {
+  async createUser(userDto: CreateUserRepoDTO): Promise<User> {
     console.log(
       `[UserService#createUser] ユーザー作成処理を開始します．(oauth_app: ${userDto.oauth_app}, connect_info: ${userDto.connect_info})`
     );
