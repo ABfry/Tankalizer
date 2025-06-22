@@ -72,4 +72,42 @@ export class PostRepository implements IPostRepository {
       throw error;
     }
   }
+
+  /**
+   * 投稿を取得する
+   * @param dto - 取得条件 (GetPostsRepoDTO)
+   * @returns {Promise<Post[]>} 投稿の配列
+   */
+  async getPosts(dto: {
+    limit: number;
+    cursor?: string | null;
+    filterByUserId?: string | null;
+    viewerId?: string | null;
+  }): Promise<Post[]> {
+    const { limit, cursor, filterByUserId, viewerId } = dto;
+    let sql = `
+      SELECT * FROM ${env.POSTS_TABLE_NAME}
+      WHERE is_deleted = FALSE
+    `;
+
+    if (filterByUserId) {
+      sql += ` AND user_id = :filterByUserId`;
+    }
+
+    if (cursor) {
+      sql += ` AND created_at < (SELECT created_at FROM ${env.POSTS_TABLE_NAME} WHERE id = :cursor)`;
+    }
+
+    sql += `
+      ORDER BY created_at DESC
+      LIMIT :limit;
+    `;
+
+    const values: Record<string, any> = { limit };
+    if (filterByUserId) values.filterByUserId = filterByUserId;
+    if (cursor) values.cursor = cursor;
+
+    const result = await db.query<Post>(sql, values);
+    return result;
+  }
 }

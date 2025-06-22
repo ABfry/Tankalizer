@@ -5,6 +5,13 @@ export type CreatePostRepoDTO = {
   user_id: string;
 };
 
+export type GetPostsRepoDTO = {
+  limit: number;
+  cursor?: string | null;
+  filterByUserId?: string | null;
+  viewerId?: string | null;
+};
+
 export type Post = {
   id: string;
   original: string;
@@ -12,11 +19,15 @@ export type Post = {
   image_path: string | null;
   created_at: Date;
   user_id: string;
-  is_deleted: boolean;
+  user_name: string;
+  user_icon: string;
+  miyabi_count: number;
+  is_miyabied: boolean;
 };
 
 export interface IPostRepository {
   findById(id: string): Promise<Post | null>;
   create(user: CreatePostRepoDTO): Promise<void>;
   delete(id: string, userId: string): Promise<void>;
+  getPosts(dto: GetPostsRepoDTO): Promise<Post[]>;
 }
