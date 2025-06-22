@@ -51,4 +51,25 @@ export class PostRepository implements IPostRepository {
       throw error;
     }
   }
+
+  /**
+   * 投稿を削除（削除フラグをONに）する
+   * @param id - 投稿ID
+   * @param userId - ユーザーID
+   * @returns {Promise<void>}
+   */
+  async delete(id: string, userId: string): Promise<void> {
+    const sql = `
+      UPDATE ${env.POSTS_TABLE_NAME}
+      SET is_deleted = TRUE
+      WHERE id = :id AND user_id = :userId;
+    `;
+    try {
+      await db.query(sql, { id, userId });
+      console.log(`[PostRepository#delete] 投稿の削除に成功しました．(postId: ${id})`);
+    } catch (error) {
+      console.error(`[PostRepository#delete] 投稿の削除に失敗しました．(postId: ${id})`, error);
+      throw error;
+    }
+  }
 }

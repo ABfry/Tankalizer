@@ -18,4 +18,5 @@ export type Post = {
 export interface IPostRepository {
   findById(id: string): Promise<Post | null>;
   create(user: CreatePostRepoDTO): Promise<void>;
+  delete(id: string, userId: string): Promise<void>;
 }

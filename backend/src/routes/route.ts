@@ -35,6 +35,8 @@ import { createUserRouteV2 } from './User/createUserRouteV2.js';
 import createUserHandlerV2 from '../controllers/User/createUserHandlerV2.js';
 import { createPostRouteV2 } from './Post/createPostRouteV2.js';
 import createPostHandlerV2 from '../controllers/Post/createPostHandlerV2.js';
+import { deletePostRouteV2 } from './Post/deletePostRouteV2.js';
+import deletePostHandlerV2 from '../controllers/Post/deletePostHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -56,5 +58,6 @@ export default router
   .openapi(sampleGeminiRoute, sampleGeminiHandler)
   .openapi(newsTankaRoute, newsTankaHandler)
   .openapi(createUserRouteV2, createUserHandlerV2)
-  .openapi(createPostRouteV2, createPostHandlerV2);
+  .openapi(createPostRouteV2, createPostHandlerV2)
+  .openapi(deletePostRouteV2, deletePostHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく

@@ -6,6 +6,7 @@ import {
   type Post,
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
+import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
 
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
@@ -72,6 +73,38 @@ export class PostService implements IPostService {
     return {
       message: '投稿しました．',
       tanka: tanka,
+    };
+  }
+
+  /**
+   * 投稿を削除するビジネスロジック
+   * @param deletePostDto - 投稿削除に必要なデータ
+   * @returns {Promise<DeletePostResult>} 削除結果
+   * @throws {Error} 投稿が見つからない、または削除権限がない場合にエラー
+   */
+  async deletePost(deletePostDto: DeletePostDTO): Promise<DeletePostResult> {
+    console.log(
+      `[PostService#deletePost] 投稿削除処理を開始します．(postId: ${deletePostDto.post_id})`
+    );
+
+    const post = await this.postRepository.findById(deletePostDto.post_id);
+
+    if (!post) {
+      throw new Error('投稿が見つかりません．');
+    }
+
+    if (post.user_id !== deletePostDto.user_id) {
+      throw new Error('許可がありません．');
+    }
+
+    await this.postRepository.delete(deletePostDto.post_id, deletePostDto.user_id);
+
+    console.log(
+      `[PostService#deletePost] 投稿の削除が完了しました．(postId: ${deletePostDto.post_id})`
+    );
+
+    return {
+      message: '投稿を削除しました．',
     };
   }
 }
