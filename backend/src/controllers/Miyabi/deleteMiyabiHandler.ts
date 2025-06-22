@@ -1,6 +1,6 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import db from '../db.js';
+import db from '../../lib/db.js';
 import { deleteMiyabiSchema } from '../../schema/Miyabi/deleteMiyabiSchema.js';
 import type { deleteMiyabiRoute } from '../../routes/Miyabi/deleteMiyabiRoute.js';
 import { env } from '../../config/env.js';
