@@ -2,14 +2,14 @@
   "name": "Tankalizer DevContainer",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": "."
+    "context": ".."
   },
   "workspaceFolder": "/app",
   "mounts": [
     // ローカルのワークスペースフォルダをコンテナの/appにマウント
     "source=${localWorkspaceFolder},target=/app,type=bind",
     // node_modulesとnextフォルダを除外
-    "source=tankaLizer-frontend-node_modules,target=/app/frontend/node_modules,type=volume",
+    "source=tankalizer-frontend-node_modules,target=/app/frontend/node_modules,type=volume",
     "source=tankalizer-frontend-next,target=/app/frontend/.next,type=volume",
     "source=tankalizer-backend-node_modules,target=/app/backend/node_modules,type=volume"
   ],
@@ -21,6 +21,7 @@
     "CHOKIDAR_USEPOLLING": "true"
   },
   "runArgs": [
+    "--network=host",
     "--name=Tankalizer",
     "--env-file=${localWorkspaceFolder}/frontend/.env",
     "--env-file=${localWorkspaceFolder}/backend/.env"
@@ -46,7 +47,7 @@
             {
               "label": "frontend",
               "type": "shell",
-              "command": "unset PORT && npm install && npm run dev",
+              "command": "unset PORT && npm run dev",
               "options": { "cwd": "${workspaceFolder}/frontend" },
               "presentation": {
                 "group": "group"
@@ -58,7 +59,7 @@
             {
               "label": "backend",
               "type": "shell",
-              "command": "npm install && npm run dev",
+              "command": "npm run dev",
               "options": { "cwd": "${workspaceFolder}/backend" },
               "presentation": {
                 "group": "group"
