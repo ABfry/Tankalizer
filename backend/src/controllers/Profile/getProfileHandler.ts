@@ -1,6 +1,6 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import db from '../db.js';
+import db from '../../lib/db.js';
 import { getProfileSchema } from '../../schema/Profile/getProfileSchema.js';
 import type { getProfileRoute } from '../../routes/Profile/getProfileRoute.js';
 import { env } from '../../config/env.js';

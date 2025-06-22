@@ -1,6 +1,6 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import db from '../db.js';
+import db from '../../lib/db.js';
 import { getPostSchema } from '../../schema/Post/getPostSchema.js';
 import type { getPostRoute } from '../../routes/Post/getPostRoute.js';
 import { env } from '../../config/env.js';

@@ -2,10 +2,12 @@ import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import type { Provider } from 'next-auth/providers';
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const providers: Provider[] = [
   GitHub({
     clientId: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECREAT,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
   }),
 ];
 
@@ -24,11 +26,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   providers,
   cookies: {
     pkceCodeVerifier: {
-      name: '__Secure-next-auth.pkce.code_verifier',
+      name: isDevelopment
+        ? 'next-auth.pkce.code_verifier'
+        : '__Secure-next-auth.pkce.code_verifier',
       options: {
         httpOnly: true,
         path: '/',
-        secure: true,
+        secure: !isDevelopment,
         sameSite: 'lax',
       },
     },
