@@ -7,7 +7,7 @@ import { type IUserService } from '../../services/user/iUserService.js';
 import { type IUserRepository } from '../../repositories/user/iUserRepository.js';
 import { UserService } from '../../services/user/userService.js';
 import { UserRepository } from '../../repositories/user/userRepository.js';
-import { type CreateUserDTO } from '../../repositories/user/iUserRepository.js';
+import { type CreateUserRepoDTO } from '../../repositories/user/iUserRepository.js';
 
 const userRepository: IUserRepository = new UserRepository();
 const userService: IUserService = new UserService(userRepository);
@@ -20,7 +20,7 @@ type CreateUserRequestSchema = z.infer<
 const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c: Context) => {
   try {
     // リクエストボディを取得し，スキーマでバリデーション
-    const userDto: CreateUserDTO = await c.req.json<CreateUserRequestSchema>();
+    const userDto: CreateUserRepoDTO = await c.req.json<CreateUserRequestSchema>();
     console.log('[Handler] /v2/user へのリクエストを受け付けました．', userDto);
 
     // DBに新規作成・既に存在するユーザー情報を受け取る

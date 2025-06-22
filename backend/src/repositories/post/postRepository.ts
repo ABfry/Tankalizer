@@ -39,7 +39,7 @@ export class PostRepository implements IPostRepository {
         user_id: postRepoDto.user_id,
       };
 
-      await db.query(sql, values); // 第2引数に配列を渡す
+      await db.query(sql, values);
       console.log(
         `[PostRepository#create] 投稿の作成に成功しました．(userId: ${postRepoDto.user_id})`
       );
