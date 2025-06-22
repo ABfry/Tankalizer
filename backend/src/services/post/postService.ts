@@ -11,6 +11,7 @@ import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
 import generateTanka from '../../lib/gemini.js';
+import { compressImage } from '../../utils/compress-image.js';
 
 export class PostService implements IPostService {
   // コンストラクタでサービスを受け取る
@@ -28,26 +29,21 @@ export class PostService implements IPostService {
   async createPost(postDto: CreatePostDTO): Promise<CreatePostResult> {
     console.log(`[PostService#createPost] 投稿作成処理を開始します．(userId: ${postDto.user_id})`);
     let key: string | null = null;
-    let fileForTanka: File | null = null;
+    let compressedFile: File | null = null;
 
     // 画像をアップロードしてパスを取得する処理
     if (postDto.image) {
       console.log('[PostService#createPost] 画像処理を実行します．');
       // 圧縮処理
-      const arrayBuffer = await postDto.image.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const compressedBuffer = await this.imageService.compressImage(buffer);
-
-      // Fileオブジェクトに変換
-      fileForTanka = new File([compressedBuffer], 'image.jpeg', { type: 'image/jpeg' });
+      const compressedFile = await compressImage(postDto.image);
 
       // S3にアップロード
-      key = await this.imageService.uploadImage(fileForTanka);
+      key = await this.imageService.uploadImage(compressedFile);
     }
 
     // GeminiにTankaを生成するリクエストを送信する処理
     console.log('[PostService#createPost] 短歌の生成を開始します．');
-    const tankaResult = await generateTanka(postDto.original, fileForTanka);
+    const tankaResult = await generateTanka(postDto.original, compressedFile);
     if (!tankaResult.isSuccess) {
       // 短歌の生成に失敗したらエラーを投げる
       throw new Error(`短歌の生成に失敗しました: ${tankaResult.message}`);
