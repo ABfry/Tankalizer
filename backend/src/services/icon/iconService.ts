@@ -17,12 +17,12 @@ export class IconService implements IIconService {
     const fileName = this.generateFileName(file, userId);
 
     // ストレージにアップロード
-    const url = await this.storageService.upload(file, fileName);
+    const key = await this.storageService.upload(file, fileName);
 
     // TODO : DBのuser_iconをurlに更新する
     //
 
-    return url;
+    return key;
   }
 
   /**
