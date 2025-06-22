@@ -13,12 +13,8 @@ export class IconService implements IIconService {
    * @param userId
    */
   async updatedIcon(file: File, userId: string): Promise<string> {
-    // userIdでアイコンを保存するディレクトリを作成
-    const directory = `${ICON_STORAGE_PATH}/${userId}`;
-
-    // ファイルネームを生成
-    const uuid = generateUuid();
-    const fileName = `${directory}/${uuid}.${file.type.split('/')[1]}`;
+    // ファイル名を生成
+    const fileName = this.generateFileName(file, userId);
 
     // ストレージにアップロード
     const url = await this.storageService.upload(file, fileName);
@@ -37,6 +33,22 @@ export class IconService implements IIconService {
     // TODO : DBからユーザアイコンのURLを取得
     const icon_url = '';
     return await this.storageService.download(icon_url);
+  }
+
+  /**
+   * ファイル名を生成する
+   * @param file - ファイル名を生成するファイル
+   * @param userId - ユーザID
+   * @returns ファイル名
+   */
+  generateFileName(file: File, userId: string): string {
+    // userIdでアイコンを保存するディレクトリを作成
+    const directory = `${ICON_STORAGE_PATH}/${userId}`;
+
+    // ファイルネームを生成
+    const uuid = generateUuid();
+    const fileName = `${directory}/${uuid}.${file.type.split('/')[1]}`;
+    return fileName;
   }
 }
 
