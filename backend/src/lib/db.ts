@@ -56,7 +56,7 @@ class DatabaseUtility {
     }
   }
 
-  query(query: string, option?: any): Promise<any> {
+  query<T = any>(query: string, option?: any): Promise<T[]> {
     return this.connect((dbc: mysql.Connection) => this.sendQuery(dbc, query, option));
   }
 
