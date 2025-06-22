@@ -19,9 +19,6 @@ export class IconService implements IIconService {
     // ストレージにアップロード
     const key = await this.storageService.upload(file, fileName);
 
-    // TODO : DBのuser_iconをurlに更新する
-    //
-
     return key;
   }
 
