@@ -1,6 +1,7 @@
 import { type IPostRepository, type CreatePostRepoDTO, type Post } from './iPostRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
+import type { GetPostRepoDTO } from '../../repositories/post/iPostRepository.js';
 
 export class PostRepository implements IPostRepository {
   /**
@@ -78,36 +79,73 @@ export class PostRepository implements IPostRepository {
    * @param dto - 取得条件 (GetPostsRepoDTO)
    * @returns {Promise<Post[]>} 投稿の配列
    */
-  async getPosts(dto: {
-    limit: number;
-    cursor?: string | null;
-    filterByUserId?: string | null;
-    viewerId?: string | null;
-  }): Promise<Post[]> {
+  async getPosts(dto: GetPostRepoDTO): Promise<Post[]> {
     const { limit, cursor, filterByUserId, viewerId } = dto;
-    let sql = `
-      SELECT * FROM ${env.POSTS_TABLE_NAME}
-      WHERE is_deleted = FALSE
-    `;
 
+    const params: Record<string, any> = { limit };
+    const whereClauses: string[] = ['posts.is_deleted = FALSE'];
+
+    // --- WHERE句を動的に組み立てる ---
     if (filterByUserId) {
-      sql += ` AND user_id = :filterByUserId`;
+      whereClauses.push(`posts.user_id = :filterByUserId`);
+      params.filterByUserId = filterByUserId;
     }
-
     if (cursor) {
-      sql += ` AND created_at < (SELECT created_at FROM ${env.POSTS_TABLE_NAME} WHERE id = :cursor)`;
+      // 指定されたカーソル（投稿ID）より作成日時が古い投稿を取得
+      whereClauses.push(
+        `posts.created_at < (SELECT created_at FROM ${env.POSTS_TABLE_NAME} WHERE id = :cursor)`
+      );
+      params.cursor = cursor;
     }
 
-    sql += `
-      ORDER BY created_at DESC
-      LIMIT :limit;
+    // --- LEFT JOINを動的に組み立てる ---
+    // viewerIdが指定されている時だけ，miyabisテーブルを正しくJOINして is_miyabi を計算する
+    let miyabiJoinClause: string;
+    if (viewerId) {
+      miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON posts.id = miyabi.post_id AND miyabi.user_id = :viewerId`;
+      params.viewerId = viewerId;
+    } else {
+      // viewerIdがなければ is_miyabi は常に false になる
+      miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON 1 = 0`; // 必ずJOINが失敗するテクニック
+    }
+
+    // --- 最終的なSQL文を組み立てる ---
+    const sql = `
+      SELECT
+        posts.id,
+        posts.original,
+        posts.tanka,
+        posts.image_path,
+        posts.created_at,
+        posts.user_id,
+        users.name AS user_name,
+        users.icon_url AS user_icon,
+        (SELECT COUNT(*) FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = posts.id) AS miyabi_count,
+        CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi
+      FROM
+        ${env.POSTS_TABLE_NAME} AS posts
+      JOIN
+        ${env.USERS_TABLE_NAME} AS users ON posts.user_id = users.id
+      ${miyabiJoinClause}
+      WHERE
+        ${whereClauses.join(' AND ')}
+      ORDER BY
+        posts.created_at DESC
+      LIMIT
+        :limit
     `;
 
-    const values: Record<string, any> = { limit };
-    if (filterByUserId) values.filterByUserId = filterByUserId;
-    if (cursor) values.cursor = cursor;
+    try {
+      const results = await db.query(sql, params);
 
-    const result = await db.query<Post>(sql, values);
-    return result;
+      // DBから取得した結果を，定義した型に合わせてキレイに整形する
+      return results.map((row: any) => ({
+        ...row,
+        is_miyabi: Boolean(row.is_miyabi), // 0か1で返ってくる場合も考慮して，きっちりboolean型に変換
+      }));
+    } catch (error) {
+      console.error(`[PostRepository#getPosts] 投稿の取得に失敗しました．`, error);
+      throw new Error('データベースからの投稿取得処理に失敗しました．');
+    }
   }
 }

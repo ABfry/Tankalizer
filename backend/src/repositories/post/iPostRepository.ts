@@ -5,7 +5,7 @@ export type CreatePostRepoDTO = {
   user_id: string;
 };
 
-export type GetPostsRepoDTO = {
+export type GetPostRepoDTO = {
   limit: number;
   cursor?: string | null;
   filterByUserId?: string | null;
