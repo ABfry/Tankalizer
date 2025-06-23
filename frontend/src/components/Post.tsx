@@ -19,6 +19,8 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+const cdnUrl =
+  process.env.NEXT_PUBLIC_CDN_URL ?? 'https://202502-test-bucket.s3.ap-northeast-1.amazonaws.com';
 
 // props の型定義
 interface PostProps {
@@ -38,6 +40,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const tanka = parseTanka(post.tanka);
   // 投稿に画像が含まれるか
   const hasImage = Boolean(post.imageUrl);
+  const imageUrl = getImageUrl(post.imageUrl);
   // 雅カウントの状態
   const [miyabiCount, setMiyabiCount] = useState(post.miyabiCount);
   // 画像の拡大表示状態
@@ -146,7 +149,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         }}
       >
         <Image
-          src={post.imageUrl !== '' ? post.imageUrl : '/imageDefault.png'}
+          src={imageUrl !== '' ? imageUrl : '/imageDefault.png'}
           fill
           alt='Image'
           className={`rounded-xl object-cover ${hasImage ? 'brightness-50' : ''}`}
@@ -198,7 +201,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         </div>
       </div>
       {/* 拡大表示が有効の場合，モーダルを表示する */}
-      {modalOpen && <ImageModal imageUrl={post.imageUrl} setModalOpen={setModalOpen} />}
+      {modalOpen && <ImageModal imageUrl={imageUrl} setModalOpen={setModalOpen} />}
       {/* 削除確認ダイアログ表示が有効の場合，ダイアログを表示する */}
       <Dialog
         isOpen={dialogOpen}
@@ -261,6 +264,27 @@ const Post = ({ post, className, onDelete }: PostProps) => {
 const parseTanka = (tanka: Array<string>): string => {
   const parsedTanka: string = `${tanka[0]}\n\u3000${tanka[1]}\n\u3000\u3000${tanka[2]}\n${tanka[3]}\n\u3000${tanka[4]}`;
   return parsedTanka;
+};
+
+/**
+ * 画像のURLからキーを取得する (最終的にはkeyをバックエンドから取得するようにするので使わない)
+ * @param imageUrl - 画像のURL
+ * @returns 画像のキー
+ */
+const extractKey = (imageUrl: string): string => {
+  const key = imageUrl.split('/').slice(3).join('/');
+  return key;
+};
+
+/**
+ * 画像のURLを取得する
+ * @param imageUrl - 画像のURL
+ * @returns 画像のURL
+ */
+const getImageUrl = (imageUrl: string): string => {
+  if (imageUrl === '') return '';
+  const key = extractKey(imageUrl);
+  return `${cdnUrl}/${key}`;
 };
 
 export default Post;
