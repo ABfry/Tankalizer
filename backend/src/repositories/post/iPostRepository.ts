@@ -22,12 +22,12 @@ export type Post = {
   user_name: string;
   user_icon: string;
   miyabi_count: number;
-  is_miyabied: boolean;
+  is_miyabi: boolean;
 };
 
 export interface IPostRepository {
   findById(id: string): Promise<Post | null>;
   create(user: CreatePostRepoDTO): Promise<void>;
   delete(id: string, userId: string): Promise<void>;
-  getPosts(dto: GetPostsRepoDTO): Promise<Post[]>;
+  getPosts(dto: GetPostRepoDTO): Promise<Post[]>;
 }

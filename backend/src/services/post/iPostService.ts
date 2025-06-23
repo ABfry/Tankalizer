@@ -17,13 +17,8 @@ export type DeletePostResult = {
   message: string;
 };
 
-export type GetPostResult = {
-  message: string;
-  posts: Post[];
-};
-
 export interface IPostService {
   createPost(postDto: CreatePostDTO): Promise<CreatePostResult>;
   deletePost(deletePostDto: DeletePostDTO): Promise<DeletePostResult>;
-  getPosts(getPostDto: GetPostDTO): Promise<z.infer<typeof getPostSchema>>;
+  getPosts(getPostDto: GetPostDTO): Promise<Post[]>;
 }

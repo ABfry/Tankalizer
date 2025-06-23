@@ -85,7 +85,7 @@ export class PostRepository implements IPostRepository {
     const params: Record<string, any> = { limit };
     const whereClauses: string[] = ['posts.is_deleted = FALSE'];
 
-    // --- WHERE句を動的に組み立てる ---
+    // WHERE句を動的に組み立てる
     if (filterByUserId) {
       whereClauses.push(`posts.user_id = :filterByUserId`);
       params.filterByUserId = filterByUserId;
@@ -98,18 +98,18 @@ export class PostRepository implements IPostRepository {
       params.cursor = cursor;
     }
 
-    // --- LEFT JOINを動的に組み立てる ---
-    // viewerIdが指定されている時だけ，miyabisテーブルを正しくJOINして is_miyabi を計算する
+    // LEFT JOINを動的に組み立てる
+    // viewerIdが指定されている時だけ，miyabisテーブルを正しくJOINして is_miyabi を判定する
     let miyabiJoinClause: string;
     if (viewerId) {
       miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON posts.id = miyabi.post_id AND miyabi.user_id = :viewerId`;
       params.viewerId = viewerId;
     } else {
       // viewerIdがなければ is_miyabi は常に false になる
-      miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON 1 = 0`; // 必ずJOINが失敗するテクニック
+      miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON 1 = 0`;
     }
 
-    // --- 最終的なSQL文を組み立てる ---
+    // 最終的なSQL文を組み立てる
     const sql = `
       SELECT
         posts.id,
@@ -138,10 +138,10 @@ export class PostRepository implements IPostRepository {
     try {
       const results = await db.query(sql, params);
 
-      // DBから取得した結果を，定義した型に合わせてキレイに整形する
+      // DBから取得した結果を，定義した型に合わせて整形
       return results.map((row: any) => ({
         ...row,
-        is_miyabi: Boolean(row.is_miyabi), // 0か1で返ってくる場合も考慮して，きっちりboolean型に変換
+        is_miyabi: Boolean(row.is_miyabi),
       }));
     } catch (error) {
       console.error(`[PostRepository#getPosts] 投稿の取得に失敗しました．`, error);

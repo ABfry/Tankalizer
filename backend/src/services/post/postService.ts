@@ -7,7 +7,7 @@ import {
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
 import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
-import { type GetPostDTO } from './iPostService.js';
+import { type GetPostDTO, type GetPostResult } from './iPostService.js';
 
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
@@ -108,19 +108,16 @@ export class PostService implements IPostService {
   /**
    * 投稿を取得するビジネスロジック
    * @param getPostDto - 投稿取得に必要なデータ
-   * @returns {Promise<z.infer<typeof getPostSchema>>} 取得結果
+   * @returns {Promise<GetPostResult>} 取得結果
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
-  async getPosts(getPostDto: GetPostDTO): Promise<Post[]> {
+  async getPosts(getPostDto: GetPostDTO): Promise<GetPostResult> {
     console.log(`[PostService#getPosts] 投稿取得処理を開始します．(limit: ${getPostDto.limit})`);
 
     const posts = await this.postRepository.getPosts(getPostDto);
 
     console.log(`[PostService#getPosts] 投稿の取得が完了しました．(count: ${posts.length})`);
 
-    return {
-      message: '投稿を取得しました．',
-      posts: posts,
-    };
+    return posts;
   }
 }

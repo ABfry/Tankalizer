@@ -4,7 +4,7 @@ import { type IPostService } from '../../services/post/iPostService.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
 import { PostService } from '../../services/post/postService.js';
 import { PostRepository } from '../../repositories/post/postRepository.js';
-import { type GetPostsRepoDTO } from '../../repositories/post/iPostRepository.js';
+import { type GetPostRepoDTO } from '../../repositories/post/iPostRepository.js';
 import { ImageService } from '../../services/image/imageService.js';
 import { S3StorageService } from '../../services/storage/s3StorageService.js';
 import type { IImageService } from '../../services/image/iImageService.js';
@@ -29,9 +29,9 @@ const getPostHandlerV2: RouteHandler<typeof getPostRouteV2, {}> = async (c: Cont
 
   try {
     // リクエストからデータを取得
-    const { limit, cursur, filterByUserId, viewerId } = await c.req.json<GetPostsRepoDTO>();
-    console.log(limit, cursur, filterByUserId, viewerId);
-    const posts = await postService.getPosts({ limit, cursur, filterByUserId, viewerId });
+    const { limit, cursor, filterByUserId, viewerId } = c.req.valid<GetPostRepoDTO>('json');
+
+    const posts = await postService.getPosts({ limit, cursor, filterByUserId, viewerId });
 
     return c.json(
       {

@@ -29,7 +29,7 @@ const deletePostHandlerV2: RouteHandler<typeof deletePostRouteV2, {}> = async (c
 
   try {
     // リクエストからデータを取得
-    const { post_id, user_id } = await c.req.json<DeletePostDTO>();
+    const { post_id, user_id } = await c.req.valid<DeletePostDTO>('json');
 
     // サービスを呼び出す
     const result = await postService.deletePost({ post_id, user_id });
