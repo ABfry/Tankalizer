@@ -7,7 +7,7 @@ import {
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
 import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
-import { type GetPostDTO, type GetPostResult } from './iPostService.js';
+import { type GetPostDTO } from './iPostService.js';
 
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
@@ -111,7 +111,7 @@ export class PostService implements IPostService {
    * @returns {Promise<GetPostResult>} 取得結果
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
-  async getPosts(getPostDto: GetPostDTO): Promise<GetPostResult> {
+  async getPosts(getPostDto: GetPostDTO): Promise<Post[]> {
     console.log(`[PostService#getPosts] 投稿取得処理を開始します．(limit: ${getPostDto.limit})`);
 
     const posts = await this.postRepository.getPosts(getPostDto);

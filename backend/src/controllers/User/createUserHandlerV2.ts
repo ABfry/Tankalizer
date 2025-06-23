@@ -20,7 +20,7 @@ type CreateUserRequestSchema = z.infer<
 const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c: Context) => {
   try {
     // リクエストボディを取得し，スキーマでバリデーション
-    const userDto: CreateUserRepoDTO = await c.req.json<CreateUserRequestSchema>();
+    const userDto: CreateUserRepoDTO = c.req.valid<CreateUserRequestSchema>('json');
     console.log('[Handler] /v2/user へのリクエストを受け付けました．', userDto);
 
     // DBに新規作成・既に存在するユーザー情報を受け取る
