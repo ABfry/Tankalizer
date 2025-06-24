@@ -1,4 +1,5 @@
 import React from 'react';
+import { auth } from '@/auth/config';
 import fetchOnePost from './actions/fetchOnePost';
 import PostPage from './PostPage';
 import { notFound } from 'next/navigation';
@@ -22,6 +23,7 @@ export const generateMetadata = async (context: { params: Promise<{ postId: stri
     description: tankaToString(post.tanka),
   };
 };
+
 /**
  * 指定されたIDの投稿を表示する．
  * @async
@@ -30,10 +32,11 @@ export const generateMetadata = async (context: { params: Promise<{ postId: stri
  */
 const Page = async (context: { params: Promise<{ postId: string }> }) => {
   const params = await context.params;
+  const session = await auth();
 
   const post = await fetchOnePost({
     postId: params.postId,
-    iconUrl: '',
+    iconUrl: session?.user?.image ?? '',
   });
 
   if (!post) notFound();

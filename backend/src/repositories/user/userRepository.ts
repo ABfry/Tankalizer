@@ -15,6 +15,7 @@ export class UserRepository implements IUserRepository {
       LIMIT 1;
     `;
     const result = await db.query<User>(sql, { connect_info });
+    //console.log('作成したユーザー', result);
     return result[0] || null;
   }
 

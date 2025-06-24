@@ -1,3 +1,4 @@
+import { env } from '../../config/env.js';
 import { type IPostService, type CreatePostResult } from './iPostService.js';
 import {
   type IPostRepository,
@@ -6,11 +7,16 @@ import {
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
 
+import { type IStorageService } from '../storage/iStorageService.js';
+import { type IImageService } from '../image/iImageService.js';
 import generateTanka from '../../lib/gemini.js';
 
 export class PostService implements IPostService {
-  // postRepositoryのインスタンスをコンストラクタで受け取る
-  constructor(private readonly postRepository: IPostRepository) {}
+  // コンストラクタでサービスを受け取る
+  constructor(
+    private readonly postRepository: IPostRepository,
+    private readonly imageService: IImageService
+  ) {}
 
   /**
    * 新しい投稿を作成するビジネスロジック
@@ -20,26 +26,27 @@ export class PostService implements IPostService {
    */
   async createPost(postDto: CreatePostDTO): Promise<CreatePostResult> {
     console.log(`[PostService#createPost] 投稿作成処理を開始します．(userId: ${postDto.user_id})`);
-    let image_path: string | null = null;
+    let key: string | null = null;
     let fileForTanka: File | null = null;
-
-    // 画像圧縮処理
 
     // 画像をアップロードしてパスを取得する処理
     if (postDto.image) {
-      console.log('[PostService#createPost] ダミーの画像処理を実行します．');
-      // 本物の処理に差し替える部分 ①：ここで圧縮処理
+      console.log('[PostService#createPost] 画像処理を実行します．');
+      // 圧縮処理
+      const arrayBuffer = await postDto.image.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const compressedBuffer = await this.imageService.compressImage(buffer);
 
-      // 本物の処理に差し替える部分 ②：ここでS3にアップロード
-      image_path = '2025-6-21/image.jpeg'; // ダミーのパス
+      // Fileオブジェクトに変換
+      fileForTanka = new File([compressedBuffer], 'image.jpeg', { type: 'image/jpeg' });
 
-      // ダミーのFileオブジェクト（generateTankaに渡すため）
-      fileForTanka = null;
+      // S3にアップロード
+      key = await this.imageService.uploadImage(fileForTanka);
     }
 
     // GeminiにTankaを生成するリクエストを送信する処理
     console.log('[PostService#createPost] 短歌の生成を開始します．');
-    const tankaResult = await generateTanka(postDto.original, null);
+    const tankaResult = await generateTanka(postDto.original, fileForTanka);
     if (!tankaResult.isSuccess) {
       // 短歌の生成に失敗したらエラーを投げる
       throw new Error(`短歌の生成に失敗しました: ${tankaResult.message}`);
@@ -53,7 +60,7 @@ export class PostService implements IPostService {
     const postRepoDto: CreatePostRepoDTO = {
       original: postDto.original,
       tanka: tanka,
-      image_path: image_path,
+      image_path: key,
       user_id: postDto.user_id,
     };
 
