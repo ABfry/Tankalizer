@@ -20,12 +20,7 @@
     "WATCHPACK_POLLING": "true",
     "CHOKIDAR_USEPOLLING": "true"
   },
-  "runArgs": [
-    "--network=host",
-    "--name=Tankalizer",
-    "--env-file=${localWorkspaceFolder}/frontend/.env",
-    "--env-file=${localWorkspaceFolder}/backend/.env"
-  ],
+  "runArgs": ["--network=host", "--name=Tankalizer"],
   "forwardPorts": [3000, 8080],
   "customizations": {
     "vscode": {
