@@ -1,4 +1,4 @@
-import { type RouteHandler } from '@hono/zod-openapi';
+import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 import { type IPostService } from '../../services/post/iPostService.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
@@ -11,7 +11,9 @@ import { S3StorageService } from '../../services/storage/s3StorageService.js';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '../../config/env.js';
 import type { deletePostRouteV2 } from '../../routes/Post/deletePostRouteV2.js';
-import type { DeletePostDTO } from '../../services/post/iPostService.js';
+import { deletePostSchema } from '../../schema/Post/deletePostSchemaV2.js';
+
+type deletePostSchema = z.infer<typeof deletePostSchema>;
 
 const deletePostHandlerV2: RouteHandler<typeof deletePostRouteV2, {}> = async (c: Context) => {
   const postRepository = new PostRepository();
@@ -29,7 +31,7 @@ const deletePostHandlerV2: RouteHandler<typeof deletePostRouteV2, {}> = async (c
 
   try {
     // リクエストからデータを取得
-    const { post_id, user_id } = await c.req.valid<DeletePostDTO>('json');
+    const { post_id, user_id } = await c.req.json<deletePostSchema>();
 
     // サービスを呼び出す
     const result = await postService.deletePost({ post_id, user_id });

@@ -32,11 +32,10 @@ export class PostService implements IPostService {
     let key: string | null = null;
     let compressedFile: File | null = null;
 
-    // 画像をアップロードしてパスを取得する処理
-    if (postDto.image) {
+    if (postDto.image && postDto.image instanceof File) {
+      // postDto.imageがFileのインスタンスかチェックする
       console.log('[PostService#createPost] 画像処理を実行します．');
-      // 圧縮処理
-      const compressedFile = await compressImage(postDto.image);
+      compressedFile = await compressImage(postDto.image);
 
       // S3にアップロード
       key = await this.imageService.uploadImage(compressedFile);
@@ -111,10 +110,10 @@ export class PostService implements IPostService {
    * @returns {Promise<GetPostResult>} 取得結果
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
-  async getPosts(getPostDto: GetPostDTO): Promise<Post[]> {
+  async getPost(getPostDto: GetPostDTO): Promise<Post[]> {
     console.log(`[PostService#getPosts] 投稿取得処理を開始します．(limit: ${getPostDto.limit})`);
 
-    const posts = await this.postRepository.getPosts(getPostDto);
+    const posts = await this.postRepository.getPost(getPostDto);
 
     console.log(`[PostService#getPosts] 投稿の取得が完了しました．(count: ${posts.length})`);
 

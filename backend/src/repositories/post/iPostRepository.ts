@@ -15,7 +15,7 @@ export type GetPostRepoDTO = {
 export type Post = {
   id: string;
   original: string;
-  tanka: object;
+  tanka: string[];
   image_path: string | null;
   created_at: Date;
   user_id: string;
@@ -29,5 +29,5 @@ export interface IPostRepository {
   findById(id: string): Promise<Post | null>;
   create(user: CreatePostRepoDTO): Promise<void>;
   delete(id: string, userId: string): Promise<void>;
-  getPosts(dto: GetPostRepoDTO): Promise<Post[]>;
+  getPost(dto: GetPostRepoDTO): Promise<Post[]>;
 }

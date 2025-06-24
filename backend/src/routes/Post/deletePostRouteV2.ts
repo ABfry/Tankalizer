@@ -67,8 +67,12 @@ export type deletePostRouteResponse200 = z.infer<
   (typeof deletePostRouteV2.responses)['200']['content']['application/json']['schema']
 >;
 
-export type deletePostRouteResponse400 = z.infer<
-  (typeof deletePostRouteV2.responses)['400']['content']['application/json']['schema']
+export type deletePostRouteResponse403 = z.infer<
+  (typeof deletePostRouteV2.responses)['403']['content']['application/json']['schema']
+>;
+
+export type deletePostRouteResponse404 = z.infer<
+  (typeof deletePostRouteV2.responses)['404']['content']['application/json']['schema']
 >;
 
 export type deletePostRouteResponse500 = z.infer<

@@ -1,10 +1,9 @@
-import { type RouteHandler } from '@hono/zod-openapi';
+import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
 import { type IPostService } from '../../services/post/iPostService.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
 import { PostService } from '../../services/post/postService.js';
 import { PostRepository } from '../../repositories/post/postRepository.js';
-import { type GetPostRepoDTO } from '../../repositories/post/iPostRepository.js';
 import { ImageService } from '../../services/image/imageService.js';
 import { S3StorageService } from '../../services/storage/s3StorageService.js';
 import type { IImageService } from '../../services/image/iImageService.js';
@@ -12,6 +11,9 @@ import type { IStorageService } from '../../services/storage/iStorageService.js'
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '../../config/env.js';
 import type { getPostRouteV2 } from '../../routes/Post/getPostRouteV2.js';
+import { getPostSchema } from '../../schema/Post/getPostSchemaV2.js';
+
+type getPostSchema = z.infer<typeof getPostSchema>;
 
 const getPostHandlerV2: RouteHandler<typeof getPostRouteV2, {}> = async (c: Context) => {
   const postRepository: IPostRepository = new PostRepository();
@@ -29,9 +31,9 @@ const getPostHandlerV2: RouteHandler<typeof getPostRouteV2, {}> = async (c: Cont
 
   try {
     // リクエストからデータを取得
-    const { limit, cursor, filterByUserId, viewerId } = c.req.valid<GetPostRepoDTO>('json');
+    const { limit, cursor, filterByUserId, viewerId } = await c.req.json<getPostSchema>();
 
-    const posts = await postService.getPosts({ limit, cursor, filterByUserId, viewerId });
+    const posts = await postService.getPost({ limit, cursor, filterByUserId, viewerId });
 
     return c.json(
       {

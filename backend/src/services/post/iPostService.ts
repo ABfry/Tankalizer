@@ -20,5 +20,5 @@ export type DeletePostResult = {
 export interface IPostService {
   createPost(postDto: CreatePostDTO): Promise<CreatePostResult>;
   deletePost(deletePostDto: DeletePostDTO): Promise<DeletePostResult>;
-  getPosts(getPostDto: GetPostDTO): Promise<Post[]>;
+  getPost(getPostDto: GetPostDTO): Promise<Post[]>;
 }

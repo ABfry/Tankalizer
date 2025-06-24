@@ -79,7 +79,7 @@ export class PostRepository implements IPostRepository {
    * @param dto - 取得条件 (GetPostsRepoDTO)
    * @returns {Promise<Post[]>} 投稿の配列
    */
-  async getPosts(dto: GetPostRepoDTO): Promise<Post[]> {
+  async getPost(dto: GetPostRepoDTO): Promise<Post[]> {
     const { limit, cursor, filterByUserId, viewerId } = dto;
 
     const params: Record<string, any> = { limit };

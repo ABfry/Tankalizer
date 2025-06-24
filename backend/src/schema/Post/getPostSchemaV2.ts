@@ -2,16 +2,10 @@ import { z } from '@hono/zod-openapi';
 
 // リクエストの型
 export const getPostSchema = z.object({
-  limit: z
-    .string()
-    .optional()
-    .default('10')
-    .transform(Number)
-    .pipe(z.number().int().positive('limitは正の整数である必要があります'))
-    .openapi({
-      example: '10',
-      description: '取得する投稿の数',
-    }),
+  limit: z.number().optional().default(10).openapi({
+    example: 10,
+    description: '取得する投稿の数',
+  }),
   cursor: z.string().optional().openapi({
     example: '8e21e23a-eb9f-11ef-9ce7-0242ac130002',
     description: 'どの投稿より古いのを取得するか指定する投稿id',
@@ -31,7 +25,7 @@ export const Post = z.object({
   id: z.string(),
   original: z.string(),
   tanka: z.array(z.string()),
-  image_path: z.string(),
+  image_path: z.string().nullable(),
   created_at: z.string(),
   user_id: z.string(),
   user_name: z.string(),
