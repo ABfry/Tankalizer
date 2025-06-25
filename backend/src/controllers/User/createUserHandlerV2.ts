@@ -7,20 +7,18 @@ import { type IUserService } from '../../services/user/iUserService.js';
 import { type IUserRepository } from '../../repositories/user/iUserRepository.js';
 import { UserService } from '../../services/user/userService.js';
 import { UserRepository } from '../../repositories/user/userRepository.js';
-import { type CreateUserRepoDTO } from '../../repositories/user/iUserRepository.js';
+import { createUserSchema } from '../../schema/User/createUserSchemaV2.js';
 
 const userRepository: IUserRepository = new UserRepository();
 const userService: IUserService = new UserService(userRepository);
 
 // zod-openapiのスキーマから，TypeScriptの型を推論
-type CreateUserRequestSchema = z.infer<
-  (typeof createUserRouteV2.schemas.request.body.content)['application/json']['schema']
->;
+type createUserSchema = z.infer<typeof createUserSchema>;
 
 const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c: Context) => {
   try {
     // リクエストボディを取得し，スキーマでバリデーション
-    const userDto: CreateUserRepoDTO = await c.req.json<CreateUserRequestSchema>();
+    const userDto = await c.req.json<createUserSchema>();
     console.log('[Handler] /v2/user へのリクエストを受け付けました．', userDto);
 
     // DBに新規作成・既に存在するユーザー情報を受け取る
@@ -44,8 +42,9 @@ const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c
     console.error('[Handler] ユーザー作成処理中にエラーが発生しました．', err);
     return c.json(
       {
-        message: 'サーバー内部でエラーが発生しました．',
-        error: err.message,
+        message: err.message,
+        statusCode: 500,
+        error: 'Internal Server Error',
       },
       500
     );

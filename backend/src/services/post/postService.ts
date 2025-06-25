@@ -6,10 +6,13 @@ import {
   type Post,
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
+import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
+import { type GetPostDTO } from './iPostService.js';
 
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
 import generateTanka from '../../lib/gemini.js';
+import { compressImage } from '../../utils/compress-image.js';
 
 export class PostService implements IPostService {
   // コンストラクタでサービスを受け取る
@@ -27,26 +30,20 @@ export class PostService implements IPostService {
   async createPost(postDto: CreatePostDTO): Promise<CreatePostResult> {
     console.log(`[PostService#createPost] 投稿作成処理を開始します．(userId: ${postDto.user_id})`);
     let key: string | null = null;
-    let fileForTanka: File | null = null;
+    let compressedFile: File | null = null;
 
-    // 画像をアップロードしてパスを取得する処理
-    if (postDto.image) {
+    if (postDto.image && postDto.image instanceof File) {
+      // postDto.imageがFileのインスタンスかチェックする
       console.log('[PostService#createPost] 画像処理を実行します．');
-      // 圧縮処理
-      const arrayBuffer = await postDto.image.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const compressedBuffer = await this.imageService.compressImage(buffer);
-
-      // Fileオブジェクトに変換
-      fileForTanka = new File([compressedBuffer], 'image.jpeg', { type: 'image/jpeg' });
+      compressedFile = await compressImage(postDto.image);
 
       // S3にアップロード
-      key = await this.imageService.uploadImage(fileForTanka);
+      key = await this.imageService.uploadImage(compressedFile);
     }
 
     // GeminiにTankaを生成するリクエストを送信する処理
     console.log('[PostService#createPost] 短歌の生成を開始します．');
-    const tankaResult = await generateTanka(postDto.original, fileForTanka);
+    const tankaResult = await generateTanka(postDto.original, compressedFile);
     if (!tankaResult.isSuccess) {
       // 短歌の生成に失敗したらエラーを投げる
       throw new Error(`短歌の生成に失敗しました: ${tankaResult.message}`);
@@ -73,5 +70,53 @@ export class PostService implements IPostService {
       message: '投稿しました．',
       tanka: tanka,
     };
+  }
+
+  /**
+   * 投稿を削除するビジネスロジック
+   * @param deletePostDto - 投稿削除に必要なデータ
+   * @returns {Promise<DeletePostResult>} 削除結果
+   * @throws {Error} 投稿が見つからない、または削除権限がない場合にエラー
+   */
+  async deletePost(deletePostDto: DeletePostDTO): Promise<DeletePostResult> {
+    console.log(
+      `[PostService#deletePost] 投稿削除処理を開始します．(postId: ${deletePostDto.post_id})`
+    );
+
+    const post = await this.postRepository.findById(deletePostDto.post_id);
+
+    if (!post) {
+      throw new Error('投稿が見つかりません．');
+    }
+
+    if (post.user_id !== deletePostDto.user_id) {
+      throw new Error('許可がありません．');
+    }
+
+    await this.postRepository.delete(deletePostDto.post_id, deletePostDto.user_id);
+
+    console.log(
+      `[PostService#deletePost] 投稿の削除が完了しました．(postId: ${deletePostDto.post_id})`
+    );
+
+    return {
+      message: '投稿を削除しました．',
+    };
+  }
+
+  /**
+   * 投稿を取得するビジネスロジック
+   * @param getPostDto - 投稿取得に必要なデータ
+   * @returns {Promise<GetPostResult>} 取得結果
+   * @throws {Error} DBエラーなど、その他の予期せぬエラー
+   */
+  async getPost(getPostDto: GetPostDTO): Promise<Post[]> {
+    console.log(`[PostService#getPosts] 投稿取得処理を開始します．(limit: ${getPostDto.limit})`);
+
+    const posts = await this.postRepository.getPost(getPostDto);
+
+    console.log(`[PostService#getPosts] 投稿の取得が完了しました．(count: ${posts.length})`);
+
+    return posts;
   }
 }
