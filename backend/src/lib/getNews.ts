@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import { XMLParser } from 'fast-xml-parser';
 import { env } from '../config/env.js';
 
 const printLine = (): void => {
@@ -7,44 +8,83 @@ const printLine = (): void => {
 
 const getNews = async () => {
   try {
-    const response = await fetch(
-      `https://api.currentsapi.services/v1/latest-news?language=ja&apiKey=${env.CURRENTS_API_KEY}`
-    );
+    const response = await fetch(`https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja`);
 
     // HTTPエラーが発生した場合
     if (!response.ok) {
       throw new Error(`HTTPエラー: ${response.status}`);
     }
 
-    const data = await response.json();
+    // XMLテキストを取得
+    const xmlText: string = await response.text();
 
-    console.log(data);
+    // XMLパーサーを初期化
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+    });
 
-    // ニュースの取得に失敗した場合
-    if (data.status !== 'ok') {
-      throw new Error('ニュースの取得に失敗しました。');
+    // XMLをオブジェクトに変換
+    const data = parser.parse(xmlText);
+
+    console.log('===== RSS構造の確認 =====');
+    console.log(JSON.stringify(data, null, 2));
+
+    // RSS構造に基づいてニュース記事を取得
+    const items = data.rss.channel.item;
+
+    console.log('===== items =====');
+    console.log(items);
+
+    if (!items) {
+      throw new Error('ニュースアイテムが見つかりません。');
     }
 
-    const newsArray = data.news;
+    // itemsが配列でない場合（取得したニュースが1つで単一オブジェクトになる場合）は配列に変換
+    let newsItems;
+    if (Array.isArray(items)) {
+      newsItems = items;
+    } else {
+      newsItems = [items];
+    }
 
-    let news;
-    for (let i = 0; i < newsArray.length; i++) {
-      const newsTemp = newsArray[i];
-      if (newsTemp.title !== '' && newsTemp.description !== '' && newsTemp.url !== '') {
-        news = newsTemp;
-        break;
+    console.log(`===== 取得したアイテム数: ${newsItems.length} =====`);
+
+    // タイトルとリンクが含まれているニュースを全て候補として収集
+    const validNewsItems = [];
+    for (let i = 0; i < newsItems.length; i++) {
+      const newsTemp = newsItems[i];
+
+      if (newsTemp.title && newsTemp.link) {
+        validNewsItems.push(newsTemp);
+        console.log(`===== 有効なニュースを発見: ${i} =====`);
       }
     }
 
-    if (!news) {
+    if (validNewsItems.length === 0) {
       throw new Error('表示できるニュースがありません。');
     }
+
+    // 有効なニュース候補の中からランダムに1つを選択
+    const randomIndex = Math.floor(Math.random() * validNewsItems.length);
+    const news = validNewsItems[randomIndex];
+
+    console.log(
+      `===== 候補数: ${validNewsItems.length}, 選択されたインデックス: ${randomIndex} =====`
+    );
+    console.log('===== 最終的に選択されたニュース =====');
+    console.log({
+      title: news.title,
+      description: news.description,
+      url: news.link,
+    });
+
     return {
       isSuccess: true,
       news: {
         title: news.title,
-        description: news.description,
-        url: news.url,
+        description: '',
+        url: news.link,
       },
     };
   } catch (error: any) {
