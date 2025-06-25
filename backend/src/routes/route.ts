@@ -39,6 +39,8 @@ import { deletePostRouteV2 } from './Post/deletePostRouteV2.js';
 import deletePostHandlerV2 from '../controllers/Post/deletePostHandlerV2.js';
 import { getPostRouteV2 } from './Post/getPostRouteV2.js';
 import getPostHandlerV2 from '../controllers/Post/getPostHandlerV2.js';
+import { getOnePostRouteV2 } from './Post/getOnePostRouteV2.js';
+import getOnePostHandlerV2 from '../controllers/Post/getOnePostHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -62,5 +64,6 @@ export default router
   .openapi(createUserRouteV2, createUserHandlerV2)
   .openapi(createPostRouteV2, createPostHandlerV2)
   .openapi(deletePostRouteV2, deletePostHandlerV2)
-  .openapi(getPostRouteV2, getPostHandlerV2);
+  .openapi(getPostRouteV2, getPostHandlerV2)
+  .openapi(getOnePostRouteV2, getOnePostHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく
