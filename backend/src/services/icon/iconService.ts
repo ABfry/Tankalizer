@@ -3,7 +3,7 @@ import type { IIconService } from './iIconService.js';
 import { generateUuid } from '../../utils/generate-uuid.js';
 
 // バケット内のアイコンを保存するルートパス
-const ICON_STORAGE_PATH = '/Icon';
+const ICON_STORAGE_PATH = 'icon';
 
 export class IconService implements IIconService {
   constructor(private readonly storageService: IStorageService) {}

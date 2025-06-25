@@ -3,7 +3,7 @@ import type { IImageService } from './iImageService.js';
 import { generateUuid } from '../../utils/generate-uuid.js';
 
 // バケット内の画像を保存するルートパス
-const IMAGE_STORAGE_PATH = '/';
+const IMAGE_STORAGE_PATH = 'image';
 
 export class ImageService implements IImageService {
   constructor(private readonly storageService: IStorageService) {}
