@@ -12,10 +12,6 @@ const fileToBuffer = async (file: File): Promise<Buffer> => {
   return Buffer.from(arrayBuffer);
 };
 
-const isImageFile = (file: File): boolean => {
-  return file.type.startsWith('image/');
-};
-
 const findOptimalQuality = async (
   sharpInstance: sharp.Sharp,
   targetFileSize: number
@@ -52,10 +48,6 @@ const bufferToFile = (buffer: Buffer, originalFile: File): File => {
  */
 const compressImageWithOptions = async (file: File, options: CompressionOptions): Promise<File> => {
   const { targetFileSize, width, height, logPrefix } = options;
-  if (!isImageFile(file)) {
-    throw new Error('ファイルが画像ではありません');
-  }
-
   const buffer = await fileToBuffer(file);
 
   const sharpInstance = sharp(buffer).rotate();
