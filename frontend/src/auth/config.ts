@@ -11,7 +11,7 @@ const providers: Provider[] = [
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
   }),
   Google({
-    clientId: process.env.GOOGLE_CLIENT_ID, 
+    clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   }),
 ];
@@ -45,27 +45,39 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   pages: {
     signIn: '/login',
   },
-  events: {
-    signIn: async ({ user }) => {
-      // console.log('signin: ' + JSON.stringify(user));
+  callbacks: {
+    jwt: async ({ token, user, trigger }) => {
+      if (trigger === 'signIn' && user) {
+        try {
+          const res = await fetch(`${process.env.BACKEND_URL}/user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: user.name,
+              icon: user.image,
+            }),
+          });
 
-      try {
-        // 認証成功時、DBにユーザデータを登録
-        const res = await fetch(`${process.env.BACKEND_URL}/user`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: user.name,
-            icon: user.image,
-          }),
-        });
+          if (!res.ok) {
+            throw new Error('Backend user creation failed');
+          }
 
-        console.log(res);
-      } catch (error) {
-        console.error(error);
+          const data = await res.json();
+          token.user_id = data.user_id;
+        } catch (error) {
+          console.error('Failed to create user:', error);
+          throw error;
+        }
       }
+      return token;
+    },
+    session: ({ session, token }) => {
+      if (token.user_id) {
+        session.user_id = token.user_id;
+      }
+      return session;
     },
   },
 });
