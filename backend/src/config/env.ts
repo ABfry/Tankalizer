@@ -18,6 +18,8 @@ const envSchema = z.object({
   POSTS_TABLE_NAME: z.string(),
   MIYABI_TABLE_NAME: z.string(),
   USERS_TABLE_NAME: z.string(),
+  DEVELOPERS_TABLE_NAME: z.string(),
+  FOLLOWS_TABLE_NAME: z.string(),
   S3_ACCESS_KEY_ID: z.string(),
   S3_SECRET_ACCESS_KEY: z.string(),
   S3_BUCKET_NAME: z.string(),
