@@ -21,7 +21,7 @@ export const createUserRouteV2 = createRoute({
     body: {
       required: true,
       content: {
-        'application/json': {
+        'multipart/form-data': {
           schema: createUserSchema,
         },
       },

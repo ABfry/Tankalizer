@@ -3,7 +3,7 @@
 import { env } from '../config/env.js';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 
-import { generateUuid } from '../utils/generate-uuid.js';
+import { generateUuid } from '../utils/generateUuid.js';
 
 const s3Client = new S3Client({
   region: 'ap-northeast-1',
