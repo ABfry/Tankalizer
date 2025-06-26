@@ -42,19 +42,7 @@ export class UserService implements IUserService {
     // ユーザーが存在しない場合，リポジトリに新しいユーザーの作成を依頼する
     console.log('[UserService#createUser] 新規ユーザーを作成します．');
 
-    let key: string;
-    let compressedFile: File;
-
-    if (userDto.icon_image && userDto.icon_image instanceof File) {
-      // postDto.imageがFileのインスタンスかチェックする
-      console.log('[UserService#createUser] 画像処理を実行します．');
-      compressedFile = await compressIconImage(userDto.icon_image);
-
-      // S3にアップロード
-      key = await this.imageService.uploadImage(compressedFile);
-    } else {
-      key = env.DEFAULT_ICON_PATH;
-    }
+    const key = await this.uploadIcon(userDto.icon_image as File);
 
     // DB保存用データの作成
     const userRepoDto: CreateUserRepoDTO = {
@@ -80,5 +68,23 @@ export class UserService implements IUserService {
       `[UserService#createUser] 新規ユーザーの作成が完了しました．(user_id: ${newUser.id})`
     );
     return newUser;
+  }
+
+  private async uploadIcon(iconImage: File): Promise<string> {
+    try {
+      if (iconImage && iconImage instanceof File) {
+        // iconImageがFileのインスタンスかチェックする
+        console.log('[UserService#createUser] 画像処理を実行します．');
+        const compressedFile = await compressIconImage(iconImage);
+
+        // S3にアップロード
+        return await this.imageService.uploadImage(compressedFile);
+      } else {
+        return env.DEFAULT_ICON_PATH;
+      }
+    } catch (error) {
+      console.error('[UserService#uploadIcon] 画像のアップロードに失敗しました．');
+      return env.DEFAULT_ICON_PATH;
+    }
   }
 }
