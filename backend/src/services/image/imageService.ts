@@ -1,6 +1,6 @@
 import type { IStorageService } from '../storage/iStorageService.js';
 import type { IImageService } from './iImageService.js';
-import { generateUuid } from '../../utils/generate-uuid.js';
+import { generateUuid } from '../../utils/generateUuid.js';
 
 // バケット内の画像を保存するルートパス
 const IMAGE_STORAGE_PATH = 'image';
