@@ -5,7 +5,7 @@ import {
   type User,
 } from '../../repositories/user/iUserRepository.js';
 import { type IImageService } from '../image/iImageService.js';
-import { compressIconImage } from '../../utils/compress-image.js';
+import { compressIconImage } from '../../utils/compressImage.js';
 import { env } from '../../config/env.js';
 
 export class UserService implements IUserService {

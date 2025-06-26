@@ -12,7 +12,7 @@ import { type GetPostDTO } from './iPostService.js';
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
 import generateTanka from '../../lib/gemini.js';
-import { compressImage } from '../../utils/compress-image.js';
+import { compressImage } from '../../utils/compressImage.js';
 
 export class PostService implements IPostService {
   // コンストラクタでサービスを受け取る
