@@ -61,6 +61,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             throw new Error('ユーザのメールアドレスが取得できませんでした');
           }
 
+          // アイコンURLが存在する場合は追加する
+          if (user.image) {
+            formData.append('icon_url', user.image);
+          }
+
           const res = await fetch(`${process.env.BACKEND_URL}/user`, {
             method: 'POST',
             body: formData,
