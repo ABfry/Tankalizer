@@ -203,7 +203,7 @@ export class PostRepository implements IPostRepository {
 
       return posts[0];
     } catch (error) {
-      console.error(`[PostRepository#getPosts] 投稿の取得に失敗しました．`, error);
+      console.error(`[PostRepository#getPost] 投稿の取得に失敗しました．`, error);
       throw new Error('データベースからの投稿取得処理に失敗しました．');
     }
   }
