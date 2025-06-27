@@ -8,13 +8,14 @@ export class UserRepository implements IUserRepository {
    * @param connect_info - メールアドレス (例: taro-gh@gmail.com)
    * @returns {Promise<User | null>} ユーザーが見つかった場合はUserオブジェクト，見つからなければnull
    */
-  async findByEmail(connect_info: string): Promise<User | null> {
+  async findByEmail(connect_info: string, oauth_app: 'github' | 'google'): Promise<User | null> {
     const sql = `
       SELECT * FROM ${env.USERS_TABLE_NAME} 
       WHERE connect_info = :connect_info
+      AND oauth_app = :oauth_app
       LIMIT 1;
     `;
-    const result = await db.query<User>(sql, { connect_info });
+    const result = await db.query<User>(sql, { connect_info, oauth_app });
     //console.log('作成したユーザー', result);
     return result[0] || null;
   }
