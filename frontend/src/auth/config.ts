@@ -5,6 +5,8 @@ import type { Provider } from 'next-auth/providers';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+type ProviderType = 'github' | 'google';
+
 const providers: Provider[] = [
   GitHub({
     clientId: process.env.GITHUB_CLIENT_ID,
@@ -47,13 +49,17 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
   callbacks: {
     jwt: async ({ token, user, trigger, account }) => {
-      console.log(process.env.BACKEND_URL);
+      // console.log(process.env.BACKEND_URL);
       if (trigger === 'signIn' && user && account) {
         try {
           const formData = new FormData();
-          formData.append('name', user.name || '');
-          formData.append('oauth_app', account.provider as 'github' | 'google');
-          formData.append('connect_info', user.email || '');
+          formData.append('name', user.name || '歌人');
+          formData.append('oauth_app', account.provider as ProviderType);
+          if (user.email) {
+            formData.append('connect_info', user.email);
+          } else {
+            throw new Error('ユーザのメールアドレスが取得できませんでした');
+          }
 
           const res = await fetch(`${process.env.BACKEND_URL}/user`, {
             method: 'POST',
@@ -61,15 +67,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           });
 
           if (!res.ok) {
-            console.error('Backend user creation failed', res);
-            throw new Error('Backend user creation failed');
+            console.error('ユーザの作成に失敗しました:', res);
+            throw new Error('ユーザの作成に失敗しました');
           }
 
           // ユーザー作成に成功した場合，ユーザーIDをトークンに追加する
           const data = await res.json();
           token.user_id = data.id;
         } catch (error) {
-          console.error('Failed to create user:', error);
+          console.error('ユーザの作成に失敗しました:', error);
           throw error;
         }
       }
