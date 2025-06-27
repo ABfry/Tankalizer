@@ -28,7 +28,10 @@ export class UserService implements IUserService {
     );
 
     // ユーザーが既に存在するかどうかをリポジトリに問い合わせる
-    const existingUser = await this.userRepository.findByEmail(userDto.connect_info);
+    const existingUser = await this.userRepository.findByEmail(
+      userDto.connect_info,
+      userDto.oauth_app
+    );
 
     // ユーザーが既に存在した場合
     if (existingUser) {
@@ -56,7 +59,7 @@ export class UserService implements IUserService {
     await this.userRepository.create(userRepoDto);
 
     // 作成したユーザー情報を再度取得して返す
-    const newUser = await this.userRepository.findByEmail(userDto.connect_info);
+    const newUser = await this.userRepository.findByEmail(userDto.connect_info, userDto.oauth_app);
 
     if (!newUser) {
       // 万が一，作成直後にユーザーが見つからない場合はエラーを投げる

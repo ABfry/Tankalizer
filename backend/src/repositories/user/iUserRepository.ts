@@ -17,6 +17,6 @@ export type User = {
 };
 
 export interface IUserRepository {
-  findByEmail(connect_info: string): Promise<User | null>;
+  findByEmail(connect_info: string, oauth_app: 'github' | 'google'): Promise<User | null>;
   create(user: CreateUserRepoDTO): Promise<void>;
 }
