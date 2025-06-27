@@ -46,13 +46,13 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     signIn: '/login',
   },
   callbacks: {
-    jwt: async ({ token, user, trigger }) => {
+    jwt: async ({ token, user, trigger, account }) => {
       console.log(process.env.BACKEND_URL);
-      if (trigger === 'signIn' && user) {
+      if (trigger === 'signIn' && user && account) {
         try {
           const formData = new FormData();
           formData.append('name', user.name || '');
-          formData.append('oauth_app', 'github');
+          formData.append('oauth_app', account.provider as 'github' | 'google');
           formData.append('connect_info', user.email || '');
 
           const res = await fetch(`${process.env.BACKEND_URL}/user`, {
