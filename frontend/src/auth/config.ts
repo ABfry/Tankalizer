@@ -47,25 +47,27 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
   callbacks: {
     jwt: async ({ token, user, trigger }) => {
+      console.log(process.env.BACKEND_URL);
       if (trigger === 'signIn' && user) {
         try {
+          const formData = new FormData();
+          formData.append('name', user.name || '');
+          formData.append('oauth_app', 'github');
+          formData.append('connect_info', user.email || '');
+
           const res = await fetch(`${process.env.BACKEND_URL}/user`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: user.name,
-              icon: user.image,
-            }),
+            body: formData,
           });
 
           if (!res.ok) {
+            console.error('Backend user creation failed', res);
             throw new Error('Backend user creation failed');
           }
 
+          // ユーザー作成に成功した場合，ユーザーIDをトークンに追加する
           const data = await res.json();
-          token.user_id = data.user_id;
+          token.user_id = data.id;
         } catch (error) {
           console.error('Failed to create user:', error);
           throw error;
