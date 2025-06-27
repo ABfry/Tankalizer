@@ -30,4 +30,5 @@ export interface IPostRepository {
   create(user: CreatePostRepoDTO): Promise<void>;
   delete(id: string, userId: string): Promise<void>;
   getPost(dto: GetPostRepoDTO): Promise<Post[]>;
+  getOnePost(id: string, viewerId?: string): Promise<Post>;
 }

@@ -7,7 +7,7 @@ import {
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
 import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
-import { type GetPostDTO } from './iPostService.js';
+import { type GetPostDTO, type GetOnePostDTO } from './iPostService.js';
 
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
@@ -107,7 +107,7 @@ export class PostService implements IPostService {
   /**
    * 投稿を取得するビジネスロジック
    * @param getPostDto - 投稿取得に必要なデータ
-   * @returns {Promise<GetPostResult>} 取得結果
+   * @returns {Promise<Post[]>} 取得結果
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
   async getPost(getPostDto: GetPostDTO): Promise<Post[]> {
@@ -118,5 +118,21 @@ export class PostService implements IPostService {
     console.log(`[PostService#getPosts] 投稿の取得が完了しました．(count: ${posts.length})`);
 
     return posts;
+  }
+
+  /**
+   * 1つの投稿を取得するビジネスロジック
+   * @param getOnePostDto - 投稿取得に必要なデータ
+   * @returns {Promise<Post>} 取得結果
+   * @throws {Error} DBエラーなど、その他の予期せぬエラー
+   */
+  async getOnePost(getOnePostDto: GetOnePostDTO): Promise<Post> {
+    console.log(`[PostService#getOnePost] 投稿取得処理を開始します．(id: ${getOnePostDto.id})`);
+
+    const post = await this.postRepository.getOnePost(getOnePostDto.id, getOnePostDto.viewerId);
+
+    console.log(`[PostService#getOnePost] 投稿の取得が完了しました．(id: ${getOnePostDto.id})`);
+
+    return post;
   }
 }
