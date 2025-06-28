@@ -33,9 +33,14 @@ const createMiyabiHandlerV2: RouteHandler<typeof createMiyabiRouteV2, {}> = asyn
     // 成功レスポンスを返す
     return c.json(result, 200);
   } catch (err: any) {
+    console.log(err.message);
     // エラーレスポンスを返す
-    if (err.message === '投稿が見つかりません．' || 'ユーザーが見つかりません．') {
+    if (err.message === '投稿が見つかりません．' || err.message === 'ユーザーが見つかりません．') {
+      console.log('404');
       return c.json({ message: err.message, statusCode: 404, error: 'Not Found' }, 404);
+    } else if (err.message === '雅が既に存在します．') {
+      console.log('409');
+      return c.json({ message: err.message, statusCode: 409, error: 'Conflict' }, 409);
     }
     console.error('[createMiyabiHandlerV2] エラーが発生しました．', err);
     return c.json(

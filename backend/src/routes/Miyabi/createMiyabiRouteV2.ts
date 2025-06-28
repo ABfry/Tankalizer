@@ -45,6 +45,14 @@ export const createMiyabiRouteV2 = createRoute({
       },
       description: 'Not Found',
     },
+    409: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: 'Conflict',
+    },
     500: {
       content: {
         'application/json': {
@@ -62,6 +70,10 @@ export type createMiyabiRouteResponse200 = z.infer<
 
 export type createMiyabiRouteResponse404 = z.infer<
   (typeof createMiyabiRouteV2.responses)['404']['content']['application/json']['schema']
+>;
+
+export type createMiyabiRouteResponse409 = z.infer<
+  (typeof createMiyabiRouteV2.responses)['409']['content']['application/json']['schema']
 >;
 
 export type createMiyabiRouteResponse500 = z.infer<

@@ -43,6 +43,15 @@ export class MiyabiService implements IMiyabiService {
       throw new Error('ユーザーが見つかりません．');
     }
 
+    const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
+      createMiyabiDto.user_id,
+      createMiyabiDto.post_id
+    );
+
+    if (miyabi) {
+      throw new Error('雅が既に存在します．');
+    }
+
     await this.miyabiRepository.create(createMiyabiDto.user_id, createMiyabiDto.post_id);
 
     console.log(
