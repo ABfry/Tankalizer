@@ -1,6 +1,10 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import { type IMiyabiService } from '../../services/miyabi/iMiyabiService.js';
+import {
+  type IMiyabiService,
+  NotFoundError,
+  ConflictError,
+} from '../../services/miyabi/iMiyabiService.js';
 import { type IMiyabiRepository } from '../../repositories/miyabi/iMiyabiRepository.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
 import { PostRepository } from '../../repositories/post/postRepository.js';
@@ -34,8 +38,11 @@ const deleteMiyabiHandlerV2: RouteHandler<typeof deleteMiyabiRouteV2, {}> = asyn
     return c.json(result, 200);
   } catch (err: any) {
     // エラーレスポンスを返す
-    if (err.message === '雅が見つかりません．') {
+    if (err instanceof NotFoundError) {
       return c.json({ message: err.message, statusCode: 404, error: 'Not Found' }, 404);
+    }
+    if (err instanceof ConflictError) {
+      return c.json({ message: err.message, statusCode: 409, error: 'Conflict' }, 409);
     }
     console.error('[deleteMiyabiHandlerV2] エラーが発生しました．', err);
     return c.json(

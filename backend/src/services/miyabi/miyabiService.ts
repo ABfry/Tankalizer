@@ -4,6 +4,8 @@ import {
   type DeleteMiyabiDTO,
   type CreateMiyabiResult,
   type DeleteMiyabiResult,
+  NotFoundError,
+  ConflictError,
 } from './iMiyabiService.js';
 import {
   type IMiyabiRepository,
@@ -34,13 +36,13 @@ export class MiyabiService implements IMiyabiService {
     const post: Post | null = await this.postRepository.findById(createMiyabiDto.post_id);
 
     if (!post) {
-      throw new Error('投稿が見つかりません．');
+      throw new NotFoundError('投稿が見つかりません．');
     }
 
     const user: User | null = await this.userRepository.findById(createMiyabiDto.user_id);
 
     if (!user) {
-      throw new Error('ユーザーが見つかりません．');
+      throw new NotFoundError('ユーザーが見つかりません．');
     }
 
     const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
@@ -49,7 +51,7 @@ export class MiyabiService implements IMiyabiService {
     );
 
     if (miyabi) {
-      throw new Error('雅が既に存在します．');
+      throw new ConflictError('雅が既に存在します．');
     }
 
     await this.miyabiRepository.create(createMiyabiDto.user_id, createMiyabiDto.post_id);
@@ -79,8 +81,20 @@ export class MiyabiService implements IMiyabiService {
       deleteMiyabiDto.post_id
     );
 
+    const post: Post | null = await this.postRepository.findById(deleteMiyabiDto.post_id);
+
+    if (!post) {
+      throw new NotFoundError('投稿が見つかりません．');
+    }
+
+    const user: User | null = await this.userRepository.findById(deleteMiyabiDto.user_id);
+
+    if (!user) {
+      throw new NotFoundError('ユーザーが見つかりません．');
+    }
+
     if (!miyabi) {
-      throw new Error('雅が見つかりません．');
+      throw new ConflictError('雅が見つかりません．');
     }
 
     await this.miyabiRepository.delete(deleteMiyabiDto.user_id, deleteMiyabiDto.post_id);

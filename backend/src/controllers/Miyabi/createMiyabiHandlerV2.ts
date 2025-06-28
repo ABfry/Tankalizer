@@ -1,6 +1,10 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import { type IMiyabiService } from '../../services/miyabi/iMiyabiService.js';
+import {
+  type IMiyabiService,
+  NotFoundError,
+  ConflictError,
+} from '../../services/miyabi/iMiyabiService.js';
 import { type IMiyabiRepository } from '../../repositories/miyabi/iMiyabiRepository.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
 import { PostRepository } from '../../repositories/post/postRepository.js';
@@ -35,11 +39,10 @@ const createMiyabiHandlerV2: RouteHandler<typeof createMiyabiRouteV2, {}> = asyn
   } catch (err: any) {
     console.log(err.message);
     // エラーレスポンスを返す
-    if (err.message === '投稿が見つかりません．' || err.message === 'ユーザーが見つかりません．') {
-      console.log('404');
+    if (err instanceof NotFoundError) {
       return c.json({ message: err.message, statusCode: 404, error: 'Not Found' }, 404);
-    } else if (err.message === '雅が既に存在します．') {
-      console.log('409');
+    }
+    if (err instanceof ConflictError) {
       return c.json({ message: err.message, statusCode: 409, error: 'Conflict' }, 409);
     }
     console.error('[createMiyabiHandlerV2] エラーが発生しました．', err);

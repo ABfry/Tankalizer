@@ -44,6 +44,14 @@ export const deleteMiyabiRouteV2 = createRoute({
       },
       description: 'Not Found',
     },
+    409: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: 'Conflict',
+    },
     500: {
       content: {
         'application/json': {
@@ -61,6 +69,10 @@ export type deleteMiyabiRouteResponse200 = z.infer<
 
 export type deleteMiyabiRouteResponse404 = z.infer<
   (typeof deleteMiyabiRouteV2.responses)['404']['content']['application/json']['schema']
+>;
+
+export type deleteMiyabiRouteResponse409 = z.infer<
+  (typeof deleteMiyabiRouteV2.responses)['409']['content']['application/json']['schema']
 >;
 
 export type deleteMiyabiRouteResponse500 = z.infer<
