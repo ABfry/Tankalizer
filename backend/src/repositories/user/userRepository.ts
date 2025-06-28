@@ -21,6 +21,21 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
+   * ユーザーIDをもとにユーザーを1件検索する
+   * @param id - ユーザーID
+   * @returns {Promise<User | null>} ユーザーが見つかった場合はUserオブジェクト，見つからなければnull
+   */
+  async findById(id: string): Promise<User | null> {
+    const sql = `
+      SELECT * FROM ${env.USERS_TABLE_NAME} 
+      WHERE id = :id
+      LIMIT 1;
+    `;
+    const result = await db.query<User>(sql, { id });
+    return result[0] || null;
+  }
+
+  /**
    * 新しいユーザーをDBに作成する
    * @param user - 作成するユーザーのデータ (CreateUserDTO)
    * @returns {Promise<void>}
