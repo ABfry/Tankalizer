@@ -47,21 +47,8 @@ class DatabaseUtility {
     });
   }
 
-  private async sendQueries(
-    dbc: mysql.Connection,
-    queries: Array<{ query: string; option?: any }>
-  ) {
-    for (var i = 0; i < queries.length; i++) {
-      await this.sendQuery(dbc, queries[i].query, queries[i].option);
-    }
-  }
-
   query<T = any>(query: string, option?: any): Promise<T[]> {
     return this.connect((dbc: mysql.Connection) => this.sendQuery(dbc, query, option));
-  }
-
-  queries(queries: Array<{ query: string; option?: any }>): Promise<any> {
-    return this.connect((dbc: mysql.Connection) => this.sendQueries(dbc, queries));
   }
 }
 
