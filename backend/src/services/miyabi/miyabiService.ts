@@ -24,7 +24,7 @@ export class MiyabiService implements IMiyabiService {
    * 雅を作成するビジネスロジック
    * @param createMiyabiDto - 雅作成に必要なデータ
    * @returns {Promise<DeleteMiyabiResult>} 作成結果
-   * @throws {Error} 投稿あるいはユーザが見つからない場合にエラー
+   * @throws {Error} 投稿あるいはユーザが見つからない，または既に同一雅が存在する場合にエラー
    */
   async createMiyabi(createMiyabiDto: CreateMiyabiDTO): Promise<CreateMiyabiResult> {
     console.log(
@@ -67,7 +67,7 @@ export class MiyabiService implements IMiyabiService {
    * 雅を削除するビジネスロジック
    * @param deleteMiyabiDto - 雅削除に必要なデータ
    * @returns {Promise<DeleteMiyabiResult>} 削除結果
-   * @throws {Error} 雅が見つからない、または削除権限がない場合にエラー
+   * @throws {Error} 雅が見つからない場合にエラー
    */
   async deleteMiyabi(deleteMiyabiDto: DeleteMiyabiDTO): Promise<DeleteMiyabiResult> {
     console.log(
