@@ -47,21 +47,37 @@ class DatabaseUtility {
     });
   }
 
-  private async sendQueries(
-    dbc: mysql.Connection,
-    queries: Array<{ query: string; option?: any }>
-  ) {
-    for (var i = 0; i < queries.length; i++) {
-      await this.sendQuery(dbc, queries[i].query, queries[i].option);
-    }
-  }
-
   query<T = any>(query: string, option?: any): Promise<T[]> {
     return this.connect((dbc: mysql.Connection) => this.sendQuery(dbc, query, option));
   }
 
-  queries(queries: Array<{ query: string; option?: any }>): Promise<any> {
-    return this.connect((dbc: mysql.Connection) => this.sendQueries(dbc, queries));
+  /**
+   * トランザクションを実行する
+   * @param queries 実行するクエリの配列
+   * @returns クエリの実行結果の配列
+   */
+  async transaction<T = any>(queries: Array<{ query: string; option?: any }>): Promise<T[]> {
+    return this.connect(async (dbc: mysql.Connection) => {
+      try {
+        // 開始
+        await this.sendQuery(dbc, 'BEGIN');
+        const results = [];
+
+        // 順次クエリを実行
+        for (const { query, option } of queries) {
+          const result = await this.sendQuery(dbc, query, option);
+          results.push(result);
+        }
+
+        // コミット
+        await this.sendQuery(dbc, 'COMMIT');
+        return results;
+      } catch (error) {
+        // 失敗したらロールバック
+        await this.sendQuery(dbc, 'ROLLBACK');
+        throw error;
+      }
+    });
   }
 }
 
