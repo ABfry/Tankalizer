@@ -18,5 +18,6 @@ export type User = {
 
 export interface IUserRepository {
   findByEmail(connect_info: string): Promise<User | null>;
+  findById(id: string): Promise<User | null>;
   create(user: CreateUserRepoDTO): Promise<void>;
 }

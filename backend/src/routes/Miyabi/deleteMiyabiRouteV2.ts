@@ -36,14 +36,6 @@ export const deleteMiyabiRouteV2 = createRoute({
       },
       description: '雅の削除が正常に完了しました．',
     },
-    403: {
-      content: {
-        'application/json': {
-          schema: ErrorResponseSchema,
-        },
-      },
-      description: 'Forbidden',
-    },
     404: {
       content: {
         'application/json': {
@@ -65,10 +57,6 @@ export const deleteMiyabiRouteV2 = createRoute({
 
 export type deleteMiyabiRouteResponse200 = z.infer<
   (typeof deleteMiyabiRouteV2.responses)['200']['content']['application/json']['schema']
->;
-
-export type deleteMiyabiRouteResponse403 = z.infer<
-  (typeof deleteMiyabiRouteV2.responses)['403']['content']['application/json']['schema']
 >;
 
 export type deleteMiyabiRouteResponse404 = z.infer<

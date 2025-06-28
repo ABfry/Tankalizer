@@ -29,7 +29,7 @@ export class MiyabiRepository implements IMiyabiRepository {
     const sql = `
       INSERT INTO ${env.MIYABI_TABLE_NAME}
       (user_id, post_id)
-      VALUES (:user_id, :post_id);
+      VALUES (:userId, :postId);
     `;
     try {
       await db.query(sql, { userId, postId });
@@ -52,7 +52,7 @@ export class MiyabiRepository implements IMiyabiRepository {
    * @returns {Promise<void>}
    */
   async delete(userId: string, postId: string): Promise<void> {
-    const sql = `DELETE FROM ${env.MIYABI_TABLE_NAME} WHERE user_id = :user_id AND post_id = :post_id;`;
+    const sql = `DELETE FROM ${env.MIYABI_TABLE_NAME} WHERE user_id = :userId AND post_id = :postId;`;
     try {
       await db.query(sql, { userId, postId });
       console.log(

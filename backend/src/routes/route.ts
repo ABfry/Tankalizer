@@ -41,6 +41,10 @@ import { getPostRouteV2 } from './Post/getPostRouteV2.js';
 import getPostHandlerV2 from '../controllers/Post/getPostHandlerV2.js';
 import { getOnePostRouteV2 } from './Post/getOnePostRouteV2.js';
 import getOnePostHandlerV2 from '../controllers/Post/getOnePostHandlerV2.js';
+import { createMiyabiRouteV2 } from './Miyabi/createMiyabiRouteV2.js';
+import createMiyabiHandlerV2 from '../controllers/Miyabi/createMiyabiHandlerV2.js';
+import { deleteMiyabiRouteV2 } from './Miyabi/deleteMiyabiRouteV2.js';
+import deleteMiyabiHandlerV2 from '../controllers/Miyabi/deleteMiyabiHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -65,5 +69,7 @@ export default router
   .openapi(createPostRouteV2, createPostHandlerV2)
   .openapi(deletePostRouteV2, deletePostHandlerV2)
   .openapi(getPostRouteV2, getPostHandlerV2)
-  .openapi(getOnePostRouteV2, getOnePostHandlerV2);
+  .openapi(getOnePostRouteV2, getOnePostHandlerV2)
+  .openapi(createMiyabiRouteV2, createMiyabiHandlerV2)
+  .openapi(deleteMiyabiRouteV2, deleteMiyabiHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく
