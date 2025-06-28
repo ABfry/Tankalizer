@@ -78,7 +78,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
           // ユーザー作成に成功した場合，ユーザーIDをトークンに追加する
           const data = await res.json();
-          token.user_id = data.id;
+          token.user_id = data.user.id;
         } catch (error) {
           console.error('ユーザの作成に失敗しました:', error);
           throw error;
