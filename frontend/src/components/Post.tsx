@@ -51,8 +51,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const [toastOpen, setToastOpen] = useState(false);
   // 削除失敗ダイアログの表示状態
   const [deleteFailedDialogOpen, setDeleteFailedDialogOpen] = useState(false);
-  // ユーザアイコンURLが一致するなら自分の投稿
-  const isMyPost = useSession().data?.user?.image === post.user.iconUrl;
+  // ユーザIDが一致するなら自分の投稿
+  const isMyPost = useSession().data?.user_id === post.user.userId;
   // ドロップダウンメニューの要素
   const dropDownItems = [];
   // ドロップダウンメニューの投稿共有ボタン
