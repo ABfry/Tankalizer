@@ -9,7 +9,7 @@ profile_text VARCHAR(255),
 icon_url VARCHAR(255) NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-UNIQUE (connect_info)
+UNIQUE (connect_info, oauth_app)
 
 );
 
