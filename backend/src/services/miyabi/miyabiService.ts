@@ -13,6 +13,7 @@ import {
 } from '../../repositories/miyabi/iMiyabiRepository.js';
 import { type IPostRepository, type Post } from '../../repositories/post/iPostRepository.js';
 import { type IUserRepository, type User } from '../../repositories/user/iUserRepository.js';
+import db from '../../lib/db.js';
 
 export class MiyabiService implements IMiyabiService {
   // コンストラクタでサービスを受け取る
@@ -29,40 +30,42 @@ export class MiyabiService implements IMiyabiService {
    * @throws {Error} 投稿あるいはユーザが見つからない，または既に同一雅が存在する場合にエラー
    */
   async createMiyabi(createMiyabiDto: CreateMiyabiDTO): Promise<CreateMiyabiResult> {
-    console.log(
-      `[MiyabiService#createMiyabi] 雅作成処理を開始します．(userId: ${createMiyabiDto.user_id}, postId: ${createMiyabiDto.post_id})`
-    );
+    return db.transaction(async (dbc) => {
+      console.log(
+        `[MiyabiService#createMiyabi] 雅作成処理を開始します．(userId: ${createMiyabiDto.user_id}, postId: ${createMiyabiDto.post_id})`
+      );
 
-    const post: Post | null = await this.postRepository.findById(createMiyabiDto.post_id);
+      const post: Post | null = await this.postRepository.findById(createMiyabiDto.post_id, dbc);
 
-    if (!post) {
-      throw new NotFoundError('投稿が見つかりません．');
-    }
+      if (!post) {
+        throw new NotFoundError('投稿が見つかりません．');
+      }
 
-    const user: User | null = await this.userRepository.findById(createMiyabiDto.user_id);
+      const user: User | null = await this.userRepository.findById(createMiyabiDto.user_id, dbc);
 
-    if (!user) {
-      throw new NotFoundError('ユーザーが見つかりません．');
-    }
+      if (!user) {
+        throw new NotFoundError('ユーザーが見つかりません．');
+      }
 
-    const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
-      createMiyabiDto.user_id,
-      createMiyabiDto.post_id
-    );
+      const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
+        createMiyabiDto.user_id,
+        createMiyabiDto.post_id
+      );
 
-    if (miyabi) {
-      throw new ConflictError('雅が既に存在します．');
-    }
+      if (miyabi) {
+        throw new ConflictError('雅が既に存在します．');
+      }
 
-    await this.miyabiRepository.create(createMiyabiDto.user_id, createMiyabiDto.post_id);
+      await this.miyabiRepository.create(createMiyabiDto.user_id, createMiyabiDto.post_id, dbc);
 
-    console.log(
-      `[MiyabiService#createMiyabi] 雅の作成が完了しました．(userId: ${createMiyabiDto.user_id}, postId: ${createMiyabiDto.post_id})`
-    );
+      console.log(
+        `[MiyabiService#createMiyabi] 雅の作成が完了しました．(userId: ${createMiyabiDto.user_id}, postId: ${createMiyabiDto.post_id})`
+      );
 
-    return {
-      message: '雅を作成しました．',
-    };
+      return {
+        message: '雅を作成しました．',
+      };
+    });
   }
 
   /**

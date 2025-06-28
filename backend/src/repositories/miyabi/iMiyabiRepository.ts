@@ -1,3 +1,5 @@
+import mysql from 'mysql2';
+
 export type Miyabi = {
   id: string;
   user_id: string;
@@ -6,7 +8,7 @@ export type Miyabi = {
 };
 
 export interface IMiyabiRepository {
-  findMiyabi(userId: string, postId: string): Promise<Miyabi | null>;
-  create(userId: string, postId: string): Promise<void>;
-  delete(userId: string, postId: string): Promise<void>;
+  findMiyabi(userId: string, postId: string, dbc?: mysql.Connection): Promise<Miyabi | null>;
+  create(userId: string, postId: string, dbc?: mysql.Connection): Promise<void>;
+  delete(userId: string, postId: string, dbc?: mysql.Connection): Promise<void>;
 }
