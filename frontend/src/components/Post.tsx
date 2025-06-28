@@ -181,7 +181,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onClick={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => ++count);
-                await addMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await addMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -189,7 +189,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onCancel={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => --count);
-                await removeMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await removeMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -211,8 +211,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
           console.log('はい');
           setDialogOpen(false);
           const result = await deletePost({
+            userId: session.data?.user_id ?? '',
             postId: post.id,
-            iconUrl: session.data?.user?.image ?? '',
           });
           if (!result) setDeleteFailedDialogOpen(true);
           else handleDelete();
