@@ -12,7 +12,7 @@ export class PostRepository implements IPostRepository {
   async findById(id: string): Promise<Post | null> {
     const sql = `
       SELECT * FROM ${env.POSTS_TABLE_NAME} 
-      WHERE id = :id
+      WHERE id = :id AND is_deleted = FALSE
       LIMIT 1;
     `;
     const result = await db.query<Post>(sql, { id });
