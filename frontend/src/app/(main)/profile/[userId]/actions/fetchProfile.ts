@@ -10,10 +10,17 @@ const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
  * @async
  * @function fetchProfile
  * @param {Object} params - 投稿データ取得のためのパラメータオブジェクト
+ * @param {string} params.targetUserId - ターゲットユーザのID（プロフィールを取得するユーザのID）
  * @param {string} params.userId - ユーザのID
  * @returns {Promise<ProfileTypes>} プロフィールデータを返すPromise．プロフィールが存在しない場合はnullを返す．
  */
-const fetchProfile = async ({ userId }: { userId: string }): Promise<ProfileTypes | null> => {
+const fetchProfile = async ({
+  targetUserId,
+  userId,
+}: {
+  targetUserId: string;
+  userId: string;
+}): Promise<ProfileTypes | null> => {
   try {
     const res = await fetch(`${backendUrl}/profile`, {
       method: 'POST',
@@ -21,7 +28,8 @@ const fetchProfile = async ({ userId }: { userId: string }): Promise<ProfileType
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user_id: userId,
+        user_id: targetUserId,
+        viewer_id: userId,
       }),
     });
 
@@ -33,11 +41,14 @@ const fetchProfile = async ({ userId }: { userId: string }): Promise<ProfileType
 
     const json = await res.json();
     const profile: ProfileTypes = {
-      userId: json.user_id,
-      name: json.user_name,
-      iconUrl: json.user_icon,
-      totalMiyabi: json.total_miyabi,
-      totalPost: json.total_post,
+      userId: json.profile.user_id,
+      name: json.profile.user_name,
+      iconUrl: json.profile.icon_url,
+      isFollowing: json.profile.is_following,
+      totalMiyabi: json.profile.total_miyabi,
+      totalPost: json.profile.total_post,
+      followingCount: json.profile.following_count,
+      followerCount: json.profile.follower_count,
     };
     return profile;
   } catch (error) {
