@@ -7,7 +7,7 @@ export class ProfileRepository implements IProfileRepository {
    * プロフィールを1つだけ取得する
    * @param user_id - ユーザーID
    * @param viewer_id - 閲覧者のユーザーID
-   * @returns {Promise<Post>} プロフィール
+   * @returns {Promise<Profile>} プロフィール
    */
   async getProfile(user_id: string, viewer_id?: string): Promise<Profile> {
     const params: { [key: string]: string | undefined } = { user_id, viewer_id };
