@@ -17,10 +17,9 @@ import { addMiyabi, removeMiyabi } from '@/app/(main)/timeline/actions/countMiya
 import deletePost from '@/app/(main)/timeline/actions/deletePost';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getImageUrl } from '@/lib/utils';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
-const cdnUrl =
-  process.env.NEXT_PUBLIC_CDN_URL ?? 'https://202502-test-bucket.s3.ap-northeast-1.amazonaws.com';
 
 // props の型定義
 interface PostProps {
@@ -266,16 +265,6 @@ const Post = ({ post, className, onDelete }: PostProps) => {
 const parseTanka = (tanka: Array<string>): string => {
   const parsedTanka: string = `${tanka[0]}\n\u3000${tanka[1]}\n\u3000\u3000${tanka[2]}\n${tanka[3]}\n\u3000${tanka[4]}`;
   return parsedTanka;
-};
-
-/**
- * 画像のURLを取得する
- * @param imageUrl - 画像のURL
- * @returns 画像のURL
- */
-const getImageUrl = (imageUrl: string): string => {
-  if (imageUrl === '') return '';
-  return `${cdnUrl}/${imageUrl}`;
 };
 
 export default Post;
