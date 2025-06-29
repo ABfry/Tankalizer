@@ -7,8 +7,9 @@ export type Profile = {
   total_post: number;
   following_count: number;
   follower_count: number;
+  is_following: boolean;
 };
 
 export interface IProfileRepository {
-  getProfile(user_id: string): Promise<Profile | null>;
+  getProfile(user_id: string, viewer_id?: string): Promise<Profile>;
 }

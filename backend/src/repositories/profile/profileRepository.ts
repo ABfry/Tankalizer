@@ -6,15 +6,24 @@ export class ProfileRepository implements IProfileRepository {
   /**
    * 投稿を1つだけ取得する
    * @param user_id - ユーザーID
+   * @param viewer_id - 閲覧者のユーザーID
    * @returns {Promise<Post>} プロフィール
    */
-  async getProfile(user_id: string): Promise<Profile> {
+  async getProfile(user_id: string, viewer_id?: string): Promise<Profile> {
+    const params: { [key: string]: string | undefined } = { user_id, viewer_id };
+
+    // viewer_id が指定されている場合, フォロー状態を確認するSELECT句を追加
+    const followCheckClause = viewer_id
+      ? `(EXISTS (SELECT 1 FROM ${env.FOLLOWS_TABLE_NAME} WHERE follower_id = :viewer_id AND followee_id = u.id)) AS is_following`
+      : 'FALSE AS is_following';
+
     const sql = `
       SELECT
         u.id AS user_id,
         u.name AS user_name,
         u.icon_url,
         u.created_at,
+        ${followCheckClause}, -- フォロー状態を確認する句
         -- ユーザーの全投稿に対する雅の総数をカウント
         (
           SELECT COUNT(*)
@@ -47,7 +56,11 @@ export class ProfileRepository implements IProfileRepository {
     `;
 
     try {
-      const results = await db.query(sql, { user_id });
+      // viewer_id が undefined の場合は params から削除
+      if (!viewer_id) {
+        delete params.viewer_id;
+      }
+      const results = await db.query(sql, params);
 
       const row = results[0];
 
@@ -56,6 +69,7 @@ export class ProfileRepository implements IProfileRepository {
         user_name: row.user_name,
         icon_url: row.icon_url,
         created_at: row.created_at,
+        is_following: Boolean(row.is_following),
         total_miyabi: Number(row.total_miyabi),
         total_post: Number(row.total_post),
         following_count: Number(row.following_count),
