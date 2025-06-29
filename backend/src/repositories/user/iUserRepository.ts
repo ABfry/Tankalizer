@@ -1,3 +1,5 @@
+import mysql from 'mysql2';
+
 export type CreateUserRepoDTO = {
   name: string;
   oauth_app: 'github' | 'google';
@@ -18,6 +20,6 @@ export type User = {
 
 export interface IUserRepository {
   findByEmail(connect_info: string, oauth_app: 'github' | 'google'): Promise<User | null>;
-  findById(id: string): Promise<User | null>;
+  findById(id: string, dbc?: mysql.Connection): Promise<User | null>;
   create(user: CreateUserRepoDTO): Promise<void>;
 }

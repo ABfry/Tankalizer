@@ -52,26 +52,32 @@ class DatabaseUtility {
   }
 
   /**
-   * トランザクションを実行する
-   * @param queries 実行するクエリの配列
-   * @returns クエリの実行結果の配列
+   * 既存の接続を使ってクエリを実行する（トランザクション用）
+   * @param dbc トランザクションで使っている接続オブジェクト
+   * @param query 実行するクエリ
+   * @param option クエリのオプション
    */
-  async transaction<T = any>(queries: Array<{ query: string; option?: any }>): Promise<T[]> {
+  queryOnConnection<T = any>(dbc: mysql.Connection, query: string, option?: any): Promise<T[]> {
+    return this.sendQuery(dbc, query, option);
+  }
+
+  /**
+   * トランザクションを実行する
+   * @param callback トランザクション内で実行したい処理を記述した関数
+   * @returns コールバック関数の実行結果
+   */
+  async transaction<T>(callback: (dbc: mysql.Connection) => Promise<T>): Promise<T> {
     return this.connect(async (dbc: mysql.Connection) => {
       try {
         // 開始
         await this.sendQuery(dbc, 'BEGIN');
-        const results = [];
 
-        // 順次クエリを実行
-        for (const { query, option } of queries) {
-          const result = await this.sendQuery(dbc, query, option);
-          results.push(result);
-        }
+        // 引数で受け取ったコールバック関数を実行
+        const result = await callback(dbc);
 
         // コミット
         await this.sendQuery(dbc, 'COMMIT');
-        return results;
+        return result;
       } catch (error) {
         // 失敗したらロールバック
         await this.sendQuery(dbc, 'ROLLBACK');

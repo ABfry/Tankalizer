@@ -1,6 +1,7 @@
 import { type IUserRepository, type CreateUserRepoDTO, type User } from './iUserRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
+import mysql from 'mysql2';
 
 export class UserRepository implements IUserRepository {
   /**
@@ -25,14 +26,22 @@ export class UserRepository implements IUserRepository {
    * @param id - ユーザーID
    * @returns {Promise<User | null>} ユーザーが見つかった場合はUserオブジェクト，見つからなければnull
    */
-  async findById(id: string): Promise<User | null> {
-    const sql = `
+  async findById(id: string, dbc?: mysql.Connection): Promise<User | null> {
+    const query = `
       SELECT * FROM ${env.USERS_TABLE_NAME} 
       WHERE id = :id
       LIMIT 1;
     `;
-    const result = await db.query<User>(sql, { id });
-    return result[0] || null;
+    const option = { id };
+    let results;
+    if (dbc) {
+      // トランザクション中の場合
+      results = await db.queryOnConnection(dbc, query, option);
+    } else {
+      // 通常の場合
+      results = await db.query(query, option);
+    }
+    return results[0] || null;
   }
 
   /**

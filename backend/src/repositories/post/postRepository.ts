@@ -2,6 +2,7 @@ import { type IPostRepository, type CreatePostRepoDTO, type Post } from './iPost
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
 import type { GetPostRepoDTO } from '../../repositories/post/iPostRepository.js';
+import mysql from 'mysql2';
 
 export class PostRepository implements IPostRepository {
   /**
@@ -9,14 +10,22 @@ export class PostRepository implements IPostRepository {
    * @param id - ID (UUID形式)
    * @returns {Promise<Post | null>} 投稿が見つかった場合はPostオブジェクト，見つからなければnull
    */
-  async findById(id: string): Promise<Post | null> {
-    const sql = `
+  async findById(id: string, dbc?: mysql.Connection): Promise<Post | null> {
+    const query = `
       SELECT * FROM ${env.POSTS_TABLE_NAME} 
       WHERE id = :id AND is_deleted = FALSE
       LIMIT 1;
     `;
-    const result = await db.query<Post>(sql, { id });
-    return result[0] || null;
+    const option = { id };
+    let results;
+    if (dbc) {
+      // トランザクション中の場合
+      results = await db.queryOnConnection<Post | null>(dbc, query, option);
+    } else {
+      // 通常の場合
+      results = await db.query<Post | null>(query, option);
+    }
+    return results[0] || null;
   }
 
   /**
