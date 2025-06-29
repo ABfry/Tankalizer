@@ -18,14 +18,10 @@ export const createUserSchema = z.object({
     example: '大阪で歌人やってます',
     description: 'プロフィール文（任意）',
   }),
-  icon_image: z
-    .custom((val) => val === null || val instanceof Blob || val == '')
-    .optional()
-    .openapi({
-      type: 'string',
-      format: 'binary',
-      description: 'アイコン画像ファイル',
-    }),
+  icon_url: z.string().openapi({
+    example: 'https://example.com/icon.png',
+    description: 'アイコン画像のURL',
+  }),
 });
 
 // レスポンスの型

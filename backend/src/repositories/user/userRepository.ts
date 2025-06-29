@@ -52,11 +52,12 @@ export class UserRepository implements IUserRepository {
   async create(user: CreateUserRepoDTO): Promise<void> {
     const sql = `
       INSERT INTO ${env.USERS_TABLE_NAME} 
-      (name, oauth_app, connect_info, profile_text, icon_url) 
-      VALUES (:name, :oauth_app, :connect_info, :profile_text, :icon_url);
+      (id, name, oauth_app, connect_info, profile_text, icon_url) 
+      VALUES (:id, :name, :oauth_app, :connect_info, :profile_text, :icon_url);
     `;
     try {
       await db.query(sql, {
+        id: user.id,
         name: user.name,
         oauth_app: user.oauth_app,
         connect_info: user.connect_info,

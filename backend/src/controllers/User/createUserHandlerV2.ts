@@ -9,12 +9,12 @@ import { UserService } from '../../services/user/userService.js';
 import { UserRepository } from '../../repositories/user/userRepository.js';
 import type { CreateUserDTO } from '../../services/user/iUserService.js';
 
-import { ImageService } from '../../services/image/imageService.js';
 import { S3StorageService } from '../../services/storage/s3StorageService.js';
-import type { IImageService } from '../../services/image/iImageService.js';
 import type { IStorageService } from '../../services/storage/iStorageService.js';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '../../config/env.js';
+import { IconService } from '../../services/icon/iconService.js';
+import type { IIconService } from '../../services/icon/iIconService.js';
 
 const userRepository: IUserRepository = new UserRepository();
 // s3設定
@@ -26,8 +26,8 @@ const s3Client = new S3Client({
   },
 });
 const storageService: IStorageService = new S3StorageService(s3Client, env.S3_BUCKET_NAME);
-const imageService: IImageService = new ImageService(storageService);
-const userService: IUserService = new UserService(userRepository, imageService);
+const iconService: IIconService = new IconService(storageService);
+const userService: IUserService = new UserService(userRepository, iconService);
 
 const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c: Context) => {
   try {
@@ -37,9 +37,9 @@ const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c
     const oauth_app = formData.get('oauth_app') as 'github' | 'google';
     const connect_info = formData.get('connect_info') as string;
     const profile_text = formData.get('profile_text') as string;
-    const icon_image = (formData.get('icon_image') as File) || null; // 画像がない場合はnull
+    const icon_url = formData.get('icon_url') as string;
 
-    const userDto: CreateUserDTO = { name, oauth_app, connect_info, profile_text, icon_image };
+    const userDto: CreateUserDTO = { name, oauth_app, connect_info, profile_text, icon_url };
 
     console.log('[Handler] /v2/user へのリクエストを受け付けました．', userDto);
 
