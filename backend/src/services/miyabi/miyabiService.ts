@@ -49,7 +49,8 @@ export class MiyabiService implements IMiyabiService {
 
       const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
         createMiyabiDto.user_id,
-        createMiyabiDto.post_id
+        createMiyabiDto.post_id,
+        dbc
       );
 
       if (miyabi) {
@@ -75,39 +76,42 @@ export class MiyabiService implements IMiyabiService {
    * @throws {Error} 雅が見つからない場合にエラー
    */
   async deleteMiyabi(deleteMiyabiDto: DeleteMiyabiDTO): Promise<DeleteMiyabiResult> {
-    console.log(
-      `[MiyabiService#deleteMiyabi] 雅削除処理を開始します．(userId: ${deleteMiyabiDto.user_id}, postId: ${deleteMiyabiDto.post_id})`
-    );
+    return db.transaction(async (dbc) => {
+      console.log(
+        `[MiyabiService#deleteMiyabi] 雅削除処理を開始します．(userId: ${deleteMiyabiDto.user_id}, postId: ${deleteMiyabiDto.post_id})`
+      );
 
-    const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
-      deleteMiyabiDto.user_id,
-      deleteMiyabiDto.post_id
-    );
+      const miyabi: Miyabi | null = await this.miyabiRepository.findMiyabi(
+        deleteMiyabiDto.user_id,
+        deleteMiyabiDto.post_id,
+        dbc
+      );
 
-    const post: Post | null = await this.postRepository.findById(deleteMiyabiDto.post_id);
+      const post: Post | null = await this.postRepository.findById(deleteMiyabiDto.post_id, dbc);
 
-    if (!post) {
-      throw new NotFoundError('投稿が見つかりません．');
-    }
+      if (!post) {
+        throw new NotFoundError('投稿が見つかりません．');
+      }
 
-    const user: User | null = await this.userRepository.findById(deleteMiyabiDto.user_id);
+      const user: User | null = await this.userRepository.findById(deleteMiyabiDto.user_id, dbc);
 
-    if (!user) {
-      throw new NotFoundError('ユーザーが見つかりません．');
-    }
+      if (!user) {
+        throw new NotFoundError('ユーザーが見つかりません．');
+      }
 
-    if (!miyabi) {
-      throw new ConflictError('雅が見つかりません．');
-    }
+      if (!miyabi) {
+        throw new ConflictError('雅が見つかりません．');
+      }
 
-    await this.miyabiRepository.delete(deleteMiyabiDto.user_id, deleteMiyabiDto.post_id);
+      await this.miyabiRepository.delete(deleteMiyabiDto.user_id, deleteMiyabiDto.post_id, dbc);
 
-    console.log(
-      `[MiyabiService#deleteMiyabi] 雅の削除が完了しました．(userId: ${deleteMiyabiDto.user_id}, postId: ${deleteMiyabiDto.post_id})`
-    );
+      console.log(
+        `[MiyabiService#deleteMiyabi] 雅の削除が完了しました．(userId: ${deleteMiyabiDto.user_id}, postId: ${deleteMiyabiDto.post_id})`
+      );
 
-    return {
-      message: '雅を削除しました．',
-    };
+      return {
+        message: '雅を削除しました．',
+      };
+    });
   }
 }
