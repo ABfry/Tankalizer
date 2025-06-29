@@ -41,6 +41,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   // 投稿に画像が含まれるか
   const hasImage = Boolean(post.imageUrl);
   const imageUrl = getImageUrl(post.imageUrl);
+  // ユーザアイコン
+  const userIconUrl = getImageUrl(post.user.iconUrl);
   // 雅カウントの状態
   const [miyabiCount, setMiyabiCount] = useState(post.miyabiCount);
   // 画像の拡大表示状態
@@ -121,7 +123,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       {/* プロフィールアイコン */}
       <div className='mb-3 flex items-center'>
         <Image
-          src={post.user.iconUrl !== '' ? post.user.iconUrl : '/iconDefault.png'}
+          src={userIconUrl !== '' ? userIconUrl : '/iconDefault.png'}
           height={40}
           width={40}
           alt='Icon'
@@ -267,24 +269,13 @@ const parseTanka = (tanka: Array<string>): string => {
 };
 
 /**
- * 画像のURLからキーを取得する (最終的にはkeyをバックエンドから取得するようにするので使わない)
- * @param imageUrl - 画像のURL
- * @returns 画像のキー
- */
-const extractKey = (imageUrl: string): string => {
-  const key = imageUrl.split('/').slice(3).join('/');
-  return key;
-};
-
-/**
  * 画像のURLを取得する
  * @param imageUrl - 画像のURL
  * @returns 画像のURL
  */
 const getImageUrl = (imageUrl: string): string => {
   if (imageUrl === '') return '';
-  const key = extractKey(imageUrl);
-  return `${cdnUrl}/${key}`;
+  return `${cdnUrl}/${imageUrl}`;
 };
 
 export default Post;
