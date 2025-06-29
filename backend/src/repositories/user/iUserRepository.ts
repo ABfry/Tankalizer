@@ -1,4 +1,5 @@
 export type CreateUserRepoDTO = {
+  id: string;
   name: string;
   oauth_app: 'github' | 'google';
   connect_info: string;

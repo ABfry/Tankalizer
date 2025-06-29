@@ -7,12 +7,14 @@ import {
 import { type IImageService } from '../image/iImageService.js';
 import { compressIconImage } from '../../utils/compressImage.js';
 import { env } from '../../config/env.js';
+import type { IIconService } from '../icon/iIconService.js';
+import { generateUuid } from '../../utils/generateUuid.js';
 
 export class UserService implements IUserService {
   // userRepositoryのインスタンスをコンストラクタで受け取る
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly imageService: IImageService
+    private readonly iconService: IIconService
   ) {}
 
   /**
@@ -45,10 +47,12 @@ export class UserService implements IUserService {
     // ユーザーが存在しない場合，リポジトリに新しいユーザーの作成を依頼する
     console.log('[UserService#createUser] 新規ユーザーを作成します．');
 
-    const key = await this.uploadIcon(userDto.icon_image as File);
+    const userId = generateUuid();
+    const key = await this.uploadIconByUrl(userDto.icon_url, userId);
 
     // DB保存用データの作成
     const userRepoDto: CreateUserRepoDTO = {
+      id: userId,
       name: userDto.name,
       oauth_app: userDto.oauth_app,
       connect_info: userDto.connect_info,
@@ -73,7 +77,14 @@ export class UserService implements IUserService {
     return newUser;
   }
 
-  private async uploadIcon(iconImage: File): Promise<string> {
+  private async uploadIconByUrl(iconUrl: string, userId: string): Promise<string> {
+    const response = await fetch(iconUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'icon.png', { type: 'image/png' });
+    return await this.uploadIcon(file, userId);
+  }
+
+  private async uploadIcon(iconImage: File, userId: string): Promise<string> {
     try {
       if (iconImage && iconImage instanceof File) {
         // iconImageがFileのインスタンスかチェックする
@@ -81,7 +92,7 @@ export class UserService implements IUserService {
         const compressedFile = await compressIconImage(iconImage);
 
         // S3にアップロード
-        return await this.imageService.uploadImage(compressedFile);
+        return await this.iconService.updatedIcon(compressedFile, userId);
       } else {
         return env.DEFAULT_ICON_PATH;
       }
