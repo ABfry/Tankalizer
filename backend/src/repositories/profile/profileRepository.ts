@@ -4,7 +4,7 @@ import { env } from '../../config/env.js';
 
 export class ProfileRepository implements IProfileRepository {
   /**
-   * 投稿を1つだけ取得する
+   * プロフィールを1つだけ取得する
    * @param user_id - ユーザーID
    * @param viewer_id - 閲覧者のユーザーID
    * @returns {Promise<Post>} プロフィール
