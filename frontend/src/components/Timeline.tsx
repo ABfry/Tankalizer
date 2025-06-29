@@ -57,9 +57,9 @@ const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: Ti
     if (mode === 'timeline') {
       newPosts = await fetchPosts({
         limit: limit,
-        iconUrl: session.data?.user?.image ?? '',
-        offsetId: offsetIdRef.current,
-        targetUserId: targetUserId,
+        cursor: offsetIdRef.current,
+        filterByUserId: targetUserId,
+        userId: session.data?.user_id ?? '',
       });
     } else {
       newPosts = await fetchRanking({

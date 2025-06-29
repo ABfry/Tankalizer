@@ -26,21 +26,21 @@ interface PostResponse {
  * @function fetchPosts
  * @param {Object} params - 投稿データ取得のためのパラメータオブジェクト
  * @param {number} params.limit - 取得する投稿の最大件数
- * @param {string} params.iconUrl - ユーザのアイコン画像URL
- * @param {string} params.offsetId - 取得を開始する投稿のID（オフセット）
- * @param {string} params.targetUserId - 取得する対象のユーザID
+ * @param {string} params.cursor - 取得を開始する投稿のID（オフセット）
+ * @param {string} params.filterByUserId - 取得する対象のユーザID
+ * @param {string} params.userId - 閲覧ユーザのID
  * @returns {Promise<PostTypes[]>} 投稿データの配列を返すPromise．投稿が存在しない場合は空配列を返す．
  */
 export const fetchPosts = async ({
   limit,
-  iconUrl,
-  offsetId,
-  targetUserId,
+  cursor,
+  filterByUserId,
+  userId,
 }: {
   limit: number;
-  iconUrl?: string;
-  offsetId?: string;
-  targetUserId?: string;
+  cursor?: string;
+  filterByUserId?: string;
+  userId?: string;
 }): Promise<PostTypes[] | []> => {
   try {
     const res = await fetch(`${backendUrl}/timeline`, {
@@ -50,9 +50,9 @@ export const fetchPosts = async ({
       },
       body: JSON.stringify({
         limit: limit,
-        my_icon: iconUrl,
-        post_id: offsetId,
-        user_id: targetUserId,
+        cursor: cursor,
+        filterByUserId: filterByUserId,
+        viewerId: userId,
       }),
     });
 

@@ -51,8 +51,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const [toastOpen, setToastOpen] = useState(false);
   // 削除失敗ダイアログの表示状態
   const [deleteFailedDialogOpen, setDeleteFailedDialogOpen] = useState(false);
-  // ユーザアイコンURLが一致するなら自分の投稿
-  const isMyPost = useSession().data?.user?.image === post.user.iconUrl;
+  // ユーザIDが一致するなら自分の投稿
+  const isMyPost = useSession().data?.user_id === post.user.userId;
   // ドロップダウンメニューの要素
   const dropDownItems = [];
   // ドロップダウンメニューの投稿共有ボタン
@@ -181,7 +181,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onClick={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => ++count);
-                await addMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await addMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -189,7 +189,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onCancel={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => --count);
-                await removeMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await removeMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -211,8 +211,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
           console.log('はい');
           setDialogOpen(false);
           const result = await deletePost({
+            userId: session.data?.user_id ?? '',
             postId: post.id,
-            iconUrl: session.data?.user?.image ?? '',
           });
           if (!result) setDeleteFailedDialogOpen(true);
           else handleDelete();

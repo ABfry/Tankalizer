@@ -12,8 +12,8 @@ export const generateMetadata = async (context: { params: Promise<{ postId: stri
   const params = await context.params;
 
   const post = await fetchOnePost({
+    userId: '',
     postId: params.postId,
-    iconUrl: '',
   });
 
   if (!post) return { title: '投稿が見つかりません' };
@@ -35,8 +35,8 @@ const Page = async (context: { params: Promise<{ postId: string }> }) => {
   const session = await auth();
 
   const post = await fetchOnePost({
+    userId: session?.user_id ?? '',
     postId: params.postId,
-    iconUrl: session?.user?.image ?? '',
   });
 
   if (!post) notFound();

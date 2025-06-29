@@ -6,11 +6,10 @@ import { PiRankingLight } from 'react-icons/pi';
 import Image from 'next/image';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Dialog from './Dialog';
 import LoginDialog from './LoginDialog';
 import { useRouter } from 'next/navigation';
-import fetchUserId from '@/app/(main)/timeline/actions/fetchUserId';
 
 // props の型定義
 interface SideMenuProps {
@@ -43,17 +42,7 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const [userId, setUserId] = useState<string>('');
-
-  // アイコン画像URLからユーザIDをFetchする
-  useEffect(() => {
-    if (session.status !== 'authenticated') return;
-    const getUserId = async () => {
-      const data = await fetchUserId({ iconUrl: session.data?.user?.image ?? '' });
-      setUserId(data);
-    };
-    getUserId();
-  }, [session.status, session.data?.user?.image]);
+  const userId = isLoggedIn ? session.data?.user_id : undefined;
 
   return (
     <div className={`${className} z-10 w-40 space-y-3`} style={style}>
@@ -75,6 +64,7 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
         <div
           onClick={() => {
             if (setIsOpen) setIsOpen(false);
+            if (!userId) return;
             router.push(`${PATHNAME.PROFILE}/${userId}`);
           }}
           className={`flex items-center rounded-lg hover:cursor-pointer hover:bg-black/5 ${
