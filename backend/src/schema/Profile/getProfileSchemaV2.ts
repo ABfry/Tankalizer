@@ -16,6 +16,7 @@ export const getProfileSchema = z.object({
 export const Profile = z.object({
   user_id: z.string(), // ユーザid
   user_name: z.string(), // ユーザ名
+  profile_text: z.string(), // 自己紹介文
   icon_url: z.string(), // ユーザアイコン
   created_at: z.date(), // ユーザ作成日時
   is_following: z.boolean(), // フォローしているか？

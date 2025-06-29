@@ -1,6 +1,7 @@
 export type Profile = {
   user_id: string;
   user_name: string;
+  profile_text: string;
   icon_url: string;
   created_at: Date;
   total_miyabi: number;
