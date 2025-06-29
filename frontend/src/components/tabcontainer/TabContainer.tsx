@@ -100,3 +100,37 @@ const TabContainer = ({ items }: TabBarProps) => {
 };
 
 export default TabContainer;
+
+// ---- つかいかた ----
+// const Tab1 = (): ReactNode => {
+//   return <div>コンテンツ1</div>;
+// };
+
+// const Tab2 = (): ReactNode => {
+//   return <div>コンテンツ2</div>;
+// };
+
+// const Tab3 = (): ReactNode => {
+//   return <div>コンテンツ3</div>;
+// };
+
+// const tabItems: TabItem[] = [
+//   {
+//     title: 'Tab1',
+//     content: <Tab1 />,
+//   },
+//   {
+//     title: 'Tab2',
+//     content: <Tab2 />,
+//   },
+//   {
+//     title: 'Tab3',
+//     content: <Tab3 />,
+//   },
+// ];
+
+// const page = () => {
+//   return (
+//     <TabContainer items={tabItems} />
+//   );
+// };
