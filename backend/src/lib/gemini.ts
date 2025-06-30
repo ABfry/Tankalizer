@@ -34,6 +34,16 @@ const generateTanka = async (originalText: string, image: File | null = null): P
       description: '生成される短歌のオブジェクト',
       type: SchemaType.OBJECT,
       properties: {
+        is_bad_word: {
+          type: SchemaType.BOOLEAN,
+          description: 'ユーザープロンプトに悪意のある単語が含まれているか',
+          nullable: false,
+        },
+        bad_reason: {
+          type: SchemaType.STRING,
+          description: 'is_bad_wordをtrueにした理由',
+          nullable: false,
+        },
         line0: {
           type: SchemaType.STRING,
           description: '短歌の1句目, 日本語で5音節程度',
@@ -86,6 +96,8 @@ const generateTanka = async (originalText: string, image: File | null = null): P
         },
       },
       required: [
+        'is_bad_word',
+        'bad_reason',
         'line0',
         'line1',
         'line2',
@@ -192,6 +204,12 @@ const generateTanka = async (originalText: string, image: File | null = null): P
 
       const tankaObject = JSON.parse(result.response.text());
       console.log(tankaObject);
+
+      // 不適切ワードのチェック
+      if (tankaObject.is_bad_word) {
+        console.log(`不適切ワード検知: ${tankaObject.bad_reason}`);
+        throw new Error('不適切ワードが含まれているため処理を終了しました。');
+      }
 
       if (isValidTanka(tankaObject)) {
         printLine();
