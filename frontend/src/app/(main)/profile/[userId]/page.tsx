@@ -1,6 +1,4 @@
-'use client';
 import React from 'react';
-import { useParams } from 'next/navigation';
 
 import ProfileBox from './_components/ProfileBox';
 import Timeline from '@/components/Timeline';
@@ -11,8 +9,8 @@ import Timeline from '@/components/Timeline';
  * @function Profile
  * @returns {JSX.Element} プロフィールを表示するReactコンポーネント
  */
-const Profile = () => {
-  const { userId } = useParams() as { userId: string };
+const Profile = ({ params }: { params: { userId: string } }) => {
+  const { userId } = params;
 
   return (
     <div>
