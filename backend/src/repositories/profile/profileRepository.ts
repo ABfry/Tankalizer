@@ -21,6 +21,7 @@ export class ProfileRepository implements IProfileRepository {
       SELECT
         u.id AS user_id,
         u.name AS user_name,
+        u.profile_text AS profile_text,
         u.icon_url,
         u.created_at,
         ${followCheckClause}, -- フォロー状態を確認する句
@@ -67,6 +68,7 @@ export class ProfileRepository implements IProfileRepository {
       const profile: Profile = {
         user_id: row.user_id,
         user_name: row.user_name,
+        profile_text: row.profile_text,
         icon_url: row.icon_url,
         created_at: row.created_at,
         is_following: Boolean(row.is_following),
