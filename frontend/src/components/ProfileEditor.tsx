@@ -106,6 +106,16 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
                 画像を削除
               </button>
             )}
+            {/* 選択ボタン（画像がない場合のみ表示） */}
+            {!currentImageUrl && (
+              <button
+                type='button'
+                className='mb-1 text-xs font-medium text-orange-500 hover:text-orange-600 hover:underline'
+                onClick={() => fileInputRef.current?.click()}
+              >
+                画像を選択
+              </button>
+            )}
 
             {/* 隠しファイル入力 */}
             <input
