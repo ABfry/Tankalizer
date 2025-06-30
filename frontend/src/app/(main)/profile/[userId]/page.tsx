@@ -10,8 +10,8 @@ import TabContainer from '@/components/tabcontainer/TabContainer';
  * @function Profile
  * @returns {JSX.Element} プロフィールを表示するReactコンポーネント
  */
-const Profile = ({ params }: { params: { userId: string } }) => {
-  const { userId } = params;
+const Profile = async ({ params }: { params: Promise<{ userId: string }> }) => {
+  const { userId } = await params;
 
   return (
     <div>
