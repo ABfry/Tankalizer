@@ -72,7 +72,7 @@ const TabContainer = ({ items }: TabBarProps) => {
               },
               opacity: { duration: 0.2 },
             }}
-            className='absolute inset-0'
+            className='w-full'
             drag='x'
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={1}

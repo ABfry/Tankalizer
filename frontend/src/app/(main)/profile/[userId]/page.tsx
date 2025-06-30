@@ -2,6 +2,7 @@ import React from 'react';
 
 import ProfileBox from './_components/ProfileBox';
 import Timeline from '@/components/Timeline';
+import TabContainer from '@/components/tabcontainer/TabContainer';
 
 /**
  * 指定されたIDのユーザのプロフィールを表示する．
@@ -16,7 +17,22 @@ const Profile = ({ params }: { params: { userId: string } }) => {
     <div>
       <div className='mx-auto max-w-sm pt-10 lg:max-w-lg'>
         <ProfileBox userId={userId} />
-        <Timeline limit={10} max={100} targetUserId={userId ?? ''} />
+        <TabContainer
+          items={[
+            {
+              title: '投稿',
+              content: <Timeline limit={10} max={100} targetUserId={userId ?? ''} />,
+            },
+            {
+              title: '仮1',
+              content: <div>aaaa</div>,
+            },
+            {
+              title: '仮2',
+              content: <div>bbbb</div>,
+            },
+          ]}
+        />
       </div>
     </div>
   );
