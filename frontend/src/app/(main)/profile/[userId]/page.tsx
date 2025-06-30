@@ -2,9 +2,11 @@
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Timeline from '@/components/Timeline';
 import fetchProfile from './actions/fetchProfile';
 import { ProfileTypes } from '@/types/profileTypes';
+import { getImageUrl } from '@/lib/utils';
 
 /**
  * 指定されたIDのユーザのプロフィールを表示する．
@@ -16,17 +18,23 @@ const Profile = () => {
   const { userId } = useParams() as { userId: string };
   const [profile, setProfile] = useState<ProfileTypes | null>(null);
   const router = useRouter();
+  // セッションの取得
+  const session = useSession();
+  const iconUrl = getImageUrl(profile?.iconUrl ?? '');
 
   // ユーザIDからプロフィールをFetchする
   useEffect(() => {
     const getProfile = async () => {
       if (!userId) return;
-      const data = await fetchProfile({ userId: userId as string });
+      const data = await fetchProfile({
+        targetUserId: userId as string,
+        userId: session.data?.user_id ?? '',
+      });
       if (!data) router.push('/user-not-found');
       setProfile(data);
     };
     getProfile();
-  }, [userId, router]);
+  }, [userId, router, session.data?.user_id]);
 
   // totalPost に応じた背景色のクラスを決定
   const getBackgroundClass = () => {
@@ -73,7 +81,7 @@ const Profile = () => {
             <div className='flex flex-col items-center space-y-4'>
               <div className='relative pt-10'>
                 <Image
-                  src={profile?.iconUrl ?? '/iconDefault.png'}
+                  src={iconUrl !== '' ? iconUrl : '/iconDefault.png'}
                   alt='プロフィール画像'
                   width={100}
                   height={100}
