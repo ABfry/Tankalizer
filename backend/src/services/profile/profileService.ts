@@ -99,7 +99,7 @@ export class ProfileService implements IProfileService {
     );
 
     console.log(
-      `[ProfileService#getProfile] プロフィールの更新が完了しました．(id: ${updateProfileDto.user_id})`
+      `[ProfileService#updateProfile] プロフィールの更新が完了しました．(id: ${updateProfileDto.user_id})`
     );
 
     return profile;
@@ -109,7 +109,7 @@ export class ProfileService implements IProfileService {
     try {
       if (iconImage && iconImage instanceof File) {
         // iconImageがFileのインスタンスかチェックする
-        console.log('[UserService#createUser] 画像処理を実行します．');
+        console.log('[ProfileService#updateProfile] 画像処理を実行します．');
         const compressedFile = await compressIconImage(iconImage);
 
         // S3にアップロード
@@ -118,7 +118,7 @@ export class ProfileService implements IProfileService {
         return null;
       }
     } catch (error) {
-      console.error('[UserService#uploadIcon] 画像のアップロードに失敗しました．');
+      console.error('[ProfileService#updateProfile] 画像のアップロードに失敗しました．');
       return null;
     }
   }

@@ -14,13 +14,29 @@ import type { getProfileRouteV2 } from '../../routes/Profile/getProfileRouteV2.j
 import { getProfileSchema } from '../../schema/Profile/getProfileSchemaV2.js';
 import { type IUserRepository } from '../../repositories/user/iUserRepository.js';
 import { UserRepository } from '../../repositories/user/userRepository.js';
+import { IconService } from '../../services/icon/iconService.js';
+import type { IIconService } from '../../services/icon/iIconService.js';
 
 type getProfileSchema = z.infer<typeof getProfileSchema>;
 
 const getProfileHandlerV2: RouteHandler<typeof getProfileRouteV2, {}> = async (c: Context) => {
   const profileRepository: IProfileRepository = new ProfileRepository();
   const userRepository: IUserRepository = new UserRepository();
-  const profileService: IProfileService = new ProfileService(profileRepository, userRepository);
+  // s3設定
+  const s3Client = new S3Client({
+    region: 'ap-northeast-1',
+    credentials: {
+      accessKeyId: env.S3_ACCESS_KEY_ID,
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+    },
+  });
+  const storageService: IStorageService = new S3StorageService(s3Client, env.S3_BUCKET_NAME);
+  const iconService: IIconService = new IconService(storageService);
+  const profileService: IProfileService = new ProfileService(
+    profileRepository,
+    userRepository,
+    iconService
+  );
 
   try {
     // リクエストからデータを取得
