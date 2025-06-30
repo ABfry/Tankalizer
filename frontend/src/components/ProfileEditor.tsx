@@ -52,6 +52,7 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
     // TODO: 保存処理をここに実装
     setIsOpen?.(false);
   }, [setIsOpen]);
+
   // モーダルが開かれるたびにフォームをリセット
   useEffect(() => {
     if (isOpen) {
@@ -66,10 +67,10 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => setIsOpen?.(open)}>
       <Dialog.Portal>
-        {/* overlay with fade‐in/out */}
+        {/* フェードイン/アウト付きのオーバーレイ */}
         <Dialog.Overlay className='fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0' />
 
-        {/* modal content with the full animation combo */}
+        {/* モーダルコンテンツ */}
         <Dialog.Content
           className={`fixed left-1/2 top-1/2 z-50 min-w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-8 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out
             data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0
@@ -182,13 +183,13 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
           {/* ボタン */}
           <div className='flex justify-center gap-3'>
             <button
-              className='rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+              className='rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-black shadow hover:bg-gray-100'
               onClick={() => setIsOpen?.(false)}
             >
               取消
             </button>
             <button
-              className='rounded-md bg-orange-400 px-4 py-2 text-sm text-white hover:bg-orange-500'
+              className='rounded-md bg-orange-400 px-4 py-2 text-sm text-white shadow hover:bg-orange-500'
               onClick={handleSave}
             >
               保存
