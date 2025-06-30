@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { judgeImage } from '@/lib/JudgeImage';
 import { calcFileSize } from '@/lib/CalcFileSize';
+import CustomDialog from '@/components/Dialog';
 
 interface ProfileEditorProps {
   className?: string;
@@ -22,6 +23,7 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [currentImageUrl, setCurrentImageUrl] = useState<string | undefined>();
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false); // 更新失敗のダイアログの表示状態
   const MAX_NAME_LENGTH = 40; // 名前の最大文字数
   const MAX_BIO_LENGTH = 160; // 自己紹介の最大文字数
   const MAX_IMAGE_SIZE = 5; // 最大ファイルサイズ（5MB）
@@ -50,6 +52,10 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
 
   const handleSave = useCallback(() => {
     // TODO: 保存処理をここに実装
+    if (true) {
+      setIsErrorDialogOpen(true);
+      return;
+    }
     setIsOpen?.(false);
   }, [setIsOpen]);
 
@@ -195,6 +201,15 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
               保存
             </button>
           </div>
+          <CustomDialog
+            isOpen={isErrorDialogOpen}
+            description='更新に失敗しました。時間をおいてやり直してみてください。'
+            isOnlyOK={true}
+            yesCallback={() => {
+              setIsErrorDialogOpen(false);
+            }}
+            yesText='はい'
+          />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
