@@ -11,12 +11,16 @@ import {
 } from '../../repositories/profile/iProfileRepository.js';
 
 import { type IUserRepository, type User } from '../../repositories/user/iUserRepository.js';
-import { keyframes } from 'hono/css';
+import { type IImageService } from '../image/iImageService.js';
+import { compressIconImage } from '../../utils/compressImage.js';
+import { env } from '../../config/env.js';
+import type { IIconService } from '../icon/iIconService.js';
 
 export class ProfileService implements IProfileService {
   constructor(
     private readonly profileRepository: IProfileRepository,
-    private readonly userRepository: IUserRepository
+    private readonly userRepository: IUserRepository,
+    private readonly iconService: IIconService
   ) {}
 
   /**
@@ -72,6 +76,13 @@ export class ProfileService implements IProfileService {
       throw new NotFoundError('ユーザーが見つかりません．');
     }
 
+    // アイコン画像のアップロード
+    let key = await this.uploadIcon(updateProfileDto.icon_image as File, updateProfileDto.user_id);
+
+    if (!key) {
+      key = user.icon_url;
+    }
+
     // DB保存用データの作成
     const updateProfileRepoDTO: UpdateProfileRepoDTO = {
       user_id: updateProfileDto.user_id,
@@ -79,6 +90,8 @@ export class ProfileService implements IProfileService {
       profile_text: updateProfileDto.profile_text,
       image_path: key,
     };
+
+    await this.profileRepository.updateProfile(updateProfileRepoDTO);
 
     const profile = await this.profileRepository.getProfile(
       updateProfileDto.user_id,
@@ -90,5 +103,23 @@ export class ProfileService implements IProfileService {
     );
 
     return profile;
+  }
+
+  private async uploadIcon(iconImage: File, userId: string): Promise<string | null> {
+    try {
+      if (iconImage && iconImage instanceof File) {
+        // iconImageがFileのインスタンスかチェックする
+        console.log('[UserService#createUser] 画像処理を実行します．');
+        const compressedFile = await compressIconImage(iconImage);
+
+        // S3にアップロード
+        return await this.iconService.updatedIcon(compressedFile, userId);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('[UserService#uploadIcon] 画像のアップロードに失敗しました．');
+      return null;
+    }
   }
 }
