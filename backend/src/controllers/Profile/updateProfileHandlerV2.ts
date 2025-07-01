@@ -8,9 +8,7 @@ import {
 import { type IProfileRepository } from '../../repositories/profile/iProfileRepository.js';
 import { ProfileService } from '../../services/profile/profileService.js';
 import { ProfileRepository } from '../../repositories/profile/profileRepository.js';
-import { ImageService } from '../../services/image/imageService.js';
 import { S3StorageService } from '../../services/storage/s3StorageService.js';
-import type { IImageService } from '../../services/image/iImageService.js';
 import type { IStorageService } from '../../services/storage/iStorageService.js';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '../../config/env.js';

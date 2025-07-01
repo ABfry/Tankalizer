@@ -11,9 +11,7 @@ import {
 } from '../../repositories/profile/iProfileRepository.js';
 
 import { type IUserRepository, type User } from '../../repositories/user/iUserRepository.js';
-import { type IImageService } from '../image/iImageService.js';
 import { compressIconImage } from '../../utils/compressImage.js';
-import { env } from '../../config/env.js';
 import type { IIconService } from '../icon/iIconService.js';
 
 export class ProfileService implements IProfileService {
