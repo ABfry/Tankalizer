@@ -35,6 +35,20 @@ import { createUserRouteV2 } from './User/createUserRouteV2.js';
 import createUserHandlerV2 from '../controllers/User/createUserHandlerV2.js';
 import { createPostRouteV2 } from './Post/createPostRouteV2.js';
 import createPostHandlerV2 from '../controllers/Post/createPostHandlerV2.js';
+import { deletePostRouteV2 } from './Post/deletePostRouteV2.js';
+import deletePostHandlerV2 from '../controllers/Post/deletePostHandlerV2.js';
+import { getPostRouteV2 } from './Post/getPostRouteV2.js';
+import getPostHandlerV2 from '../controllers/Post/getPostHandlerV2.js';
+import { getOnePostRouteV2 } from './Post/getOnePostRouteV2.js';
+import getOnePostHandlerV2 from '../controllers/Post/getOnePostHandlerV2.js';
+import { createMiyabiRouteV2 } from './Miyabi/createMiyabiRouteV2.js';
+import createMiyabiHandlerV2 from '../controllers/Miyabi/createMiyabiHandlerV2.js';
+import { deleteMiyabiRouteV2 } from './Miyabi/deleteMiyabiRouteV2.js';
+import deleteMiyabiHandlerV2 from '../controllers/Miyabi/deleteMiyabiHandlerV2.js';
+import { getProfileRouteV2 } from './Profile/getProfileRouteV2.js';
+import getProfileHandlerV2 from '../controllers/Profile/getProfileHandlerV2.js';
+import { updateProfileRouteV2 } from './Profile/updateProfileRouteV2.js';
+import updateProfileHandlerV2 from '../controllers/Profile/updateProfileHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -56,5 +70,12 @@ export default router
   .openapi(sampleGeminiRoute, sampleGeminiHandler)
   .openapi(newsTankaRoute, newsTankaHandler)
   .openapi(createUserRouteV2, createUserHandlerV2)
-  .openapi(createPostRouteV2, createPostHandlerV2);
+  .openapi(createPostRouteV2, createPostHandlerV2)
+  .openapi(deletePostRouteV2, deletePostHandlerV2)
+  .openapi(getPostRouteV2, getPostHandlerV2)
+  .openapi(getOnePostRouteV2, getOnePostHandlerV2)
+  .openapi(createMiyabiRouteV2, createMiyabiHandlerV2)
+  .openapi(deleteMiyabiRouteV2, deleteMiyabiHandlerV2)
+  .openapi(getProfileRouteV2, getProfileHandlerV2)
+  .openapi(updateProfileRouteV2, updateProfileHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく

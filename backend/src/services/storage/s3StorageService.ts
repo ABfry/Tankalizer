@@ -23,8 +23,7 @@ export class S3StorageService implements IStorageService {
 
     await this.s3Client.send(command);
 
-    // return key; // 最終的にはkeyを返すようにする・・？
-    return this.getUrl(key);
+    return key;
   }
 
   async download(key: string): Promise<Buffer> {

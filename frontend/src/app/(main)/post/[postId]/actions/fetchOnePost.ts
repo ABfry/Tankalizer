@@ -10,15 +10,15 @@ const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
  * @async
  * @function fetchOnePost
  * @param {Object} params - 投稿データ取得のためのパラメータオブジェクト
- * @param {string} params.iconUrl - ユーザのアイコン画像URL
+ * @param {string} params.userId - ユーザのID
  * @param {string} params.postId - 取得する投稿のID（オフセット）
  * @returns {Promise<PostTypes[]>} 投稿データを返すPromise．投稿が存在しない場合はnullを返す．
  */
 export const fetchOnePost = async ({
-  iconUrl,
+  userId,
   postId,
 }: {
-  iconUrl?: string;
+  userId?: string;
   postId?: string;
 }): Promise<PostTypes | null> => {
   try {
@@ -28,8 +28,8 @@ export const fetchOnePost = async ({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        my_icon: iconUrl,
-        post_id: postId,
+        id: postId,
+        viewerId: userId,
       }),
     });
 
@@ -41,19 +41,19 @@ export const fetchOnePost = async ({
 
     const json = await res.json();
     const post: PostTypes = {
-      id: json.id,
-      tanka: json.tanka,
-      original: json.original,
-      imageUrl: json.image_path ?? '',
-      date: new Date(json.created_at),
+      id: json.post.id,
+      tanka: json.post.tanka,
+      original: json.post.original,
+      imageUrl: json.post.image_path ?? '',
+      date: new Date(json.post.created_at),
       user: {
-        name: json.user_name,
-        iconUrl: json.user_icon,
-        userId: json.user_id,
+        name: json.post.user_name,
+        iconUrl: json.post.user_icon,
+        userId: json.post.user_id,
       },
-      miyabiCount: json.miyabi_count,
-      miyabiIsClicked: json.is_miyabi,
-      rank: json.rank,
+      miyabiCount: json.post.miyabi_count,
+      miyabiIsClicked: json.post.is_miyabi,
+      rank: json.post.rank,
     };
     return post;
   } catch (error) {

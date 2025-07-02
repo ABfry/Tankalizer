@@ -1,9 +1,9 @@
 import type { IStorageService } from '../storage/iStorageService.js';
 import type { IIconService } from './iIconService.js';
-import { generateUuid } from '../../utils/generate-uuid.js';
+import { generateUuid } from '../../utils/generateUuid.js';
 
 // バケット内のアイコンを保存するルートパス
-const ICON_STORAGE_PATH = '/Icon';
+const ICON_STORAGE_PATH = 'icon';
 
 export class IconService implements IIconService {
   constructor(private readonly storageService: IStorageService) {}

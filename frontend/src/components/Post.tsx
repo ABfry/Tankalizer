@@ -17,10 +17,9 @@ import { addMiyabi, removeMiyabi } from '@/app/(main)/timeline/actions/countMiya
 import deletePost from '@/app/(main)/timeline/actions/deletePost';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getImageUrl } from '@/lib/utils';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
-const cdnUrl =
-  process.env.NEXT_PUBLIC_CDN_URL ?? 'https://202502-test-bucket.s3.ap-northeast-1.amazonaws.com';
 
 // props の型定義
 interface PostProps {
@@ -41,6 +40,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   // 投稿に画像が含まれるか
   const hasImage = Boolean(post.imageUrl);
   const imageUrl = getImageUrl(post.imageUrl);
+  // ユーザアイコン
+  const userIconUrl = getImageUrl(post.user.iconUrl);
   // 雅カウントの状態
   const [miyabiCount, setMiyabiCount] = useState(post.miyabiCount);
   // 画像の拡大表示状態
@@ -51,8 +52,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const [toastOpen, setToastOpen] = useState(false);
   // 削除失敗ダイアログの表示状態
   const [deleteFailedDialogOpen, setDeleteFailedDialogOpen] = useState(false);
-  // ユーザアイコンURLが一致するなら自分の投稿
-  const isMyPost = useSession().data?.user?.image === post.user.iconUrl;
+  // ユーザIDが一致するなら自分の投稿
+  const isMyPost = useSession().data?.user_id === post.user.userId;
   // ドロップダウンメニューの要素
   const dropDownItems = [];
   // ドロップダウンメニューの投稿共有ボタン
@@ -121,7 +122,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       {/* プロフィールアイコン */}
       <div className='mb-3 flex items-center'>
         <Image
-          src={post.user.iconUrl !== '' ? post.user.iconUrl : '/iconDefault.png'}
+          src={userIconUrl !== '' ? userIconUrl : '/iconDefault.png'}
           height={40}
           width={40}
           alt='Icon'
@@ -181,7 +182,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onClick={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => ++count);
-                await addMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await addMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -189,7 +190,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onCancel={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => --count);
-                await removeMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await removeMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -211,8 +212,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
           console.log('はい');
           setDialogOpen(false);
           const result = await deletePost({
+            userId: session.data?.user_id ?? '',
             postId: post.id,
-            iconUrl: session.data?.user?.image ?? '',
           });
           if (!result) setDeleteFailedDialogOpen(true);
           else handleDelete();
@@ -264,27 +265,6 @@ const Post = ({ post, className, onDelete }: PostProps) => {
 const parseTanka = (tanka: Array<string>): string => {
   const parsedTanka: string = `${tanka[0]}\n\u3000${tanka[1]}\n\u3000\u3000${tanka[2]}\n${tanka[3]}\n\u3000${tanka[4]}`;
   return parsedTanka;
-};
-
-/**
- * 画像のURLからキーを取得する (最終的にはkeyをバックエンドから取得するようにするので使わない)
- * @param imageUrl - 画像のURL
- * @returns 画像のキー
- */
-const extractKey = (imageUrl: string): string => {
-  const key = imageUrl.split('/').slice(3).join('/');
-  return key;
-};
-
-/**
- * 画像のURLを取得する
- * @param imageUrl - 画像のURL
- * @returns 画像のURL
- */
-const getImageUrl = (imageUrl: string): string => {
-  if (imageUrl === '') return '';
-  const key = extractKey(imageUrl);
-  return `${cdnUrl}/${key}`;
 };
 
 export default Post;

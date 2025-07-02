@@ -1,13 +1,21 @@
-import { type IUserService } from './iUserService.js';
+import { type IUserService, type CreateUserDTO } from './iUserService.js';
 import {
   type IUserRepository,
   type CreateUserRepoDTO,
   type User,
 } from '../../repositories/user/iUserRepository.js';
+import { type IImageService } from '../image/iImageService.js';
+import { compressIconImage } from '../../utils/compressImage.js';
+import { env } from '../../config/env.js';
+import type { IIconService } from '../icon/iIconService.js';
+import { generateUuid } from '../../utils/generateUuid.js';
 
 export class UserService implements IUserService {
   // userRepositoryのインスタンスをコンストラクタで受け取る
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly iconService: IIconService
+  ) {}
 
   /**
    * 新しいユーザーを作成するビジネスロジック
@@ -16,13 +24,16 @@ export class UserService implements IUserService {
    * @returns {Promise<User>} 作成または取得したユーザー情報
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
-  async createUser(userDto: CreateUserRepoDTO): Promise<User> {
+  async createUser(userDto: CreateUserDTO): Promise<User> {
     console.log(
       `[UserService#createUser] ユーザー作成処理を開始します．(oauth_app: ${userDto.oauth_app}, connect_info: ${userDto.connect_info})`
     );
 
     // ユーザーが既に存在するかどうかをリポジトリに問い合わせる
-    const existingUser = await this.userRepository.findByEmail(userDto.connect_info);
+    const existingUser = await this.userRepository.findByEmail(
+      userDto.connect_info,
+      userDto.oauth_app
+    );
 
     // ユーザーが既に存在した場合
     if (existingUser) {
@@ -35,10 +46,24 @@ export class UserService implements IUserService {
 
     // ユーザーが存在しない場合，リポジトリに新しいユーザーの作成を依頼する
     console.log('[UserService#createUser] 新規ユーザーを作成します．');
-    await this.userRepository.create(userDto);
+
+    const userId = generateUuid();
+    const key = await this.uploadIconByUrl(userDto.icon_url, userId);
+
+    // DB保存用データの作成
+    const userRepoDto: CreateUserRepoDTO = {
+      id: userId,
+      name: userDto.name,
+      oauth_app: userDto.oauth_app,
+      connect_info: userDto.connect_info,
+      profile_text: userDto.profile_text,
+      icon_url: key,
+    };
+
+    await this.userRepository.create(userRepoDto);
 
     // 作成したユーザー情報を再度取得して返す
-    const newUser = await this.userRepository.findByEmail(userDto.connect_info);
+    const newUser = await this.userRepository.findByEmail(userDto.connect_info, userDto.oauth_app);
 
     if (!newUser) {
       // 万が一，作成直後にユーザーが見つからない場合はエラーを投げる
@@ -50,5 +75,30 @@ export class UserService implements IUserService {
       `[UserService#createUser] 新規ユーザーの作成が完了しました．(user_id: ${newUser.id})`
     );
     return newUser;
+  }
+
+  private async uploadIconByUrl(iconUrl: string, userId: string): Promise<string> {
+    const response = await fetch(iconUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'icon.png', { type: 'image/png' });
+    return await this.uploadIcon(file, userId);
+  }
+
+  private async uploadIcon(iconImage: File, userId: string): Promise<string> {
+    try {
+      if (iconImage && iconImage instanceof File) {
+        // iconImageがFileのインスタンスかチェックする
+        console.log('[UserService#createUser] 画像処理を実行します．');
+        const compressedFile = await compressIconImage(iconImage);
+
+        // S3にアップロード
+        return await this.iconService.updatedIcon(compressedFile, userId);
+      } else {
+        return env.DEFAULT_ICON_PATH;
+      }
+    } catch (error) {
+      console.error('[UserService#uploadIcon] 画像のアップロードに失敗しました．');
+      return env.DEFAULT_ICON_PATH;
+    }
   }
 }

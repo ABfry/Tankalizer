@@ -16,16 +16,10 @@
   "containerEnv": {
     "NODE_ENV": "development",
     "TZ": "Asia/Tokyo",
-    "BACKEND_URL": "http://localhost:8080",
     "WATCHPACK_POLLING": "true",
     "CHOKIDAR_USEPOLLING": "true"
   },
-  "runArgs": [
-    "--network=host",
-    "--name=Tankalizer",
-    "--env-file=${localWorkspaceFolder}/frontend/.env",
-    "--env-file=${localWorkspaceFolder}/backend/.env"
-  ],
+  "runArgs": ["--network=host", "--name=Tankalizer"],
   "forwardPorts": [3000, 8080],
   "customizations": {
     "vscode": {

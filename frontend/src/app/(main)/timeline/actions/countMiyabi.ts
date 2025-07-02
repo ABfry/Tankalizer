@@ -8,10 +8,10 @@ const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
  * @async
  * @function addMiyabi
  * @param {Object} params - 雅追加のためのパラメータオブジェクト
- * @param {string} params.iconUrl - ユーザのアイコン画像URL
+ * @param {string} params.userId - ユーザのID
  * @param {string} params.postId - 雅する投稿のID
  */
-export const addMiyabi = async ({ iconUrl, postId }: { iconUrl: string; postId: string }) => {
+export const addMiyabi = async ({ userId, postId }: { userId: string; postId: string }) => {
   try {
     const res = await fetch(`${backendUrl}/miyabi`, {
       method: 'POST',
@@ -19,8 +19,8 @@ export const addMiyabi = async ({ iconUrl, postId }: { iconUrl: string; postId: 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        user_id: userId,
         post_id: postId,
-        my_icon: iconUrl,
       }),
     });
 
@@ -38,10 +38,10 @@ export const addMiyabi = async ({ iconUrl, postId }: { iconUrl: string; postId: 
  * @async
  * @function removeMiyabi
  * @param {Object} params - 雅追加のためのパラメータオブジェクト
- * @param {string} params.iconUrl - ユーザのアイコン画像URL
+ * @param {string} params.userId - ユーザのID
  * @param {string} params.postId - 雅する投稿のID
  */
-export const removeMiyabi = async ({ iconUrl, postId }: { iconUrl: string; postId: string }) => {
+export const removeMiyabi = async ({ userId, postId }: { userId: string; postId: string }) => {
   try {
     const res = await fetch(`${backendUrl}/miyabi`, {
       method: 'DELETE',
@@ -50,7 +50,7 @@ export const removeMiyabi = async ({ iconUrl, postId }: { iconUrl: string; postI
       },
       body: JSON.stringify({
         post_id: postId,
-        my_icon: iconUrl,
+        user_id: userId,
       }),
     });
 

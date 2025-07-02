@@ -18,9 +18,9 @@ export const createUserSchema = z.object({
     example: '大阪で歌人やってます',
     description: 'プロフィール文（任意）',
   }),
-  icon_url: z.string().url().max(255).openapi({
-    example: 'https://example.com/file.jpg',
-    description: 'ユーザアイコンのURL（S3のURL）',
+  icon_url: z.string().openapi({
+    example: 'https://example.com/icon.png',
+    description: 'アイコン画像のURL',
   }),
 });
 

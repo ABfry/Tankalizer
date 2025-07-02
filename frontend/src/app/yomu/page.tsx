@@ -149,8 +149,7 @@ const SignedInPage = (): React.ReactNode => {
     const res = await postYomu({
       originalText: text,
       imageData: file?.file ?? null,
-      userName: session.data?.user?.name ?? '',
-      userIconPath: session.data?.user?.image ?? '',
+      userId: session.data?.user_id ?? '',
     });
 
     if (res.message !== '投稿に成功しました') {
