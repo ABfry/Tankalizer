@@ -57,11 +57,10 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
         targetUserId: userId as string,
         userId: session.data?.user_id ?? '',
       });
-      if (!data) router.push('/user-not-found');
       setProfile(data);
     };
     getProfile();
-  }, [userId, router, session.data?.user_id]);
+  }, [userId, session.data?.user_id]);
 
   return (
     <div className={`${className} z-10 w-40 space-y-3`} style={style}>
