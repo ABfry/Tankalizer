@@ -6,11 +6,15 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { judgeImage } from '@/lib/JudgeImage';
 import { calcFileSize } from '@/lib/CalcFileSize';
 import CustomDialog from '@/components/Dialog';
+import updateProfile from '@/app/(main)/profile/[userId]/actions/updateProfile';
+import { ProfileTypes } from '@/types/profileTypes';
+import { getImageUrl } from '@/lib/utils';
 
 interface ProfileEditorProps {
   className?: string;
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
+  profile?: ProfileTypes;
 }
 
 /**
@@ -19,14 +23,16 @@ interface ProfileEditorProps {
  * @component ProfileEditor
  * @return {JSX.Element} プロフィール編集モーダルを表示するReactコンポーネント
  */
-const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => {
+const ProfileEditor = ({ className, isOpen, setIsOpen, profile }: ProfileEditorProps) => {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [currentImageUrl, setCurrentImageUrl] = useState<string | undefined>();
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false); // 更新失敗のダイアログの表示状態
-  const MAX_NAME_LENGTH = 40; // 名前の最大文字数
-  const MAX_BIO_LENGTH = 160; // 自己紹介の最大文字数
+  const MAX_NAME_LENGTH = 20; // 名前の最大文字数
+  const MAX_BIO_LENGTH = 255; // 自己紹介の最大文字数
   const MAX_IMAGE_SIZE = 5; // 最大ファイルサイズ（5MB）
+  const isImageUpdated = useRef(false); // 画像が更新されたかどうかのフラグ
+  const iconUrl = getImageUrl(profile?.iconUrl ?? '');
 
   // 画像選択用の隠し input への参照
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -48,28 +54,46 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
       }
       setCurrentImageUrl(URL.createObjectURL(file));
     }
+    // 画像が更新されたことを示すフラグを設定
+    isImageUpdated.current = true;
   }, []);
 
-  const handleSave = useCallback(() => {
-    // TODO: 保存処理をここに実装
-    if (true) {
+  const handleSave = useCallback(async () => {
+    try {
+      const updatedProfile = await updateProfile({
+        userId: session.data?.user_id ?? '',
+        name,
+        bio,
+        imageData: isImageUpdated.current ? fileInputRef.current?.files?.[0] ?? null : null,
+      });
+
+      if (updatedProfile) {
+        // 更新成功
+        setIsOpen?.(false);
+        isImageUpdated.current = false;
+        window.location.reload(); // 最新プロフィール反映
+      } else {
+        // 更新失敗
+        setIsErrorDialogOpen(true);
+      }
+    } catch (error) {
+      // エラー発生
       setIsErrorDialogOpen(true);
-      return;
+      console.error('プロフィール更新中にエラーが発生しました:', error);
     }
-    setIsOpen?.(false);
-  }, [setIsOpen]);
+  }, [session.data?.user_id, name, bio, setIsOpen]);
 
   // モーダルが開かれるたびにフォームをリセット
   useEffect(() => {
     if (isOpen) {
-      setName(session.data?.user?.name ?? '');
-      setBio('');
-      setCurrentImageUrl(session.data?.user?.image ?? undefined);
+      setName(profile?.name ?? '');
+      setBio(profile?.bio ?? '');
+      setCurrentImageUrl(iconUrl ?? undefined);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
-  }, [isOpen, session.data?.user?.name, session.data?.user?.image]);
+  }, [isOpen, profile, iconUrl]);
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => setIsOpen?.(open)}>
       <Dialog.Portal>
@@ -91,17 +115,21 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
 
           {/* プロフィール画像 */}
           <div className='mb-4 flex flex-col items-center'>
-            <Image
-              src={currentImageUrl ?? '/iconDefault.png'}
-              alt='現在のプロフィール画像'
-              width={96}
-              height={96}
-              className='mb-2 cursor-pointer rounded-full object-cover'
+            <div
+              className='relative mb-2 size-24 cursor-pointer overflow-hidden rounded-full'
               onClick={() => fileInputRef.current?.click()}
-            />
+            >
+              <Image
+                src={currentImageUrl ?? '/iconDefault.png'}
+                alt='現在のプロフィール画像'
+                fill
+                sizes='96px'
+                className='object-cover'
+              />
+            </div>
 
             {/* 削除ボタン（画像がある場合のみ表示） */}
-            {currentImageUrl && (
+            {/*{currentImageUrl && (
               <button
                 type='button'
                 className='mb-1 text-xs font-medium text-orange-500 hover:text-orange-600 hover:underline'
@@ -112,17 +140,15 @@ const ProfileEditor = ({ className, isOpen, setIsOpen }: ProfileEditorProps) => 
               >
                 画像を削除
               </button>
-            )}
+            )*/}
             {/* 選択ボタン（画像がない場合のみ表示） */}
-            {!currentImageUrl && (
-              <button
-                type='button'
-                className='mb-1 text-xs font-medium text-orange-500 hover:text-orange-600 hover:underline'
-                onClick={() => fileInputRef.current?.click()}
-              >
-                画像を選択
-              </button>
-            )}
+            <button
+              type='button'
+              className='mb-1 text-xs font-medium text-orange-500 hover:text-orange-600 hover:underline'
+              onClick={() => fileInputRef.current?.click()}
+            >
+              画像を選択
+            </button>
 
             {/* 隠しファイル入力 */}
             <input
