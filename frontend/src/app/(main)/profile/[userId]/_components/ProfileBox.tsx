@@ -124,7 +124,7 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
               <p>総獲得雅数: {profile?.totalMiyabi ?? '取得中'}</p>
               <p>総詠歌数: {profile?.totalPost ? `${profile.totalPost}首` : '取得中'}</p>
             </div>
-            {session.data?.user_id !== userId && (
+            {session.status === 'authenticated' && session.data?.user_id !== userId && (
               <div className='mt-4 flex justify-center'>
                 <button
                   onClick={() => setIsFavorited(!isFavorited)}
