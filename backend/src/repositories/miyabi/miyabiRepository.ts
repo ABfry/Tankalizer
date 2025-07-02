@@ -106,7 +106,7 @@ export class MiyabiRepository implements IMiyabiRepository {
       isMiyabiClause = `(EXISTS (SELECT 1 FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = p.id AND user_id = :viewerId))`;
       params.viewerId = viewerId;
     } else {
-      // viewerIdがなければ、is_miyabiは常にfalse
+      // viewerIdがなければ，is_miyabiは常にfalse
       isMiyabiClause = 'FALSE';
     }
 
