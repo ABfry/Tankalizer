@@ -44,6 +44,7 @@ const fetchProfile = async ({
       userId: json.profile.user_id,
       name: json.profile.user_name,
       iconUrl: json.profile.icon_url,
+      bio: json.profile.profile_text,
       isFollowing: json.profile.is_following,
       totalMiyabi: json.profile.total_miyabi,
       totalPost: json.profile.total_post,

@@ -1,25 +1,29 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import { type IProfileService, NotFoundError } from '../../services/profile/iProfileService.js';
+import {
+  type IProfileService,
+  NotFoundError,
+  type UpdateProfileDTO,
+} from '../../services/profile/iProfileService.js';
 import { type IProfileRepository } from '../../repositories/profile/iProfileRepository.js';
 import { ProfileService } from '../../services/profile/profileService.js';
 import { ProfileRepository } from '../../repositories/profile/profileRepository.js';
-import { ImageService } from '../../services/image/imageService.js';
 import { S3StorageService } from '../../services/storage/s3StorageService.js';
-import type { IImageService } from '../../services/image/iImageService.js';
 import type { IStorageService } from '../../services/storage/iStorageService.js';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '../../config/env.js';
-import type { getProfileRouteV2 } from '../../routes/Profile/getProfileRouteV2.js';
-import { getProfileSchema } from '../../schema/Profile/getProfileSchemaV2.js';
+import type { updateProfileRouteV2 } from '../../routes/Profile/updateProfileRouteV2.js';
+import { updateProfileSchema } from '../../schema/Profile/updateProfileSchemaV2.js';
 import { type IUserRepository } from '../../repositories/user/iUserRepository.js';
 import { UserRepository } from '../../repositories/user/userRepository.js';
 import { IconService } from '../../services/icon/iconService.js';
 import type { IIconService } from '../../services/icon/iIconService.js';
 
-type getProfileSchema = z.infer<typeof getProfileSchema>;
+type updateProfileSchema = z.infer<typeof updateProfileSchema>;
 
-const getProfileHandlerV2: RouteHandler<typeof getProfileRouteV2, {}> = async (c: Context) => {
+const updateProfileHandlerV2: RouteHandler<typeof updateProfileRouteV2, {}> = async (
+  c: Context
+) => {
   const profileRepository: IProfileRepository = new ProfileRepository();
   const userRepository: IUserRepository = new UserRepository();
   // s3設定
@@ -40,13 +44,25 @@ const getProfileHandlerV2: RouteHandler<typeof getProfileRouteV2, {}> = async (c
 
   try {
     // リクエストからデータを取得
-    const { user_id, viewer_id } = await c.req.json<getProfileSchema>();
+    const formData = await c.req.formData();
+    const user_id = formData.get('user_id') as string;
+    const user_name = formData.get('user_name') as string;
+    const profile_text = formData.get('profile_text') as string;
+    const icon_image = (formData.get('icon_image') as File) || null; // 画像がない場合はnull
 
-    const profile = await profileService.getProfile({ user_id, viewer_id });
+    // DTOにデータを詰める
+    const updateProfileDto: UpdateProfileDTO = {
+      user_id,
+      user_name,
+      profile_text,
+      icon_image,
+    };
+
+    const profile = await profileService.updateProfile(updateProfileDto);
 
     return c.json(
       {
-        message: 'プロフィールを取得しました．',
+        message: 'プロフィールを更新しました．',
         profile: profile,
       },
       200
@@ -59,4 +75,4 @@ const getProfileHandlerV2: RouteHandler<typeof getProfileRouteV2, {}> = async (c
   }
 };
 
-export default getProfileHandlerV2;
+export default updateProfileHandlerV2;

@@ -1,15 +1,27 @@
 import { z } from '@hono/zod-openapi';
 
 // リクエストの型
-export const getProfileSchema = z.object({
+export const updateProfileSchema = z.object({
   user_id: z.string().openapi({
     example: '8e21e23a-eb9f-11ef-9ce7-0242ac130002',
-    description: 'ユーザーID',
+    description: 'プロフィールを編集したいユーザーのID',
   }),
-  viewer_id: z.string().optional().openapi({
-    example: '8e21e23a-eb9f-11ef-9ce7-0242ac130002',
-    description: '閲覧者のユーザーid',
+  user_name: z.string().max(20).openapi({
+    example: '太郎くん',
+    description: '新しいユーザー名',
   }),
+  profile_text: z.string().max(255).openapi({
+    example: '虎ノ門ヒルズで歌人やってます．',
+    description: '新しい自己紹介文',
+  }),
+  icon_image: z
+    .custom((val) => val === null || val instanceof Blob || val == '')
+    .optional()
+    .openapi({
+      type: 'string',
+      format: 'binary',
+      description: '新しいアイコン画像ファイル',
+    }),
 });
 
 // profileのスキーマ
@@ -27,7 +39,7 @@ export const Profile = z.object({
 });
 
 // レスポンスの型
-export const getProfileResponseSchema = z.object({
+export const updateProfileResponseSchema = z.object({
   message: z.string(),
   profile: Profile,
 });

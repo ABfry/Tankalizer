@@ -1,4 +1,8 @@
-import { type IProfileRepository, type Profile } from './iProfileRepository.js';
+import {
+  type IProfileRepository,
+  type Profile,
+  type UpdateProfileRepoDTO,
+} from './iProfileRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
 
@@ -21,6 +25,7 @@ export class ProfileRepository implements IProfileRepository {
       SELECT
         u.id AS user_id,
         u.name AS user_name,
+        u.profile_text AS profile_text,
         u.icon_url,
         u.created_at,
         ${followCheckClause}, -- フォロー状態を確認する句
@@ -67,6 +72,7 @@ export class ProfileRepository implements IProfileRepository {
       const profile: Profile = {
         user_id: row.user_id,
         user_name: row.user_name,
+        profile_text: row.profile_text,
         icon_url: row.icon_url,
         created_at: row.created_at,
         is_following: Boolean(row.is_following),
@@ -80,6 +86,37 @@ export class ProfileRepository implements IProfileRepository {
     } catch (error) {
       console.error(`[ProfileRepository#getProfile] プロフィールの取得に失敗しました．`, error);
       throw new Error('データベースからのプロフィール取得処理に失敗しました．');
+    }
+  }
+
+  /**
+   * プロフィールを更新する
+   * @param updateProfileRepoDTO - 更新するプロフィールのデータ
+   * @returns {Promise<void>}
+   */
+  async updateProfile(updateProfileRepoDto: UpdateProfileRepoDTO): Promise<void> {
+    const { user_id, user_name, profile_text, image_path } = updateProfileRepoDto;
+
+    const sql = `
+      UPDATE ${env.USERS_TABLE_NAME}
+      SET
+        name = :user_name,
+        profile_text = :profile_text,
+        icon_url = :image_path
+      WHERE
+        id = :user_id
+    `;
+
+    try {
+      const result = await db.query(sql, {
+        user_id,
+        user_name,
+        profile_text,
+        image_path,
+      });
+    } catch (error) {
+      console.error(`[ProfileRepository#updateProfile] プロフィールの更新に失敗しました．`, error);
+      throw new Error('データベースのプロフィール更新処理に失敗しました．');
     }
   }
 }
