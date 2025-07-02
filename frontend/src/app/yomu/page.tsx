@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './page.module.scss';
@@ -14,6 +14,9 @@ import Loading from '@/components/Loading';
 import AfterYomu from './AfterYomu';
 import { calcFileSize } from '@/lib/CalcFileSize';
 import FileUploadButton from '@/components/FileUploadButton';
+import fetchProfile from '@/app/(main)/profile/[userId]/actions/fetchProfile';
+import { ProfileTypes } from '@/types/profileTypes';
+import { getImageUrl } from '@/lib/utils';
 // import { checkAuthUser } from './CheckAuthUser';
 const MAX_LENGTH = 140; // 最大文字数
 
@@ -73,6 +76,9 @@ const SignedInPage = (): React.ReactNode => {
   const [resResult, setResResult] = useState<PostResult | null>(null);
 
   const [isDragActive, setIsDragActive] = useState(false);
+  const [profile, setProfile] = useState<ProfileTypes | null>(null);
+
+  const iconUrl = getImageUrl(profile?.iconUrl ?? '');
 
   const router = useRouter();
 
@@ -162,6 +168,18 @@ const SignedInPage = (): React.ReactNode => {
     setPostStatus(PostStatus.SUCCESS);
   };
 
+  // ユーザIDからプロフィールをFetchする
+  useEffect(() => {
+    const getProfile = async () => {
+      const data = await fetchProfile({
+        targetUserId: session.data?.user_id ?? '',
+        userId: session.data?.user_id ?? '',
+      });
+      setProfile(data);
+    };
+    getProfile();
+  }, [session.data?.user_id]);
+
   return (
     <>
       <main className='fixed left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2'>
@@ -189,7 +207,7 @@ const SignedInPage = (): React.ReactNode => {
             {/* ユーザーアイコンとテキストエリア */}
             <div className='gap-4 md:flex md:items-start'>
               <Image
-                src={session.data?.user?.image ?? ''}
+                src={iconUrl || '/iconDefault.png'}
                 height={50}
                 width={50}
                 alt='Icon'
@@ -306,8 +324,8 @@ const SignedInPage = (): React.ReactNode => {
         <AfterYomu
           tanka={resResult?.tanka ?? []}
           imagePath={file?.filePath ?? ''}
-          userName={session.data?.user?.name ?? ''}
-          userIconPath={session.data?.user?.image ?? ''}
+          userName={profile?.name ?? ''}
+          userIconPath={iconUrl || '/iconDefault.png'}
         />
       )}
     </>
