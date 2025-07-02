@@ -124,7 +124,7 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
               <p>総獲得雅数: {profile?.totalMiyabi ?? '取得中'}</p>
               <p>総詠歌数: {profile?.totalPost ? `${profile.totalPost}首` : '取得中'}</p>
             </div>
-            {session.data?.user_id !== userId && (
+            {session.status === 'authenticated' && session.data?.user_id !== userId && (
               <div className='mt-4 flex justify-center'>
                 <button
                   onClick={() => setIsFavorited(!isFavorited)}
@@ -138,8 +138,22 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
                     xmlns='http://www.w3.org/2000/svg'
                   >
                     <defs>
-                      <linearGradient id='rainbow' x1='0%' y1='0%' x2='200%' y2='0%' gradientUnits='objectBoundingBox'>
-                        <animateTransform attributeName='gradientTransform' type='translate' from='0 0' to='-1 0' dur='3s' repeatCount='indefinite' />
+                      <linearGradient
+                        id='rainbow'
+                        x1='0%'
+                        y1='0%'
+                        x2='200%'
+                        y2='0%'
+                        gradientUnits='objectBoundingBox'
+                      >
+                        <animateTransform
+                          attributeName='gradientTransform'
+                          type='translate'
+                          from='0 0'
+                          to='-1 0'
+                          dur='3s'
+                          repeatCount='indefinite'
+                        />
                         <stop offset='0%' stopColor='#ff0000' />
                         <stop offset='8.33%' stopColor='#ff7f00' />
                         <stop offset='16.66%' stopColor='#ffff00' />
