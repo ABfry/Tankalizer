@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const envSchema = z.object({
+  NODE_ENV: z.string(),
   FRONTEND_URL: z.string().url(),
   PORT: z.coerce.number().optional(),
   GEMINI_API_KEY: z.string(),
