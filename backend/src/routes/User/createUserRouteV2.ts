@@ -34,7 +34,23 @@ export const createUserRouteV2 = createRoute({
           schema: createUserResponseSchema,
         },
       },
-      description: 'ユーザーの作成または情報取得が正常に完了しました．',
+      description: '旧DBからの乗り換えが完了しました．',
+    },
+    201: {
+      content: {
+        'application/json': {
+          schema: createUserResponseSchema,
+        },
+      },
+      description: '新規ユーザーの作成が正常に完了しました．',
+    },
+    409: {
+      content: {
+        'application/json': {
+          schema: createUserResponseSchema,
+        },
+      },
+      description: 'ユーザーが既に作成済みです．',
     },
     500: {
       content: {
@@ -49,6 +65,14 @@ export const createUserRouteV2 = createRoute({
 
 export type createUserRouteResponse200 = z.infer<
   (typeof createUserRouteV2.responses)['200']['content']['application/json']['schema']
+>;
+
+export type createUserRouteResponse201 = z.infer<
+  (typeof createUserRouteV2.responses)['201']['content']['application/json']['schema']
+>;
+
+export type createUserRouteResponse409 = z.infer<
+  (typeof createUserRouteV2.responses)['409']['content']['application/json']['schema']
 >;
 
 export type createUserRouteResponse500 = z.infer<
