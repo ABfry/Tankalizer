@@ -1,4 +1,4 @@
-import { type IMiyabiRepository, type Miyabi } from './iMiyabiRepository.js';
+import { type IMiyabiRepository, type Miyabi, type RankedPost } from './iMiyabiRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
 import mysql from 'mysql2';
@@ -88,6 +88,77 @@ export class MiyabiRepository implements IMiyabiRepository {
         error
       );
       throw error;
+    }
+  }
+
+  /**
+   * 雅ランキングを取得する
+   * @param limit - 取得する投稿数の上限
+   * @param viewerId - ビューアーのユーザーID（オプション）
+   * @returns {Promise<PostWithRank[]>}
+   */
+  async getMiyabiRanking(limit: number, viewerId?: string): Promise<RankedPost[]> {
+    const params: { [key: string]: any } = { limit };
+
+    // viewerId が指定されている場合，閲覧者が雅済みかチェックする句を動的に生成
+    let isMiyabiClause: string;
+    if (viewerId) {
+      isMiyabiClause = `(EXISTS (SELECT 1 FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = p.id AND user_id = :viewerId))`;
+      params.viewerId = viewerId;
+    } else {
+      // viewerIdがなければ，is_miyabiは常にfalse
+      isMiyabiClause = 'FALSE';
+    }
+
+    const sql = `
+      SELECT
+        p.id,
+        p.original,
+        p.tanka,
+        p.image_path,
+        p.created_at,
+        p.user_id,
+        u.name AS user_name,
+        u.icon_url AS user_icon,
+        COUNT(m.id) AS miyabi_count,
+        ${isMiyabiClause} AS is_miyabi
+      FROM
+        ${env.POSTS_TABLE_NAME} AS p
+      -- 投稿者情報を取得するためにusersテーブルをJOIN
+      JOIN
+        ${env.USERS_TABLE_NAME} AS u ON p.user_id = u.id
+      -- 雅の数を集計するためにmiyabisテーブルをJOIN
+      JOIN
+        ${env.MIYABI_TABLE_NAME} AS m ON p.id = m.post_id
+      WHERE
+        -- 直近7日間の投稿に絞る
+        m.created_at >= (NOW() - INTERVAL 7 DAY)
+        AND p.is_deleted = FALSE
+      GROUP BY
+        p.id, u.id
+      ORDER BY
+        miyabi_count DESC, p.created_at DESC
+      LIMIT :limit
+    `;
+
+    try {
+      const results = await db.query(sql, params);
+
+      // 整形
+      const rankedPosts: RankedPost[] = results.map((row: any, index: number) => ({
+        ...row,
+        rank: index + 1,
+        is_miyabi: Boolean(row.is_miyabi),
+        miyabi_count: Number(row.miyabi_count),
+      }));
+
+      return rankedPosts;
+    } catch (error) {
+      console.error(
+        '[MiyabiRepository#getMiyabiRanking] 雅ランキングの取得に失敗しました．',
+        error
+      );
+      throw new Error('データベースからの雅ランキング取得処理に失敗しました．');
     }
   }
 }
