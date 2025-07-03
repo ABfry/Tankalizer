@@ -177,18 +177,18 @@ CREATE TABLE follows (
                     # シングルクォートをエスケープ
                     tanka_json = tanka_json.replace("'", "''")
                     
-                    image_path = row.get('image_path', '')
-                    if image_path:
+                    image_path = row.get('image_path', '').strip()
+
+                    # 空文字列、"NULL"、"null"などをNULLとして扱う
+                    if image_path and image_path.upper() != 'NULL':
                         # S3 URLからパス部分のみを抽出
-                        if 'amazonaws.com/' in image_path:
-                            # URLの最後の部分（日付/ファイル名）を取得
-                            path_parts = image_path.split('amazonaws.com/')[-1]
-                            # バケット名の後のパスを取得
-                            if '/' in path_parts:
-                                image_path = '/'.join(path_parts.split('/')[1:])
+                        if '.com/' in image_path:
+                            image_path = image_path.split('.com/')[-1]
+                        # SQLクォートをエスケープして、クォートで囲む
                         image_path = f"'{image_path.replace("'", "''")}'"
                     else:
-                        image_path = '/icon/news_icon.png'
+                        # SQLのNULL値（クォートなし）
+                        image_path = 'NULL'
                     
                     created_at = row.get('created_at', '')
                     is_deleted = 'FALSE'  # デフォルトはFALSE
