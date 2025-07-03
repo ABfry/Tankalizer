@@ -50,6 +50,7 @@ const fetchProfile = async ({
       totalPost: json.profile.total_post,
       followingCount: json.profile.following_count,
       followerCount: json.profile.follower_count,
+      isDeveloper: json.profile.is_developer ?? false,
     };
     return profile;
   } catch (error) {

@@ -8,4 +8,5 @@ export type ProfileTypes = {
   totalPost: number;
   followingCount: number;
   followerCount: number;
+  isDeveloper?: boolean;
 };
