@@ -270,6 +270,9 @@ export class PostRepository implements IPostRepository {
         posts.user_id,
         users.name AS user_name,
         users.icon_url AS user_icon,
+        (EXISTS (SELECT 1 FROM ${
+          env.DEVELOPERS_TABLE_NAME
+        } WHERE user_id = posts.user_id)) AS is_developer,
         (SELECT COUNT(*) FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = posts.id) AS miyabi_count,
         CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi
       FROM
@@ -293,6 +296,7 @@ export class PostRepository implements IPostRepository {
       // DBから取得した結果を，定義した型に合わせて整形
       return results.map((row: any) => ({
         ...row,
+        is_developer: Boolean(row.is_developer),
         is_miyabi: Boolean(row.is_miyabi),
       }));
     } catch (error) {
