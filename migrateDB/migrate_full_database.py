@@ -99,7 +99,7 @@ CREATE TABLE follows (
     def load_users_csv(self, csv_file_path, output_file):
         """usersテーブルのCSVを読み込み、ID マッピングを作成"""
         
-        insert_template = """INSERT INTO users (id, name, oauth_app, connect_info, icon_url, created_at, old_icon_url) VALUES ('{id}', '{name}', '{oauth_app}', '{connect_info}', '{icon_url}', '{created_at}', '{old_icon_url}');"""
+        insert_template = """INSERT INTO users (id, name, oauth_app, connect_info, profile_text, icon_url, created_at, old_icon_url) VALUES ('{id}', '{name}', '{oauth_app}', '{connect_info}', {profile_text}, '{icon_url}', '{created_at}', '{old_icon_url}');"""
         
         with open(csv_file_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -123,6 +123,7 @@ CREATE TABLE follows (
                     name = row['name'].replace("'", "''")
                     oauth_app = 'github'
                     connect_info = old_id
+                    profile_text = 'NULL'
                     icon_url = row['icon'].replace("'", "''")
                     created_at = row['created_at']
                     old_icon_url = row['icon'].replace("'", "''")
@@ -133,6 +134,7 @@ CREATE TABLE follows (
                         name=name,
                         oauth_app=oauth_app,
                         connect_info=connect_info,
+                        profile_text=profile_text,
                         icon_url=icon_url,
                         created_at=created_at,
                         old_icon_url=old_icon_url
