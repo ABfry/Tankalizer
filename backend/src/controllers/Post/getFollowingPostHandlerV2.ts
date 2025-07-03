@@ -1,6 +1,6 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import { type IPostService } from '../../services/post/iPostService.js';
+import { type IPostService, NotFoundError } from '../../services/post/iPostService.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
 import { PostService } from '../../services/post/postService.js';
 import { PostRepository } from '../../repositories/post/postRepository.js';
@@ -12,12 +12,14 @@ import type { IImageService } from '../../services/image/iImageService.js';
 import type { IStorageService } from '../../services/storage/iStorageService.js';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '../../config/env.js';
-import type { getPostRouteV2 } from '../../routes/Post/getPostRouteV2.js';
-import { getPostSchema } from '../../schema/Post/getPostSchemaV2.js';
+import type { getFollowingPostRouteV2 } from '../../routes/Post/getFollowingPostRouteV2.js';
+import { getFollowingPostSchema } from '../../schema/Post/getFollowingPostSchemaV2.js';
 
-type getPostSchema = z.infer<typeof getPostSchema>;
+type getFollowingPostSchema = z.infer<typeof getFollowingPostSchema>;
 
-const getPostHandlerV2: RouteHandler<typeof getPostRouteV2, {}> = async (c: Context) => {
+const getFollowingPostHandlerV2: RouteHandler<typeof getFollowingPostRouteV2, {}> = async (
+  c: Context
+) => {
   const postRepository: IPostRepository = new PostRepository();
   // s3設定
   const s3Client = new S3Client({
@@ -34,9 +36,9 @@ const getPostHandlerV2: RouteHandler<typeof getPostRouteV2, {}> = async (c: Cont
 
   try {
     // リクエストからデータを取得
-    const { limit, cursor, filterByUserId, viewerId } = await c.req.json<getPostSchema>();
+    const { limit, cursor, viewerId } = await c.req.json<getFollowingPostSchema>();
 
-    const posts = await postService.getPost({ limit, cursor, filterByUserId, viewerId });
+    const posts = await postService.getFollowingPost({ limit, cursor, viewerId });
 
     return c.json(
       {
@@ -46,8 +48,11 @@ const getPostHandlerV2: RouteHandler<typeof getPostRouteV2, {}> = async (c: Cont
       200
     );
   } catch (err: any) {
+    if (err instanceof NotFoundError) {
+      return c.json({ message: err.message, statusCode: 404, error: 'Not Found' }, 404);
+    }
     return c.json({ message: err.message, statusCode: 500, error: 'Internal Server Error' }, 500);
   }
 };
 
-export default getPostHandlerV2;
+export default getFollowingPostHandlerV2;

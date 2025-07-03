@@ -4,6 +4,8 @@ import { type IPostService } from '../../services/post/iPostService.js';
 import { type IPostRepository } from '../../repositories/post/iPostRepository.js';
 import { PostService } from '../../services/post/postService.js';
 import { PostRepository } from '../../repositories/post/postRepository.js';
+import { type IUserRepository } from '../../repositories/user/iUserRepository.js';
+import { UserRepository } from '../../repositories/user/userRepository.js';
 import { ImageService } from '../../services/image/imageService.js';
 import { S3StorageService } from '../../services/storage/s3StorageService.js';
 import type { IImageService } from '../../services/image/iImageService.js';
@@ -27,7 +29,8 @@ const getOnePostHandlerV2: RouteHandler<typeof getOnePostRouteV2, {}> = async (c
   });
   const storageService: IStorageService = new S3StorageService(s3Client, env.S3_BUCKET_NAME);
   const imageService: IImageService = new ImageService(storageService);
-  const postService: IPostService = new PostService(postRepository, imageService);
+  const userRepository: IUserRepository = new UserRepository();
+  const postService: IPostService = new PostService(postRepository, imageService, userRepository);
 
   try {
     // リクエストからデータを取得
