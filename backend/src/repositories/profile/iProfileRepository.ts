@@ -4,6 +4,7 @@ export type Profile = {
   profile_text: string;
   icon_url: string;
   created_at: Date;
+  is_developer: boolean;
   total_miyabi: number;
   total_post: number;
   following_count: number;

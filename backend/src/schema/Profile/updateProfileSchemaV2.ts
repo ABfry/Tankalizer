@@ -31,6 +31,7 @@ export const Profile = z.object({
   profile_text: z.string(), // 自己紹介文
   icon_url: z.string(), // ユーザアイコン
   created_at: z.date(), // ユーザ作成日時
+  is_developer: z.boolean(), // 開発者か？
   is_following: z.boolean(), // フォローしているか？
   total_miyabi: z.number(), // 総獲得雅数
   total_post: z.number(), // 総投稿数
