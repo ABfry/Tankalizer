@@ -188,7 +188,7 @@ CREATE TABLE follows (
                                 image_path = '/'.join(path_parts.split('/')[1:])
                         image_path = f"'{image_path.replace("'", "''")}'"
                     else:
-                        image_path = 'NULL'
+                        image_path = '/icon/news_icon.png'
                     
                     created_at = row.get('created_at', '')
                     is_deleted = 'FALSE'  # デフォルトはFALSE
