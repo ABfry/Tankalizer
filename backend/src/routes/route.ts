@@ -49,6 +49,8 @@ import { getProfileRouteV2 } from './Profile/getProfileRouteV2.js';
 import getProfileHandlerV2 from '../controllers/Profile/getProfileHandlerV2.js';
 import { updateProfileRouteV2 } from './Profile/updateProfileRouteV2.js';
 import updateProfileHandlerV2 from '../controllers/Profile/updateProfileHandlerV2.js';
+import { getFollowingUserRouteV2 } from './Profile/getFollowingUserRouteV2.js';
+import getFollowingUserHandlerV2 from '../controllers/Profile/getFollowingUserHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -77,5 +79,6 @@ export default router
   .openapi(createMiyabiRouteV2, createMiyabiHandlerV2)
   .openapi(deleteMiyabiRouteV2, deleteMiyabiHandlerV2)
   .openapi(getProfileRouteV2, getProfileHandlerV2)
-  .openapi(updateProfileRouteV2, updateProfileHandlerV2);
+  .openapi(updateProfileRouteV2, updateProfileHandlerV2)
+  .openapi(getFollowingUserRouteV2, getFollowingUserHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく

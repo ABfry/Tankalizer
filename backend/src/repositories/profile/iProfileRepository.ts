@@ -19,7 +19,15 @@ export type UpdateProfileRepoDTO = {
   image_path: string;
 };
 
+export type GetFollowingUserRepoDto = {
+  user_id: string;
+  viewer_id?: string;
+  limit: number;
+  cursor?: string;
+};
+
 export interface IProfileRepository {
   getProfile(user_id: string, viewer_id?: string): Promise<Profile>;
   updateProfile(updateProfileRepoDTO: UpdateProfileRepoDTO): Promise<void>;
+  getFollowingUser(getFollowingUserRepoDto: GetFollowingUserRepoDto): Promise<Profile[]>;
 }
