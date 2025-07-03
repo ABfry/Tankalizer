@@ -9,6 +9,7 @@ import { compressIconImage } from '../../utils/compressImage.js';
 import { env } from '../../config/env.js';
 import type { IIconService } from '../icon/iIconService.js';
 import { generateUuid } from '../../utils/generateUuid.js';
+import type { CreateUserResponse } from './iUserService.js';
 
 export class UserService implements IUserService {
   // userRepositoryのインスタンスをコンストラクタで受け取る
@@ -24,7 +25,7 @@ export class UserService implements IUserService {
    * @returns {Promise<User>} 作成または取得したユーザー情報
    * @throws {Error} DBエラーなど、その他の予期せぬエラー
    */
-  async createUser(userDto: CreateUserDTO): Promise<User> {
+  async createUser(userDto: CreateUserDTO): Promise<CreateUserResponse> {
     console.log(
       `[UserService#createUser] ユーザー作成処理を開始します．(oauth_app: ${userDto.oauth_app}, connect_info: ${userDto.connect_info})`
     );
@@ -41,7 +42,7 @@ export class UserService implements IUserService {
         `[UserService#createUser] ユーザーは既に存在します．処理を終了します．(user_id: ${existingUser.id})`
       );
       // 既に存在するユーザー情報をそのまま返す
-      return existingUser;
+      return { user: existingUser, type: 'existing' };
     }
 
     // old_icon_urlでユーザーを検索
@@ -49,7 +50,8 @@ export class UserService implements IUserService {
 
     // old_icon_urlが一致するユーザーが存在した場合
     if (existingUserByIcon) {
-      return await this.updateExistingUser(existingUserByIcon, userDto);
+      const updatedUser = await this.updateExistingUser(existingUserByIcon, userDto);
+      return { user: updatedUser, type: 'migrated' };
     }
 
     // ユーザーが存在しない場合，リポジトリに新しいユーザーの作成を依頼する
@@ -82,7 +84,7 @@ export class UserService implements IUserService {
     console.log(
       `[UserService#createUser] 新規ユーザーの作成が完了しました．(user_id: ${newUser.id})`
     );
-    return newUser;
+    return { user: newUser, type: 'created' };
   }
 
   private async uploadIconByUrl(iconUrl: string, userId: string): Promise<string> {
