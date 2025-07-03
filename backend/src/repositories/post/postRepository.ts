@@ -130,12 +130,15 @@ export class PostRepository implements IPostRepository {
         users.name AS user_name,
         users.icon_url AS user_icon,
         (SELECT COUNT(*) FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = posts.id) AS miyabi_count,
-        CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi
+        CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi,
+        CASE WHEN developers.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_developer
       FROM
         ${env.POSTS_TABLE_NAME} AS posts
       JOIN
         ${env.USERS_TABLE_NAME} AS users ON posts.user_id = users.id
       ${miyabiJoinClause}
+      LEFT JOIN
+        ${env.DEVELOPERS_TABLE_NAME} AS developers ON posts.user_id = developers.user_id
       WHERE
         ${whereClauses.join(' AND ')}
       ORDER BY
@@ -150,6 +153,7 @@ export class PostRepository implements IPostRepository {
       // DBから取得した結果を，定義した型に合わせて整形
       return results.map((row: any) => ({
         ...row,
+        is_developer: Boolean(row.is_developer),
         is_miyabi: Boolean(row.is_miyabi),
       }));
     } catch (error) {
@@ -191,12 +195,15 @@ export class PostRepository implements IPostRepository {
         users.name AS user_name,
         users.icon_url AS user_icon,
         (SELECT COUNT(*) FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = posts.id) AS miyabi_count,
-        CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi
+        CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi,
+        CASE WHEN developers.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS is_developer  
       FROM
         ${env.POSTS_TABLE_NAME} AS posts
       JOIN
         ${env.USERS_TABLE_NAME} AS users ON posts.user_id = users.id
       ${miyabiJoinClause}
+      LEFT JOIN
+        ${env.DEVELOPERS_TABLE_NAME} AS developers ON posts.user_id = developers.user_id
       WHERE
         ${whereClauses.join(' AND ')}
     `;
@@ -207,6 +214,7 @@ export class PostRepository implements IPostRepository {
       // DBから取得した結果を，定義した型に合わせて整形
       const posts: Post[] = results.map((row: any) => ({
         ...row,
+        is_developer: Boolean(row.is_developer),
         is_miyabi: Boolean(row.is_miyabi),
       }));
 
