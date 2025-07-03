@@ -44,6 +44,14 @@ export class UserService implements IUserService {
       return existingUser;
     }
 
+    // old_icon_urlでユーザーを検索
+    const existingUserByIcon = await this.userRepository.findByOldIconUrl(userDto.icon_url);
+
+    // old_icon_urlが一致するユーザーが存在した場合
+    if (existingUserByIcon) {
+      return await this.updateExistingUser(existingUserByIcon, userDto);
+    }
+
     // ユーザーが存在しない場合，リポジトリに新しいユーザーの作成を依頼する
     console.log('[UserService#createUser] 新規ユーザーを作成します．');
 
@@ -100,5 +108,39 @@ export class UserService implements IUserService {
       console.error('[UserService#uploadIcon] 画像のアップロードに失敗しました．');
       return env.DEFAULT_ICON_PATH;
     }
+  }
+
+  /**
+   * 旧データベースに登録されていたユーザーの情報を更新する
+   * @param existingUser - 既存のユーザー情報
+   * @param userDto - 更新するユーザー情報
+   * @returns {Promise<User>} 更新後のユーザー情報
+   */
+  private async updateExistingUser(existingUser: User, userDto: CreateUserDTO): Promise<User> {
+    console.log(
+      `[UserService#updateExistingUser] old_icon_urlが一致するユーザーが見つかりました．情報を更新します．(user_id: ${existingUser.id})`
+    );
+
+    // アイコンをS3にアップロード
+    const newIconUrl = await this.uploadIconByUrl(userDto.icon_url, existingUser.id);
+
+    // connect_infoとicon_urlを更新
+    await this.userRepository.updateConnectInfoAndIcon(
+      existingUser.id,
+      userDto.connect_info,
+      userDto.oauth_app,
+      newIconUrl
+    );
+
+    // 更新後のユーザー情報を取得して返す
+    const updatedUser = await this.userRepository.findById(existingUser.id);
+    if (!updatedUser) {
+      throw new Error('ユーザー情報の更新に失敗しました．');
+    }
+
+    console.log(
+      `[UserService#updateExistingUser] ユーザー情報の更新が完了しました．(user_id: ${updatedUser.id})`
+    );
+    return updatedUser;
   }
 }
