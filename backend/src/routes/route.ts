@@ -87,7 +87,7 @@ export default router
   .openapi(getProfileRouteV2, getProfileHandlerV2)
   .openapi(updateProfileRouteV2, updateProfileHandlerV2)
   .openapi(followRoute, followHandler)
-  .openapi(unfollowRoute, unfollowHandler);
+  .openapi(unfollowRoute, unfollowHandler)
   .openapi(getFollowingPostRouteV2, getFollowingPostHandlerV2)
   .openapi(getMiyabiRankingRouteV2, getMiyabiRankingHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく
