@@ -62,7 +62,6 @@ export const fetchMutuals = async ({
     }
 
     const json = await res.json();
-    console.log('取得したうたトモユーザ数:', json);
     return json.users.map((profile: ProfileResponse) => ({
       name: profile.user_name,
       iconUrl: profile.icon_url,

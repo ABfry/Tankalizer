@@ -10,6 +10,7 @@ import Dialog from '@/components/Dialog';
 import LoginDialog from './LoginDialog';
 import { useRouter } from 'next/navigation';
 import { getImageUrl } from '@/lib/utils';
+import { follow, unfollow } from '@/app/(main)/profile/[userId]/actions/FollowunFollow';
 
 // props の型定義
 interface UserProps {
@@ -35,8 +36,10 @@ const User = ({ profile, className, onDelete }: UserProps) => {
   const session = useSession();
   // ログイン促進ダイアログの開閉状態
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   // 親の持つPostsから自身を削除する
   const handleDelete = () => {
+    if (profile.userId !== session.data?.user_id) return;
     onDelete?.(profile.userId);
   };
 
@@ -71,23 +74,30 @@ const User = ({ profile, className, onDelete }: UserProps) => {
         </div>
         <button
           className={`ml-auto shrink-0 rounded-full px-4 py-2 ${
-            profile.isFollowing
+            isFollowing
               ? 'bg-orange-400 text-white hover:bg-orange-500'
               : 'border border-gray-300 bg-white/70 text-black hover:bg-gray-100/70'
           }`}
-          onClick={() => {
+          onClick={async () => {
             if (session.status !== 'authenticated') {
               setLoginDialogOpen(true);
               return;
             }
-            // ログイン済みなら，推し登録・解除の処理を行
-            if (profile.isFollowing) {
+            // ログイン済みなら，推し登録・解除の処理を行う
+            if (isFollowing) {
               setDialogOpen(true);
             } else {
+              const result = await follow({
+                followerId: session.data?.user_id ?? '',
+                followeeId: profile.userId,
+              });
+              if (result) {
+                setIsFollowing(true);
+              }
             }
           }}
         >
-          {profile.isFollowing ? '推し解除' : '推す！'}
+          {isFollowing ? '推し解除' : '推す！'}
         </button>
       </div>
       <p className='ml-[58px] text-gray-600'>{profile.bio}</p>
@@ -98,14 +108,16 @@ const User = ({ profile, className, onDelete }: UserProps) => {
         description='このユーザを推しから外しますか？'
         yesCallback={async () => {
           console.log('はい');
-          setDialogOpen(false);
-          /*const result = await unfollow({
-            userId: session.data?.user_id ?? '',
-            targetUserId: profile.userId,
+          const result = await unfollow({
+            followerId: session.data?.user_id ?? '',
+            followeeId: profile.userId,
           });
           if (!result) setUnfollowFailedDialogOpen(true);
-          else handleDelete();*/
-          handleDelete();
+          else {
+            setIsFollowing(false);
+            handleDelete();
+            setDialogOpen(false);
+          }
         }}
         noCallback={() => {
           console.log('いいえ');
