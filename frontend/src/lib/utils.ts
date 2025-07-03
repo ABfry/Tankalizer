@@ -15,5 +15,8 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function getImageUrl(imageUrl: string): string {
   if (imageUrl === '') return '';
+
+  // すでにURLの場合はそのまま返す
+  if (imageUrl.startsWith('https://')) return imageUrl;
   return `${cdnUrl}/${imageUrl}`;
 }

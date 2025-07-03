@@ -4,6 +4,7 @@ import {
   NotFoundError,
   type UpdateProfileDTO,
   type GetFollowingUserDTO,
+  type GetMutualFollowingUserDTO,
 } from './iProfileService.js';
 import {
   type IProfileRepository,
@@ -146,5 +147,35 @@ export class ProfileService implements IProfileService {
     );
 
     return followingUsers;
+  }
+
+  /**
+   * 相互フォローしているユーザーを取得するビジネスロジック
+   * @param getMutualFollowingUserDto - 相互フォローしているユーザーを取得するためのDTO
+   * @returns {Promise<Profile[]>} 相互フォローしているユーザーのプロフィールの配列
+   * @throws {Error} DBエラーなど、その他の予期せぬエラー
+   */
+  async getMutualFollowingUser(
+    getMutualFollowingUserDto: GetMutualFollowingUserDTO
+  ): Promise<Profile[]> {
+    console.log(
+      `[ProfileService#getMutualFollowingUser] 相互フォローしているユーザーの取得処理を開始します．(user_id: ${getMutualFollowingUserDto.user_id})`
+    );
+
+    const user: User | null = await this.userRepository.findById(getMutualFollowingUserDto.user_id);
+
+    if (!user) {
+      throw new NotFoundError('ユーザーが見つかりません．');
+    }
+
+    const mutualfollowingUsers = await this.profileRepository.getMutualFollowingUser(
+      getMutualFollowingUserDto
+    );
+
+    console.log(
+      `[ProfileService#getMutualFollowingUser] 相互フォローしているユーザーの取得が完了しました．(user_id: ${getMutualFollowingUserDto.user_id})`
+    );
+
+    return mutualfollowingUsers;
   }
 }
