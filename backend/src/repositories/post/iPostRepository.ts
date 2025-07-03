@@ -23,6 +23,7 @@ export type Post = {
   user_id: string;
   user_name: string;
   user_icon: string;
+  is_developer: boolean;
   miyabi_count: number;
   is_miyabi: boolean;
 };
@@ -33,4 +34,5 @@ export interface IPostRepository {
   delete(id: string, userId: string): Promise<void>;
   getPost(dto: GetPostRepoDTO): Promise<Post[]>;
   getOnePost(id: string, viewerId?: string): Promise<Post>;
+  getFollowingPost(limit: number, viewerId: string, cursor?: string | null): Promise<Post[]>;
 }

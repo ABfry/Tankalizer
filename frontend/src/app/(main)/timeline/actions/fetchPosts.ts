@@ -18,6 +18,7 @@ interface PostResponse {
   miyabi_count: number;
   is_miyabi: boolean;
   rank?: number;
+  is_developer?: boolean;
 }
 
 /**
@@ -77,6 +78,7 @@ export const fetchPosts = async ({
       miyabiCount: post.miyabi_count,
       miyabiIsClicked: post.is_miyabi,
       rank: post.rank,
+      isDeveloper: post.is_developer ?? false,
     }));
   } catch (error) {
     console.error(error);
@@ -90,15 +92,15 @@ export const fetchPosts = async ({
  * @function fetchRanking
  * @param {Object} params - ランキング取得のためのパラメータオブジェクト
  * @param {number} params.limit - 取得する投稿の最大件数
- * @param {string} params.iconUrl - ユーザのアイコン画像URL
+ * @param {string} params.userId - ユーザのID
  * @returns {Promise<PostTypes[]>} 投稿データの配列を返すPromise．投稿が存在しない場合は空配列を返す．
  */
 export const fetchRanking = async ({
   limit,
-  iconUrl,
+  userId,
 }: {
   limit: number;
-  iconUrl?: string;
+  userId?: string;
 }): Promise<PostTypes[] | []> => {
   try {
     const res = await fetch(`${backendUrl}/miyabiranking`, {
@@ -108,7 +110,7 @@ export const fetchRanking = async ({
       },
       body: JSON.stringify({
         limit: limit,
-        my_icon: iconUrl,
+        viewerId: userId,
       }),
     });
 
@@ -119,7 +121,7 @@ export const fetchRanking = async ({
     }
 
     const json = await res.json();
-    return json.posts.map((post: PostResponse) => ({
+    return json.ranked_posts.map((post: PostResponse) => ({
       id: post.id,
       tanka: post.tanka,
       original: post.original,
@@ -133,6 +135,7 @@ export const fetchRanking = async ({
       miyabiCount: post.miyabi_count,
       miyabiIsClicked: post.is_miyabi,
       rank: post.rank,
+      isDeveloper: post.is_developer ?? false,
     }));
   } catch (error) {
     console.error(error);

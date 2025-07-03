@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import fetchProfile from '../actions/fetchProfile';
 import { ProfileTypes } from '@/types/profileTypes';
 import { getImageUrl } from '@/lib/utils';
+import ProfileEditor from '@/components/ProfileEditor';
 
 export interface ProfileBoxProps {
   userId: string;
@@ -13,6 +14,7 @@ export interface ProfileBoxProps {
 
 const ProfileBox = ({ userId }: ProfileBoxProps) => {
   const [profile, setProfile] = useState<ProfileTypes | null>(null);
+  const [profileEditorOpen, setProfileEditorOpen] = useState(false);
   const router = useRouter();
   // セッションの取得
   const session = useSession();
@@ -31,6 +33,8 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
     };
     getProfile();
   }, [userId, router, session.data?.user_id]);
+
+  const [isFavorited, setIsFavorited] = useState(false);
 
   // totalPost に応じた背景色のクラスを決定
   const getBackgroundClass = () => {
@@ -66,7 +70,7 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
 
   return (
     <div
-      className={`mx-4 rounded-2xl border-2 border-gray-300 bg-gradient-to-r ${getBackgroundClass()} to-amber-50 shadow-lg`}
+      className={`relative mx-4 rounded-2xl border-2 border-gray-300 bg-gradient-to-r ${getBackgroundClass()} to-amber-50 shadow-lg`}
     >
       <div className='border-b border-gray-300 py-2 text-center text-xl font-semibold text-gray-700'>
         プロフィール
@@ -81,6 +85,15 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
               height={100}
               className='z-10 rounded-full border-2 border-gray-300'
             />
+            {profile?.isDeveloper && (
+              <Image
+                src='/developer.png'
+                alt='Developer Badge'
+                width={50}
+                height={50}
+                className='absolute bottom-[-10px] right-[-30px] z-20'
+              />
+            )}
             {getImageSrc() && (
               <Image
                 src={getImageSrc()}
@@ -122,9 +135,77 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
               <p>総獲得雅数: {profile?.totalMiyabi ?? '取得中'}</p>
               <p>総詠歌数: {profile?.totalPost ? `${profile.totalPost}首` : '取得中'}</p>
             </div>
+            <p className='pt-5 text-gray-600'>{profile?.bio}</p>
+            {session.status === 'authenticated' && session.data?.user_id !== userId && (
+              <div className='mt-4 flex justify-center'>
+                <button
+                  onClick={() => setIsFavorited(!isFavorited)}
+                  className='relative flex items-center justify-center rounded-full p-4 text-yellow-400 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-yellow-400/20 active:scale-95'
+                  aria-label='お気に入りに追加'
+                >
+                  <svg
+                    className='size-24'
+                    viewBox='0 0 24 24'
+                    fill={isFavorited ? 'url(#rainbow)' : 'currentColor'}
+                    xmlns='http://www.w3.org/2000/svg'
+                  >
+                    <defs>
+                      <linearGradient
+                        id='rainbow'
+                        x1='0%'
+                        y1='0%'
+                        x2='200%'
+                        y2='0%'
+                        gradientUnits='objectBoundingBox'
+                      >
+                        <animateTransform
+                          attributeName='gradientTransform'
+                          type='translate'
+                          from='0 0'
+                          to='-1 0'
+                          dur='3s'
+                          repeatCount='indefinite'
+                        />
+                        <stop offset='0%' stopColor='#ff0000' />
+                        <stop offset='8.33%' stopColor='#ff7f00' />
+                        <stop offset='16.66%' stopColor='#ffff00' />
+                        <stop offset='25%' stopColor='#00ff00' />
+                        <stop offset='33.33%' stopColor='#0000ff' />
+                        <stop offset='41.66%' stopColor='#8b00ff' />
+                        <stop offset='50%' stopColor='#ff0000' />
+                        <stop offset='58.33%' stopColor='#ff7f00' />
+                        <stop offset='66.66%' stopColor='#ffff00' />
+                        <stop offset='75%' stopColor='#00ff00' />
+                        <stop offset='83.33%' stopColor='#0000ff' />
+                        <stop offset='91.66%' stopColor='#8b00ff' />
+                        <stop offset='100%' stopColor='#ff0000' />
+                      </linearGradient>
+                    </defs>
+                    <path d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z' />
+                  </svg>
+                  <span className='absolute text-lg font-bold text-black'>推し</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
+        <div className='absolute right-2 top-6'>
+          {session.data?.user_id === userId && (
+            <button
+              onClick={() => setProfileEditorOpen(true)}
+              className='rounded-md border border-gray-400 bg-white/70 px-3 py-1 text-gray-700 shadow-sm hover:bg-gray-100 focus:outline-none'
+            >
+              編集
+            </button>
+          )}
+        </div>
       </div>
+      <ProfileEditor
+        className=''
+        isOpen={profileEditorOpen}
+        setIsOpen={setProfileEditorOpen}
+        profile={profile ?? undefined}
+      />
     </div>
   );
 };

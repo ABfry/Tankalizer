@@ -2,6 +2,8 @@ import {
   type IProfileRepository,
   type Profile,
   type UpdateProfileRepoDTO,
+  type GetFollowingUserRepoDto,
+  type GetMutualFollowingUserRepoDto,
 } from './iProfileRepository.js';
 import db from '../../lib/db.js';
 import { env } from '../../config/env.js';
@@ -29,6 +31,7 @@ export class ProfileRepository implements IProfileRepository {
         u.icon_url,
         u.created_at,
         ${followCheckClause}, -- フォロー状態を確認する句
+        (EXISTS (SELECT 1 FROM ${env.DEVELOPERS_TABLE_NAME} WHERE user_id = u.id)) AS is_developer,
         -- ユーザーの全投稿に対する雅の総数をカウント
         (
           SELECT COUNT(*)
@@ -76,6 +79,7 @@ export class ProfileRepository implements IProfileRepository {
         icon_url: row.icon_url,
         created_at: row.created_at,
         is_following: Boolean(row.is_following),
+        is_developer: Boolean(row.is_developer),
         total_miyabi: Number(row.total_miyabi),
         total_post: Number(row.total_post),
         following_count: Number(row.following_count),
@@ -117,6 +121,190 @@ export class ProfileRepository implements IProfileRepository {
     } catch (error) {
       console.error(`[ProfileRepository#updateProfile] プロフィールの更新に失敗しました．`, error);
       throw new Error('データベースのプロフィール更新処理に失敗しました．');
+    }
+  }
+
+  /**
+   * フォローしているユーザーを取得する
+   * @param getFollowingUserRepoDto - フォローしているユーザーを取得するためのDTO
+   * @returns {Promise<Profile[]>} フォローしているユーザーのプロフィールの配列
+   */
+  async getFollowingUser(getFollowingUserRepoDto: GetFollowingUserRepoDto): Promise<Profile[]> {
+    const { user_id, viewer_id, limit, cursor } = getFollowingUserRepoDto;
+    const params: { [key: string]: string | number | undefined } = { user_id, viewer_id, limit };
+
+    let cursorClause = '';
+    if (cursor) {
+      cursorClause =
+        'AND f.followed_at < (SELECT followed_at FROM follows WHERE follower_id = :user_id AND followee_id = :cursor)';
+      params.cursor = cursor;
+    }
+
+    const followCheckClause = viewer_id
+      ? `(EXISTS (SELECT 1 FROM ${env.FOLLOWS_TABLE_NAME} WHERE follower_id = :viewer_id AND followee_id = u.id)) AS is_following`
+      : 'FALSE AS is_following';
+
+    const sql = `
+      SELECT
+        u.id AS user_id,
+        u.name AS user_name,
+        u.profile_text,
+        u.icon_url,
+        u.created_at,
+        ${followCheckClause},
+        (EXISTS (SELECT 1 FROM ${env.DEVELOPERS_TABLE_NAME} WHERE user_id = u.id)) AS is_developer,
+        (
+          SELECT COUNT(*)
+          FROM ${env.MIYABI_TABLE_NAME} m
+          JOIN ${env.POSTS_TABLE_NAME} p ON m.post_id = p.id
+          WHERE p.user_id = u.id
+        ) AS total_miyabi,
+        (
+          SELECT COUNT(*)
+          FROM ${env.POSTS_TABLE_NAME} p
+          WHERE p.user_id = u.id AND p.is_deleted = FALSE
+        ) AS total_post,
+        (
+          SELECT COUNT(*)
+          FROM ${env.FOLLOWS_TABLE_NAME} f
+          WHERE f.follower_id = u.id
+        ) AS following_count,
+        (
+          SELECT COUNT(*)
+          FROM ${env.FOLLOWS_TABLE_NAME} f
+          WHERE f.followee_id = u.id
+        ) AS follower_count
+      FROM
+        ${env.USERS_TABLE_NAME} u
+      JOIN
+        ${env.FOLLOWS_TABLE_NAME} f ON u.id = f.followee_id
+      WHERE
+        f.follower_id = :user_id
+        ${cursorClause}
+      ORDER BY
+        f.followed_at DESC
+      LIMIT :limit
+    `;
+
+    try {
+      if (!viewer_id) {
+        delete params.viewer_id;
+      }
+      const results = await db.query(sql, params);
+      return results.map((row: any) => ({
+        user_id: row.user_id,
+        user_name: row.user_name,
+        profile_text: row.profile_text,
+        icon_url: row.icon_url,
+        created_at: row.created_at,
+        is_following: Boolean(row.is_following),
+        is_developer: Boolean(row.is_developer),
+        total_miyabi: Number(row.total_miyabi),
+        total_post: Number(row.total_post),
+        following_count: Number(row.following_count),
+        follower_count: Number(row.follower_count),
+      }));
+    } catch (error) {
+      console.error(
+        `[ProfileRepository#getFollowingUser] フォローしているユーザーの取得に失敗しました．`,
+        error
+      );
+      throw new Error('データベースからのフォローしているユーザー取得処理に失敗しました．');
+    }
+  }
+
+  /**
+   * 相互フォローしているユーザーを取得する
+   * @param getMutualFollowingUserRepoDto - 相互フォローしているユーザーを取得するためのDTO
+   * @returns {Promise<Profile[]>} 相互フォローしているユーザーのプロフィールの配列
+   */
+  async getMutualFollowingUser(
+    getMutualFollowingUserRepoDto: GetMutualFollowingUserRepoDto
+  ): Promise<Profile[]> {
+    const { user_id, viewer_id, limit, cursor } = getMutualFollowingUserRepoDto;
+    const params: { [key: string]: string | number | undefined } = { user_id, viewer_id, limit };
+
+    let cursorClause = '';
+    if (cursor) {
+      // f1はuser_idがフォローした時間, f2は相手がuser_idをフォローした時間
+      // f1のfollowed_atをカーソルの基準とする
+      cursorClause =
+        'AND f1.followed_at < (SELECT followed_at FROM follows WHERE follower_id = :user_id AND followee_id = :cursor)';
+      params.cursor = cursor;
+    }
+
+    const followCheckClause = viewer_id
+      ? `(EXISTS (SELECT 1 FROM ${env.FOLLOWS_TABLE_NAME} WHERE follower_id = :viewer_id AND followee_id = u.id)) AS is_following`
+      : 'FALSE AS is_following';
+
+    const sql = `
+    SELECT
+      u.id AS user_id,
+      u.name AS user_name,
+      u.profile_text,
+      u.icon_url,
+      u.created_at,
+      ${followCheckClause},
+      (EXISTS (SELECT 1 FROM ${env.DEVELOPERS_TABLE_NAME} WHERE user_id = u.id)) AS is_developer,
+      (
+        SELECT COUNT(*)
+        FROM ${env.MIYABI_TABLE_NAME} m
+        JOIN ${env.POSTS_TABLE_NAME} p ON m.post_id = p.id
+        WHERE p.user_id = u.id
+      ) AS total_miyabi,
+      (
+        SELECT COUNT(*)
+        FROM ${env.POSTS_TABLE_NAME} p
+        WHERE p.user_id = u.id AND p.is_deleted = FALSE
+      ) AS total_post,
+      (
+        SELECT COUNT(*)
+        FROM ${env.FOLLOWS_TABLE_NAME} f
+        WHERE f.follower_id = u.id
+      ) AS following_count,
+      (
+        SELECT COUNT(*)
+        FROM ${env.FOLLOWS_TABLE_NAME} f
+        WHERE f.followee_id = u.id
+      ) AS follower_count
+    FROM
+      ${env.USERS_TABLE_NAME} u
+    JOIN
+      ${env.FOLLOWS_TABLE_NAME} f1 ON u.id = f1.followee_id AND f1.follower_id = :user_id
+    JOIN
+      ${env.FOLLOWS_TABLE_NAME} f2 ON u.id = f2.follower_id AND f2.followee_id = :user_id
+    WHERE
+      u.id != :user_id -- 自分自身は除外 (念のため)
+      ${cursorClause}
+    ORDER BY
+      f1.followed_at DESC
+    LIMIT :limit
+  `;
+
+    try {
+      if (!viewer_id) {
+        delete params.viewer_id;
+      }
+      const results = await db.query(sql, params);
+      return results.map((row: any) => ({
+        user_id: row.user_id,
+        user_name: row.user_name,
+        profile_text: row.profile_text,
+        icon_url: row.icon_url,
+        created_at: row.created_at,
+        is_following: Boolean(row.is_following),
+        is_developer: Boolean(row.is_developer),
+        total_miyabi: Number(row.total_miyabi),
+        total_post: Number(row.total_post),
+        following_count: Number(row.following_count),
+        follower_count: Number(row.follower_count),
+      }));
+    } catch (error) {
+      console.error(
+        `[ProfileRepository#getMutualFollowingUser] 相互フォローしているユーザーの取得に失敗しました．`,
+        error
+      );
+      throw new Error('データベースからの相互フォローしているユーザー取得処理に失敗しました．');
     }
   }
 }

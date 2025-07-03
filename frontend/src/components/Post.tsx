@@ -137,6 +137,16 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             {post.user.name}
           </p>
         </div>
+        {/* 開発者バッジ */}
+        {post.isDeveloper && (
+          <Image
+            src='/developer.png'
+            height={40}
+            width={40}
+            alt='Developer Badge'
+            className='ml-2'
+          />
+        )}
         <DropDownButton className='ml-auto flex' items={dropDownItems}></DropDownButton>
       </div>
       {/* アイコン以外 */}

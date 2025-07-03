@@ -76,9 +76,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             throw new Error('ユーザの作成に失敗しました');
           }
 
-          // ユーザー作成に成功した場合，ユーザーIDをトークンに追加する
           const data = await res.json();
+
+          // ユーザー作成に成功した場合，ユーザーIDをトークンに追加する
           token.user_id = data.user.id;
+
+          // レスポンスタイプの判定（仮
+          if (data.type === 'migrated') {
+            console.log('旧DBからの乗り換えが完了しました');
+          } else if (data.type === 'created') {
+            console.log('新規ユーザーの作成が完了しました');
+          } else if (data.type === 'existing') {
+            console.log('ユーザーは既に作成済みですなのでそのままログインします');
+          }
         } catch (error) {
           console.error('ユーザの作成に失敗しました:', error);
           throw error;
