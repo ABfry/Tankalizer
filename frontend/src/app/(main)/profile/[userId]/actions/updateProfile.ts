@@ -1,4 +1,3 @@
-// サーバアクション
 'use server';
 
 import { ProfileTypes } from '@/types/profileTypes';
@@ -6,31 +5,39 @@ import { ProfileTypes } from '@/types/profileTypes';
 const backendUrl = process.env.BACKEND_URL ?? 'http://localhost:8080';
 
 /**
- * プロフィールを取得する非同期関数
+ * プロフィールを更新する非同期関数
  * @async
- * @function fetchProfile
- * @param {Object} params - 投稿データ取得のためのパラメータオブジェクト
- * @param {string} params.targetUserId - ターゲットユーザのID（プロフィールを取得するユーザのID）
+ * @function updateProfile
+ * @param {Object} params - 更新用パラメータ
  * @param {string} params.userId - ユーザのID
- * @returns {Promise<ProfileTypes>} プロフィールデータを返すPromise．プロフィールが存在しない場合はnullを返す．
+ * @param {string} params.name - ユーザ名
+ * @param {string} params.bio - 自己紹介
+ * @param {File | null} params.imageData - プロフィール画像のデータ
+ * @returns {Promise<ProfileTypes | null>} 更新後のプロフィールデータ、失敗時はnullを返す
  */
-const fetchProfile = async ({
-  targetUserId,
+const updateProfile = async ({
   userId,
+  name,
+  bio,
+  imageData,
 }: {
-  targetUserId: string;
   userId: string;
+  name: string;
+  bio: string;
+  imageData: File | null;
 }): Promise<ProfileTypes | null> => {
   try {
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    formData.append('user_name', name);
+    formData.append('profile_text', bio);
+    if (imageData) {
+      formData.append('icon_image', imageData);
+    }
+
     const res = await fetch(`${backendUrl}/profile`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_id: targetUserId,
-        viewer_id: userId,
-      }),
+      method: 'PUT',
+      body: formData,
     });
 
     // エラーがある場合はnullを返す
@@ -40,7 +47,7 @@ const fetchProfile = async ({
     }
 
     const json = await res.json();
-    const profile: ProfileTypes = {
+    const updatedProfile: ProfileTypes = {
       userId: json.profile.user_id,
       name: json.profile.user_name,
       iconUrl: json.profile.icon_url,
@@ -50,13 +57,12 @@ const fetchProfile = async ({
       totalPost: json.profile.total_post,
       followingCount: json.profile.following_count,
       followerCount: json.profile.follower_count,
-      isDeveloper: json.profile.is_developer ?? false,
     };
-    return profile;
+    return updatedProfile;
   } catch (error) {
     console.error(error);
     return null;
   }
 };
 
-export default fetchProfile;
+export default updateProfile;

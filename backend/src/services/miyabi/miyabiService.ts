@@ -6,10 +6,12 @@ import {
   type DeleteMiyabiResult,
   NotFoundError,
   ConflictError,
+  type GetMiyabiRankingDTO,
 } from './iMiyabiService.js';
 import {
   type IMiyabiRepository,
   type Miyabi,
+  type RankedPost,
 } from '../../repositories/miyabi/iMiyabiRepository.js';
 import { type IPostRepository, type Post } from '../../repositories/post/iPostRepository.js';
 import { type IUserRepository, type User } from '../../repositories/user/iUserRepository.js';
@@ -113,5 +115,27 @@ export class MiyabiService implements IMiyabiService {
         message: '雅を削除しました．',
       };
     });
+  }
+
+  /**
+   * 雅ランキングを取得するビジネスロジック
+   * @param getMiyabiRankingDto - ランキング取得に必要なデータ
+   * @returns {Promise<RankedPost[]>} ランキング結果
+   */
+  async getMiyabiRanking(getMiyabiRankingDto: GetMiyabiRankingDTO): Promise<RankedPost[]> {
+    console.log(
+      `[MiyabiService#getMiyabiRanking] 雅ランキング取得処理を開始します．(limit: ${getMiyabiRankingDto.limit})`
+    );
+
+    const rankedPosts: RankedPost[] = await this.miyabiRepository.getMiyabiRanking(
+      getMiyabiRankingDto.limit,
+      getMiyabiRankingDto.viewerId
+    );
+
+    console.log(
+      `[MiyabiService#getMiyabiRanking] 雅ランキングの取得が完了しました．(count: ${rankedPosts.length})`
+    );
+
+    return rankedPosts;
   }
 }

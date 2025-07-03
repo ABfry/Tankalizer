@@ -27,6 +27,7 @@ export const createUserSchema = z.object({
 // レスポンスの型
 export const createUserResponseSchema = z.object({
   message: z.string(),
+  type: z.enum(['existing', 'migrated', 'created']),
   user: z.object({
     id: z.string(),
     name: z.string(),

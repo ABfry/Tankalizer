@@ -53,6 +53,10 @@ import { getFollowingUserRouteV2 } from './Profile/getFollowingUserRouteV2.js';
 import getFollowingUserHandlerV2 from '../controllers/Profile/getFollowingUserHandlerV2.js';
 import { getMutualFollowingUserRouteV2 } from './Profile/getMutualFollowingUserRouteV2.js';
 import getMutualFollowingUserHandlerV2 from '../controllers/Profile/getMutualFollowingUserHandlerV2.js';
+import { getFollowingPostRouteV2 } from './Post/getFollowingPostRouteV2.js';
+import getFollowingPostHandlerV2 from '../controllers/Post/getFollowingPostHandlerV2.js';
+import { getMiyabiRankingRouteV2 } from './Miyabi/getMiyabiRankingRouteV2.js';
+import getMiyabiRankingHandlerV2 from '../controllers/Miyabi/getMiyabiRankingHandlerV2.js';
 
 const router = new OpenAPIHono();
 
@@ -83,5 +87,7 @@ export default router
   .openapi(getProfileRouteV2, getProfileHandlerV2)
   .openapi(updateProfileRouteV2, updateProfileHandlerV2)
   .openapi(getFollowingUserRouteV2, getFollowingUserHandlerV2)
-  .openapi(getMutualFollowingUserRouteV2, getMutualFollowingUserHandlerV2);
+  .openapi(getMutualFollowingUserRouteV2, getMutualFollowingUserHandlerV2)
+  .openapi(getFollowingPostRouteV2, getFollowingPostHandlerV2)
+  .openapi(getMiyabiRankingRouteV2, getMiyabiRankingHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく
