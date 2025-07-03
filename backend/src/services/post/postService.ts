@@ -7,7 +7,13 @@ import {
 } from '../../repositories/post/iPostRepository.js';
 import type { CreatePostDTO } from './iPostService.js';
 import { type DeletePostDTO, type DeletePostResult } from './iPostService.js';
-import { type GetPostDTO, type GetOnePostDTO } from './iPostService.js';
+import {
+  type GetPostDTO,
+  type GetOnePostDTO,
+  type GetFollowingPostDTO,
+  NotFoundError,
+} from './iPostService.js';
+import { type IUserRepository, type User } from '../../repositories/user/iUserRepository.js';
 
 import { type IStorageService } from '../storage/iStorageService.js';
 import { type IImageService } from '../image/iImageService.js';
@@ -18,7 +24,8 @@ export class PostService implements IPostService {
   // コンストラクタでサービスを受け取る
   constructor(
     private readonly postRepository: IPostRepository,
-    private readonly imageService: IImageService
+    private readonly imageService: IImageService,
+    private readonly userRepository: IUserRepository
   ) {}
 
   /**
@@ -134,5 +141,35 @@ export class PostService implements IPostService {
     console.log(`[PostService#getOnePost] 投稿の取得が完了しました．(id: ${getOnePostDto.id})`);
 
     return post;
+  }
+
+  /**
+   * フォローしているユーザーの投稿を取得するビジネスロジック
+   * @param getFollowingPostDto - 投稿取得に必要なデータ
+   * @returns {Promise<Post[]>} 取得結果
+   * @throws {Error} DBエラーなど、その他の予期せぬエラー
+   */
+  async getFollowingPost(getFollowingPostDto: GetFollowingPostDTO): Promise<Post[]> {
+    console.log(
+      `[PostService#getFollowingPost] 投稿取得処理を開始します．(limit: ${getFollowingPostDto.limit})`
+    );
+
+    const user: User | null = await this.userRepository.findById(getFollowingPostDto.viewerId);
+
+    if (!user) {
+      throw new NotFoundError('ユーザーが見つかりません．');
+    }
+
+    const posts = await this.postRepository.getFollowingPost(
+      getFollowingPostDto.limit,
+      getFollowingPostDto.viewerId,
+      getFollowingPostDto.cursor
+    );
+
+    console.log(
+      `[PostService#getFollowingPost] 投稿の取得が完了しました．(count: ${posts.length})`
+    );
+
+    return posts;
   }
 }
