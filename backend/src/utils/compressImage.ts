@@ -5,6 +5,7 @@ interface CompressionOptions {
   width?: number;
   height?: number;
   logPrefix: string;
+  cropToSquare?: boolean;
 }
 
 const fileToBuffer = async (file: File): Promise<Buffer> => {
@@ -51,7 +52,7 @@ const bufferToFile = (buffer: Buffer, originalFile: File): File => {
  * @returns {Promise<File>} 圧縮後の画像file
  */
 const compressImageWithOptions = async (file: File, options: CompressionOptions): Promise<File> => {
-  const { targetFileSize, width, height, logPrefix } = options;
+  const { targetFileSize, width, height, logPrefix, cropToSquare } = options;
   if (!isImageFile(file)) {
     throw new Error('ファイルが画像ではありません');
   }
@@ -59,8 +60,13 @@ const compressImageWithOptions = async (file: File, options: CompressionOptions)
   const buffer = await fileToBuffer(file);
 
   const sharpInstance = sharp(buffer).rotate();
+
+  // cropToSquareフラグがtrueの場合，正方形にクロップする処理
   if (width && height) {
-    sharpInstance.resize(width, height, { fit: 'inside' });
+    sharpInstance.resize(width, height, {
+      fit: cropToSquare ? 'cover' : 'inside', // trueならクロップ，falseなら通常のリサイズ
+      position: 'center',
+    });
   }
 
   const initialBuffer = await sharpInstance.jpeg().toBuffer();
@@ -107,5 +113,6 @@ export const compressIconImage = async (file: File): Promise<File> => {
     width: 256,
     height: 256,
     logPrefix: 'compressIconImage',
+    cropToSquare: true,
   });
 };
