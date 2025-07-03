@@ -3,6 +3,7 @@ import {
   type IProfileService,
   NotFoundError,
   type UpdateProfileDTO,
+  type GetFollowingUserDTO,
 } from './iProfileService.js';
 import {
   type IProfileRepository,
@@ -119,5 +120,31 @@ export class ProfileService implements IProfileService {
       console.error('[ProfileService#updateProfile] 画像のアップロードに失敗しました．');
       return null;
     }
+  }
+
+  /**
+   * フォローしているユーザーを取得するビジネスロジック
+   * @param getFollowingUserDto - フォローしているユーザーを取得するためのDTO
+   * @returns {Promise<Profile[]>} フォローしているユーザーのプロフィールの配列
+   * @throws {Error} DBエラーなど、その他の予期せぬエラー
+   */
+  async getFollowingUser(getFollowingUserDto: GetFollowingUserDTO): Promise<Profile[]> {
+    console.log(
+      `[ProfileService#getFollowingUser] フォローしているユーザーの取得処理を開始します．(user_id: ${getFollowingUserDto.user_id})`
+    );
+
+    const user: User | null = await this.userRepository.findById(getFollowingUserDto.user_id);
+
+    if (!user) {
+      throw new NotFoundError('ユーザーが見つかりません．');
+    }
+
+    const followingUsers = await this.profileRepository.getFollowingUser(getFollowingUserDto);
+
+    console.log(
+      `[ProfileService#getFollowingUser] フォローしているユーザーの取得が完了しました．(user_id: ${getFollowingUserDto.user_id})`
+    );
+
+    return followingUsers;
   }
 }

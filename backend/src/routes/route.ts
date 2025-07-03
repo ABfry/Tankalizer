@@ -49,6 +49,8 @@ import { getProfileRouteV2 } from './Profile/getProfileRouteV2.js';
 import getProfileHandlerV2 from '../controllers/Profile/getProfileHandlerV2.js';
 import { updateProfileRouteV2 } from './Profile/updateProfileRouteV2.js';
 import updateProfileHandlerV2 from '../controllers/Profile/updateProfileHandlerV2.js';
+import { getFollowingUserRouteV2 } from './Profile/getFollowingUserRouteV2.js';
+import getFollowingUserHandlerV2 from '../controllers/Profile/getFollowingUserHandlerV2.js';
 import { getFollowingPostRouteV2 } from './Post/getFollowingPostRouteV2.js';
 import getFollowingPostHandlerV2 from '../controllers/Post/getFollowingPostHandlerV2.js';
 import { getMiyabiRankingRouteV2 } from './Miyabi/getMiyabiRankingRouteV2.js';
@@ -82,6 +84,7 @@ export default router
   .openapi(deleteMiyabiRouteV2, deleteMiyabiHandlerV2)
   .openapi(getProfileRouteV2, getProfileHandlerV2)
   .openapi(updateProfileRouteV2, updateProfileHandlerV2)
+  .openapi(getFollowingUserRouteV2, getFollowingUserHandlerV2)
   .openapi(getFollowingPostRouteV2, getFollowingPostHandlerV2)
   .openapi(getMiyabiRankingRouteV2, getMiyabiRankingHandlerV2);
 // .openapi(helloRoute, helloWorldHandler); //こういう感じで足していく
