@@ -10,4 +10,5 @@ export type PostTypes = {
   miyabiCount: number;
   miyabiIsClicked: boolean;
   rank?: number;
+  isDeveloper?: boolean;
 };

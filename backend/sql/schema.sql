@@ -8,9 +8,10 @@ connect_info VARCHAR(100) NOT NULL,
 profile_text VARCHAR(255),
 icon_url VARCHAR(255) NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+old_icon_url VARCHAR(255),
 
-UNIQUE (connect_info, oauth_app)
-
+UNIQUE (connect_info, oauth_app),
+UNIQUE (old_icon_url)
 );
 
 -- posts

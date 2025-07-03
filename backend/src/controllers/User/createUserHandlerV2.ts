@@ -43,21 +43,53 @@ const createUserHandlerV2: RouteHandler<typeof createUserRouteV2, {}> = async (c
 
     console.log('[Handler] /v2/user へのリクエストを受け付けました．', userDto);
 
-    // DBに新規作成・既に存在するユーザー情報を受け取る
-    const user = await userService.createUser(userDto);
+    // ユーザー作成処理
+    const createUserResponse = await userService.createUser(userDto);
 
-    // 成功レスポンスを返す
-    console.log(`[Handler] ユーザー作成処理が正常に完了しました．(userId: ${user.id})`);
+    // ユーザーが既に作成済みの場合
+    if (createUserResponse.type === 'existing') {
+      return c.json(
+        {
+          message: 'ユーザーは既に作成済みです．',
+          user: createUserResponse.user,
+          type: createUserResponse.type,
+        },
+        200
+      );
+    }
+
+    // 旧DBからの乗り換えが完了した場合
+    if (createUserResponse.type === 'migrated') {
+      return c.json(
+        {
+          message: '旧DBからの乗り換えが完了しました．',
+          user: createUserResponse.user,
+          type: createUserResponse.type,
+        },
+        200
+      );
+    }
+
+    // 新規ユーザーの作成が完了した場合
+    if (createUserResponse.type === 'created') {
+      return c.json(
+        {
+          message: '新規ユーザーの作成が完了しました．',
+          user: createUserResponse.user,
+          type: createUserResponse.type,
+        },
+        200
+      );
+    }
+
+    // typeが不明な場合
     return c.json(
       {
-        message: 'ユーザー作成処理が正常に完了しました．',
-        user: {
-          id: user.id,
-          name: user.name,
-          icon_url: user.icon_url,
-        },
+        message: '不明なエラーが発生しました．',
+        statusCode: 500,
+        error: 'Internal Server Error',
       },
-      200
+      500
     );
   } catch (err: any) {
     // エラーハンドリング
