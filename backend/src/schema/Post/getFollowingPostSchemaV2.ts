@@ -23,6 +23,7 @@ export const Post = z.object({
   tanka: z.array(z.string()),
   image_path: z.string().nullable(),
   created_at: z.string(),
+  is_developer: z.boolean(),
   user_id: z.string(),
   user_name: z.string(),
   user_icon: z.string(),

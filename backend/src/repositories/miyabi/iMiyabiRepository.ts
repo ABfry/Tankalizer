@@ -14,6 +14,7 @@ export type RankedPost = {
   tanka: string[];
   image_path: string | null;
   created_at: Date;
+  is_developer: boolean;
   user_id: string;
   user_name: string;
   user_icon: string;
