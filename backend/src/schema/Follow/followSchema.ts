@@ -5,8 +5,14 @@ import { z } from 'zod';
 
 // フォロー・フォロー解除APIのリクエスト形式
 export const followRequestSchema = z.object({
-  followerId: z.string().uuid('フォローするユーザーIDが正しくありません'), // フォローする人のID
-  followeeId: z.string().uuid('フォローされるユーザーIDが正しくありません'), // フォローされる人のID
+  followerId: z.string().openapi({
+    example: '65647a77-54e3-11f0-a651-0242ac130003',
+    description: 'フォローするユーザーID (36文字のUUID形式)',
+  }),
+  followeeId: z.string().openapi({
+    example: '469b4df1-0306-4dfb-8a1e-4625d1d6e293',
+    description: 'フォローされるユーザーID (36文字のUUID形式)',
+  }),
 });
 
 // フォロー・フォロー解除APIのレスポンス形式
