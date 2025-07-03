@@ -8,7 +8,7 @@ import { followRequestSchema, followResponseSchema } from '../../schema/Follow/f
  */
 export const unfollowRoute = createRoute({
   method: 'post', // HTTPメソッド
-  path: '/unfollow', // エンドポイントのパス
+  path: '/v2/unfollow', // エンドポイントのパス
   tags: ['Follow'], // OpenAPIでのタグ分け
   request: {
     body: {

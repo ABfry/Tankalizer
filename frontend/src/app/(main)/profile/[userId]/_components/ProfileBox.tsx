@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import fetchProfile from '../actions/fetchProfile';
 import { ProfileTypes } from '@/types/profileTypes';
+import { follow, unfollow } from '../actions/FollowunFollow';
 import { getImageUrl } from '@/lib/utils';
 import ProfileEditor from '@/components/ProfileEditor';
 
@@ -35,6 +36,35 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
   }, [userId, router, session.data?.user_id]);
 
   const [isFavorited, setIsFavorited] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setIsFavorited(profile.isFollowing);
+    }
+  }, [profile]);
+
+  const handleFavoriteClick = async () => {
+    if (!session.data?.user_id || !userId) return;
+
+    const requestData = {
+      followerId: session.data.user_id,
+      followeeId: userId,
+    };
+
+    if (isFavorited) {
+      // 現在フォローしている場合、アンフォローする
+      const result = await unfollow(requestData);
+      if (result) {
+        setIsFavorited(false);
+      }
+    } else {
+      // 現在フォローしていない場合、フォローする
+      const result = await follow(requestData);
+      if (result) {
+        setIsFavorited(true);
+      }
+    }
+  };
 
   // totalPost に応じた背景色のクラスを決定
   const getBackgroundClass = () => {
@@ -129,7 +159,7 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
             {session.status === 'authenticated' && session.data?.user_id !== userId && (
               <div className='mt-4 flex justify-center'>
                 <button
-                  onClick={() => setIsFavorited(!isFavorited)}
+                  onClick={handleFavoriteClick}
                   className='relative flex items-center justify-center rounded-full p-4 text-yellow-400 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-yellow-400/20 active:scale-95'
                   aria-label='お気に入りに追加'
                 >
