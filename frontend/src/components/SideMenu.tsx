@@ -6,10 +6,13 @@ import { PiRankingLight } from 'react-icons/pi';
 import Image from 'next/image';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Dialog from './Dialog';
 import LoginDialog from './LoginDialog';
 import { useRouter } from 'next/navigation';
+import fetchProfile from '@/app/(main)/profile/[userId]/actions/fetchProfile';
+import { ProfileTypes } from '@/types/profileTypes';
+import { getImageUrl } from '@/lib/utils';
 
 // props の型定義
 interface SideMenuProps {
@@ -43,6 +46,21 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const userId = isLoggedIn ? session.data?.user_id : undefined;
+  const [profile, setProfile] = useState<ProfileTypes | null>(null);
+  const iconUrl = getImageUrl(profile?.iconUrl ?? '');
+
+  // ユーザIDからプロフィールをFetchする
+  useEffect(() => {
+    const getProfile = async () => {
+      if (!userId) return;
+      const data = await fetchProfile({
+        targetUserId: userId as string,
+        userId: session.data?.user_id ?? '',
+      });
+      setProfile(data);
+    };
+    getProfile();
+  }, [userId, session.data?.user_id]);
 
   return (
     <div className={`${className} z-10 w-40 space-y-3`} style={style}>
@@ -116,13 +134,13 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
       {isLoggedIn && (
         <div className='flex items-center'>
           <Image
-            src={session.data?.user?.image ?? '/iconDefault.png'}
+            src={iconUrl || '/iconDefault.png'}
             height={28}
             width={28}
             alt='Icon'
             className='rounded-full'
           />
-          <a className='pl-1 text-xl'>{session.data?.user?.name ?? 'Name'}</a>
+          <a className='pl-1 text-xl'>{profile?.name ?? '歌人A'}</a>
         </div>
       )}
       {/* ログアウト確認ダイアログ表示が有効の場合，ダイアログを表示する */}
