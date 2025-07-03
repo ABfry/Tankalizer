@@ -85,6 +85,15 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
               height={100}
               className='z-10 rounded-full border-2 border-gray-300'
             />
+            {profile?.isDeveloper && (
+              <Image
+                src='/developer.png'
+                alt='Developer Badge'
+                width={50}
+                height={50}
+                className='absolute bottom-[-10px] right-[-30px] z-20'
+              />
+            )}
             {getImageSrc() && (
               <Image
                 src={getImageSrc()}
@@ -126,6 +135,7 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
               <p>総獲得雅数: {profile?.totalMiyabi ?? '取得中'}</p>
               <p>総詠歌数: {profile?.totalPost ? `${profile.totalPost}首` : '取得中'}</p>
             </div>
+            <p className='pt-5 text-gray-600'>{profile?.bio}</p>
             {session.status === 'authenticated' && session.data?.user_id !== userId && (
               <div className='mt-4 flex justify-center'>
                 <button
