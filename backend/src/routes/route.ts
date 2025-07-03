@@ -56,6 +56,7 @@ import unfollowHandler from '../controllers/Follow/unfollowHandler.js';
 import { getFollowingUserRouteV2 } from './Profile/getFollowingUserRouteV2.js';
 import getFollowingUserHandlerV2 from '../controllers/Profile/getFollowingUserHandlerV2.js';
 import { getMutualFollowingUserRouteV2 } from './Profile/getMutualFollowingUserRouteV2.js';
+import getMutualFollowingUserHandlerV2 from '../controllers/Profile/getMutualFollowingUserHandlerV2.js';
 import { getFollowingPostRouteV2 } from './Post/getFollowingPostRouteV2.js';
 import getFollowingPostHandlerV2 from '../controllers/Post/getFollowingPostHandlerV2.js';
 import { getMiyabiRankingRouteV2 } from './Miyabi/getMiyabiRankingRouteV2.js';
