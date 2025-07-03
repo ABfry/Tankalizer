@@ -33,7 +33,7 @@ const TabContainer = ({ items }: TabBarProps) => {
   };
 
   return (
-    <div className='mx-auto max-w-sm pt-10 lg:max-w-lg'>
+    <div className='mx-auto max-w-sm px-3 pt-3 lg:max-w-lg'>
       <TabBar items={items} callbackTabClick={switchToTab} activeIndex={activeId} />
 
       <div className='relative min-h-[300px] overflow-hidden'>

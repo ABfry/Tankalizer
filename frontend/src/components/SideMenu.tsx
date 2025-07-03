@@ -46,7 +46,7 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const userId = isLoggedIn ? session.data?.user_id : undefined;
-  const [profile, setProfile] = useState<ProfileTypes | null>(null);
+  const [profile, setProfile] = useState<ProfileTypes | undefined>(undefined);
   const iconUrl = getImageUrl(profile?.iconUrl ?? '');
 
   // ユーザIDからプロフィールをFetchする
