@@ -50,10 +50,9 @@ const postNews = async (requestApiKey: string) => {
   try {
     const formData = new FormData();
     formData.append('original', originalText);
-    formData.append('user_icon', `https://avatars.githubusercontent.com/u/${env.NEWS_USER_ID}?v=4`);
-    formData.append('user_name', '風聞');
+    formData.append('user_id', env.NEWS_USER_ID);
 
-    const postResponse = await fetch(`http://localhost:8080/post`, {
+    const postResponse = await fetch(`http://localhost:8080/v2/post`, {
       method: 'POST',
       body: formData,
     });
