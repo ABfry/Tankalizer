@@ -54,6 +54,7 @@ export const fetchOnePost = async ({
       miyabiCount: json.post.miyabi_count,
       miyabiIsClicked: json.post.is_miyabi,
       rank: json.post.rank,
+      isDeveloper: json.post.is_developer ?? false,
     };
     return post;
   } catch (error) {

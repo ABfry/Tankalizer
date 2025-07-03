@@ -120,6 +120,7 @@ export class MiyabiRepository implements IMiyabiRepository {
         p.user_id,
         u.name AS user_name,
         u.icon_url AS user_icon,
+        (EXISTS (SELECT 1 FROM ${env.DEVELOPERS_TABLE_NAME} WHERE user_id = u.id)) AS is_developer,
         COUNT(m.id) AS miyabi_count,
         ${isMiyabiClause} AS is_miyabi
       FROM
@@ -148,6 +149,7 @@ export class MiyabiRepository implements IMiyabiRepository {
       const rankedPosts: RankedPost[] = results.map((row: any, index: number) => ({
         ...row,
         rank: index + 1,
+        is_developer: Boolean(row.is_developer),
         is_miyabi: Boolean(row.is_miyabi),
         miyabi_count: Number(row.miyabi_count),
       }));

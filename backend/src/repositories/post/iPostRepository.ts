@@ -23,6 +23,7 @@ export type Post = {
   user_id: string;
   user_name: string;
   user_icon: string;
+  is_developer: boolean;
   miyabi_count: number;
   is_miyabi: boolean;
 };

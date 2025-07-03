@@ -18,6 +18,7 @@ interface PostResponse {
   miyabi_count: number;
   is_miyabi: boolean;
   rank?: number;
+  is_developer?: boolean;
 }
 
 /**
@@ -77,6 +78,7 @@ export const fetchPosts = async ({
       miyabiCount: post.miyabi_count,
       miyabiIsClicked: post.is_miyabi,
       rank: post.rank,
+      isDeveloper: post.is_developer ?? false,
     }));
   } catch (error) {
     console.error(error);
@@ -133,6 +135,7 @@ export const fetchRanking = async ({
       miyabiCount: post.miyabi_count,
       miyabiIsClicked: post.is_miyabi,
       rank: post.rank,
+      isDeveloper: post.is_developer ?? false,
     }));
   } catch (error) {
     console.error(error);
