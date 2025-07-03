@@ -22,6 +22,7 @@ export const Post = z.object({
   user_id: z.string(),
   user_name: z.string(),
   user_icon: z.string(),
+  is_developer: z.boolean(),
   miyabi_count: z.number().int().min(0),
   is_miyabi: z.boolean(),
 });

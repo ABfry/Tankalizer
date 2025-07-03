@@ -29,6 +29,7 @@ export class ProfileRepository implements IProfileRepository {
         u.icon_url,
         u.created_at,
         ${followCheckClause}, -- フォロー状態を確認する句
+        (EXISTS (SELECT 1 FROM ${env.DEVELOPERS_TABLE_NAME} WHERE user_id = u.id)) AS is_developer,
         -- ユーザーの全投稿に対する雅の総数をカウント
         (
           SELECT COUNT(*)
@@ -76,6 +77,7 @@ export class ProfileRepository implements IProfileRepository {
         icon_url: row.icon_url,
         created_at: row.created_at,
         is_following: Boolean(row.is_following),
+        is_developer: Boolean(row.is_developer),
         total_miyabi: Number(row.total_miyabi),
         total_post: Number(row.total_post),
         following_count: Number(row.following_count),
