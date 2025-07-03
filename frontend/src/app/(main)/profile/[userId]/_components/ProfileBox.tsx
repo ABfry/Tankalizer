@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import fetchProfile from '../actions/fetchProfile';
 import { ProfileTypes } from '@/types/profileTypes';
 import { getImageUrl } from '@/lib/utils';
+import ProfileEditor from '@/components/ProfileEditor';
 
 export interface ProfileBoxProps {
   userId: string;
@@ -13,6 +14,7 @@ export interface ProfileBoxProps {
 
 const ProfileBox = ({ userId }: ProfileBoxProps) => {
   const [profile, setProfile] = useState<ProfileTypes | null>(null);
+  const [profileEditorOpen, setProfileEditorOpen] = useState(false);
   const router = useRouter();
   // セッションの取得
   const session = useSession();
@@ -68,7 +70,7 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
 
   return (
     <div
-      className={`mx-4 rounded-2xl border-2 border-gray-300 bg-gradient-to-r ${getBackgroundClass()} to-amber-50 shadow-lg`}
+      className={`relative mx-4 rounded-2xl border-2 border-gray-300 bg-gradient-to-r ${getBackgroundClass()} to-amber-50 shadow-lg`}
     >
       <div className='border-b border-gray-300 py-2 text-center text-xl font-semibold text-gray-700'>
         プロフィール
@@ -177,7 +179,23 @@ const ProfileBox = ({ userId }: ProfileBoxProps) => {
             )}
           </div>
         </div>
+        <div className='absolute right-2 top-6'>
+          {session.data?.user_id === userId && (
+            <button
+              onClick={() => setProfileEditorOpen(true)}
+              className='rounded-md border border-gray-400 bg-white/70 px-3 py-1 text-gray-700 shadow-sm hover:bg-gray-100 focus:outline-none'
+            >
+              編集
+            </button>
+          )}
+        </div>
       </div>
+      <ProfileEditor
+        className=''
+        isOpen={profileEditorOpen}
+        setIsOpen={setProfileEditorOpen}
+        profile={profile ?? undefined}
+      />
     </div>
   );
 };
