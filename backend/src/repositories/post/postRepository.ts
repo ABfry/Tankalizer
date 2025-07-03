@@ -216,4 +216,80 @@ export class PostRepository implements IPostRepository {
       throw new Error('データベースからの投稿取得処理に失敗しました．');
     }
   }
+
+  /**
+   * フォローしているユーザーの投稿を取得する
+   * @param limit - 取得する投稿の数
+   * @param viewerId - 閲覧者のユーザーid
+   * @param cursor - どの投稿より古いのを取得するか指定する投稿id
+   * @returns {Promise<Post[]>} 投稿の配列
+   */
+  async getFollowingPost(limit: number, viewerId: string, cursor?: string | null): Promise<Post[]> {
+    const params: Record<string, any> = { limit, viewerId };
+    const whereClauses: string[] = [
+      'posts.is_deleted = FALSE',
+      `follows.follower_id = :viewerId`, // 閲覧者がフォローしているユーザーに絞り込む
+    ];
+
+    // WHERE句を動的に組み立てる
+    if (cursor) {
+      // 指定されたカーソル（投稿ID）より作成日時が古い投稿を取得
+      whereClauses.push(
+        `posts.created_at < (SELECT created_at FROM ${env.POSTS_TABLE_NAME} WHERE id = :cursor)`
+      );
+      params.cursor = cursor;
+    }
+
+    // LEFT JOINを動的に組み立てる
+    // viewerIdが指定されている時だけ，miyabisテーブルを正しくJOINして is_miyabi を判定する
+    let miyabiJoinClause: string;
+    if (viewerId) {
+      miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON posts.id = miyabi.post_id AND miyabi.user_id = :viewerId`;
+      params.viewerId = viewerId;
+    } else {
+      // viewerIdがなければ is_miyabi は常に false になる
+      miyabiJoinClause = `LEFT JOIN ${env.MIYABI_TABLE_NAME} AS miyabi ON 1 = 0`;
+    }
+
+    // 最終的なSQL文を組み立てる
+    const sql = `
+      SELECT
+        posts.id,
+        posts.original,
+        posts.tanka,
+        posts.image_path,
+        posts.created_at,
+        posts.user_id,
+        users.name AS user_name,
+        users.icon_url AS user_icon,
+        (SELECT COUNT(*) FROM ${env.MIYABI_TABLE_NAME} WHERE post_id = posts.id) AS miyabi_count,
+        CASE WHEN miyabi.id IS NOT NULL THEN TRUE ELSE FALSE END AS is_miyabi
+      FROM
+        ${env.POSTS_TABLE_NAME} AS posts
+      INNER JOIN
+        ${env.FOLLOWS_TABLE_NAME} AS follows ON posts.user_id = follows.followee_id
+      INNER JOIN
+        ${env.USERS_TABLE_NAME} AS users ON posts.user_id = users.id
+      ${miyabiJoinClause}
+      WHERE
+        ${whereClauses.join(' AND ')}
+      ORDER BY
+        posts.created_at DESC
+      LIMIT
+        :limit
+    `;
+
+    try {
+      const results = await db.query(sql, params);
+
+      // DBから取得した結果を，定義した型に合わせて整形
+      return results.map((row: any) => ({
+        ...row,
+        is_miyabi: Boolean(row.is_miyabi),
+      }));
+    } catch (error) {
+      console.error(`[PostRepository#getFollowingPosts] 投稿の取得に失敗しました．`, error);
+      throw new Error('データベースからの投稿取得処理に失敗しました．');
+    }
+  }
 }
