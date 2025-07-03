@@ -187,7 +187,7 @@ CREATE TABLE follows (
                         if '.com/' in image_path:
                             image_path = image_path.split('.com/')[-1]
                         # SQLクォートをエスケープして、クォートで囲む
-                        image_path = f"'{image_path.replace("'", "''")}'"
+                        image_path = "'{}'".format(image_path.replace("'", "''"))
                     else:
                         # SQLのNULL値（クォートなし）
                         image_path = 'NULL'
