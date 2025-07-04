@@ -100,7 +100,7 @@ const generateTanka = async (originalText: string, image: File | null = null): P
     };
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction: systemInstruction,
       generationConfig: {
         responseMimeType: 'application/json',
