@@ -96,10 +96,12 @@ const Post = ({ post, className, onDelete }: PostProps) => {
     onClick: () => setReportDialogOpen(true),
     className: '',
     icon: <MdReport />,
-    color: 'black',
+    color: 'red',
   };
-  // ドロップダウンに共有ボタン追加
-  dropDownItems.push(dropDownReportButton);
+  // 自分の投稿でないならドロップダウンに共有ボタン追加
+  if (!isMyPost) {
+    dropDownItems.push(dropDownReportButton);
+  }
   // セッションの取得
   const session = useSession();
   // ログイン状態
