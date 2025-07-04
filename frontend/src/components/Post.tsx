@@ -9,7 +9,7 @@ import ImageModal from '@/components/ImageModal';
 import MiyabiButton from '@/components/MiyabiButton';
 import DropDownButton from './DropDownButton';
 import { formatDateKanji, toKanjiNumber } from '@/app/(main)/timeline/utils/kanjiNumber';
-import { MdDeleteForever, MdShare } from 'react-icons/md';
+import { MdDeleteForever, MdShare, MdReport } from 'react-icons/md';
 import { useSession } from 'next-auth/react';
 import Dialog from '@/components/Dialog';
 import LoginDialog from './LoginDialog';
@@ -18,6 +18,7 @@ import deletePost from '@/app/(main)/timeline/actions/deletePost';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getImageUrl } from '@/lib/utils';
+import ReportDialog from './ReportDialog';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 
@@ -48,6 +49,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   // 削除確認ダイアログの表示状態
   const [dialogOpen, setDialogOpen] = useState(false);
+  // 通報ダイアログの表示状態
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   // コピートーストの表示状態
   const [toastOpen, setToastOpen] = useState(false);
   // 削除失敗ダイアログの表示状態
@@ -87,6 +90,16 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   if (isMyPost) {
     dropDownItems.push(dropDownDeleteButton);
   }
+  // ドロップダウンメニューの投稿通報ボタン
+  const dropDownReportButton = {
+    label: '投稿を通報',
+    onClick: () => setReportDialogOpen(true),
+    className: '',
+    icon: <MdReport />,
+    color: 'black',
+  };
+  // ドロップダウンに共有ボタン追加
+  dropDownItems.push(dropDownReportButton);
   // セッションの取得
   const session = useSession();
   // ログイン状態
@@ -246,6 +259,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         yesText='はい'
         isOnlyOK
       />
+      {/* 通報ダイアログ表示が有効の場合，ダイアログを表示する */}
+      <ReportDialog isOpen={reportDialogOpen} setIsOpen={setReportDialogOpen} post={post} />
       {/* リンクをコピーした場合，トーストを表示する */}
       <AnimatePresence mode='wait'>
         {toastOpen && (
