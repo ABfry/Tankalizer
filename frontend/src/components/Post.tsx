@@ -160,7 +160,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         }}
       >
         <Image
-          src={imageUrl !== '' ? imageUrl : '/imageDefault.png'}
+          src={imageUrl}
           fill
           alt='Image'
           className={`rounded-xl object-cover ${hasImage ? 'brightness-50' : ''}`}
