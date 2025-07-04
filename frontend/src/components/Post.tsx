@@ -169,14 +169,14 @@ const Post = ({ post, className, onDelete }: PostProps) => {
           <p
             className={`self-end font-shinryu ${
               hasImage ? 'text-white' : 'text-black'
-            } mr-3 text-base [text-orientation:upright] [writing-mode:vertical-rl] lg:text-lg`}
+            } mr-3 text-sm [text-orientation:upright] [writing-mode:vertical-rl] sm:text-sm md:text-base lg:text-lg`}
           >
             {post.user.name}
           </p>
           <p
             className={`inline-block align-top font-shinryu ${
               hasImage ? 'text-white' : 'text-black'
-            } whitespace-pre-line text-2xl [text-orientation:upright] [writing-mode:vertical-rl] lg:text-3xl`}
+            } whitespace-pre-line text-xl [text-orientation:upright] [writing-mode:vertical-rl] sm:text-xl md:text-2xl lg:text-3xl`}
           >
             {tanka}
           </p>
