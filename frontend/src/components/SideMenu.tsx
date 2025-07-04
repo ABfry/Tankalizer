@@ -155,7 +155,9 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
             alt='Icon'
             className='rounded-full'
           />
-          <a className='pl-1 text-xl'>{profile?.name ?? '再ログインお願いします'}</a>
+          <a className='pl-1 text-xl'>
+            {iconUrl.startsWith('http://') ? '再ログインしてください' : (profile?.name ?? '取得中・・')}
+          </a>
         </div>
       )}
       {/* ログアウト確認ダイアログ表示が有効の場合，ダイアログを表示する */}
