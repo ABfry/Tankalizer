@@ -132,7 +132,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         <div className='ml-2 cursor-pointer items-center'>
           <p
             onClick={() => router.push(`/profile/${post.user.userId}`)}
-            className='text-lg text-black hover:underline'
+            className='select-none text-lg text-black hover:underline'
           >
             {post.user.name}
           </p>
