@@ -17,8 +17,9 @@ KC3Hack テーマ「K.A.N.S.A.I.」短歌の文化を現代に合った面白い
 
 ## プロダクト説明
 ### タイムライン: 最新の短歌や推しの短歌が並ぶ
-良いと思った短歌には「雅」（いいねのようなもの）をしよう。
-![CleanShot 2025-02-24 at 00 40 55](https://github.com/user-attachments/assets/06c1ba4f-949f-4a90-bce4-6c254464a752)
+良いと思った短歌には「雅」（いいねのようなもの）をしよう。  
+![output](https://github.com/user-attachments/assets/ec8acef8-39d4-4959-aaa5-29c083b068d2)
+
 
 ### 推し歌人・うたトモ
 お気に入りの歌人は「推し」ボタンで推し登録しよう！
