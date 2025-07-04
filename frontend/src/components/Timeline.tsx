@@ -5,14 +5,18 @@ import { useSession } from 'next-auth/react';
 import { PostTypes } from '@/types/postTypes';
 import PostList from '@/components/PostList';
 import ScrollableList from '@/components/ScrollableList';
-import { fetchPosts, fetchRanking } from '@/app/(main)/timeline/actions/fetchPosts';
+import {
+  fetchPosts,
+  fetchRanking,
+  fetchPostsForFollowing,
+} from '@/app/(main)/timeline/actions/fetchPosts';
 
 // props の型定義
 interface TimelineProps {
   limit: number;
   max: number;
   targetUserId?: string;
-  mode?: 'ranking' | 'timeline';
+  mode?: 'ranking' | 'timeline' | 'following';
   className?: string;
 }
 
@@ -63,7 +67,13 @@ const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: Ti
         filterByUserId: targetUserId,
         userId: session.data?.user_id ?? '',
       });
-    } else {
+    } else if (mode === 'following') {
+      newPosts = await fetchPostsForFollowing({
+        limit: limit,
+        cursor: offsetIdRef.current,
+        userId: session.data?.user_id ?? '',
+      });
+    } else if (mode === 'ranking') {
       newPosts = await fetchRanking({
         limit: max,
         userId: session.data?.user_id ?? '',
