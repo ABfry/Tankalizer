@@ -1,39 +1,22 @@
 'use client';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import fetchProfile from '../actions/fetchProfile';
+import React, { useState, useEffect } from 'react';
 import { ProfileTypes } from '@/types/profileTypes';
 import { follow, unfollow } from '../actions/FollowunFollow';
 import { getImageUrl } from '@/lib/utils';
 import ProfileEditor from '@/components/ProfileEditor';
+import { useSession } from 'next-auth/react';
 
 export interface ProfileBoxProps {
+  profile?: ProfileTypes;
   userId: string;
 }
 
-const ProfileBox = ({ userId }: ProfileBoxProps) => {
-  const [profile, setProfile] = useState<ProfileTypes | null>(null);
+const ProfileBox = ({ profile, userId }: ProfileBoxProps) => {
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
-  const router = useRouter();
   // セッションの取得
   const session = useSession();
   const iconUrl = getImageUrl(profile?.iconUrl ?? '');
-
-  // ユーザIDからプロフィールをFetchする
-  useEffect(() => {
-    const getProfile = async () => {
-      if (!userId) return;
-      const data = await fetchProfile({
-        targetUserId: userId as string,
-        userId: session.data?.user_id ?? '',
-      });
-      if (!data) router.push('/user-not-found');
-      setProfile(data);
-    };
-    getProfile();
-  }, [userId, router, session.data?.user_id]);
 
   const [isFavorited, setIsFavorited] = useState(false);
 

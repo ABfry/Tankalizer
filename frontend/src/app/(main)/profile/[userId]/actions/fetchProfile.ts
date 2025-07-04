@@ -20,7 +20,7 @@ const fetchProfile = async ({
 }: {
   targetUserId: string;
   userId: string;
-}): Promise<ProfileTypes | null> => {
+}): Promise<ProfileTypes | undefined> => {
   try {
     const res = await fetch(`${backendUrl}/profile`, {
       method: 'POST',
@@ -36,7 +36,7 @@ const fetchProfile = async ({
     // エラーがある場合はnullを返す
     if (!res.ok) {
       console.log(res.statusText);
-      return null;
+      return undefined;
     }
 
     const json = await res.json();
@@ -55,7 +55,7 @@ const fetchProfile = async ({
     return profile;
   } catch (error) {
     console.error(error);
-    return null;
+    return undefined;
   }
 };
 
