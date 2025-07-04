@@ -59,15 +59,15 @@ const Profile = () => {
           items={[
             {
               title: '投稿',
-              content: <Timeline limit={10} max={100} targetUserId={userId ?? ''} />,
+              content: <Timeline limit={10} max={10000} targetUserId={userId ?? ''} />,
             },
             {
               title: 'うたトモ',
-              content: <UserList profile={profile} limit={10} max={100} mode='mutuals' />,
+              content: <UserList profile={profile} limit={10} max={10000} mode='mutuals' />,
             },
             {
               title: '推し歌人',
-              content: <UserList profile={profile} limit={10} max={100} mode='following' />,
+              content: <UserList profile={profile} limit={10} max={10000} mode='following' />,
             },
           ]}
         />

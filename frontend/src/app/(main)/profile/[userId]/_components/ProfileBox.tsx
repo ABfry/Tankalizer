@@ -153,50 +153,16 @@ const ProfileBox = ({ profile, userId }: ProfileBoxProps) => {
               <div className='mt-4 flex justify-center'>
                 <button
                   onClick={handleFavoriteClick}
-                  className='relative flex items-center justify-center rounded-full p-4 text-yellow-400 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-yellow-400/20 active:scale-95'
-                  aria-label='お気に入りに追加'
+                  className='relative flex items-center justify-center rounded-full bg-transparent p-4 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-gray-200/50 active:scale-95'
+                  aria-label={isFavorited ? 'フォローを外す' : 'フォローする'}
                 >
-                  <svg
+                  <Image
+                    src={isFavorited ? '/oshi.png' : '/osu.png'}
+                    alt={isFavorited ? 'フォロー中' : 'フォローする'}
+                    width={96}
+                    height={96}
                     className='size-24'
-                    viewBox='0 0 24 24'
-                    fill={isFavorited ? 'url(#rainbow)' : 'currentColor'}
-                    xmlns='http://www.w3.org/2000/svg'
-                  >
-                    <defs>
-                      <linearGradient
-                        id='rainbow'
-                        x1='0%'
-                        y1='0%'
-                        x2='200%'
-                        y2='0%'
-                        gradientUnits='objectBoundingBox'
-                      >
-                        <animateTransform
-                          attributeName='gradientTransform'
-                          type='translate'
-                          from='0 0'
-                          to='-1 0'
-                          dur='3s'
-                          repeatCount='indefinite'
-                        />
-                        <stop offset='0%' stopColor='#ff0000' />
-                        <stop offset='8.33%' stopColor='#ff7f00' />
-                        <stop offset='16.66%' stopColor='#ffff00' />
-                        <stop offset='25%' stopColor='#00ff00' />
-                        <stop offset='33.33%' stopColor='#0000ff' />
-                        <stop offset='41.66%' stopColor='#8b00ff' />
-                        <stop offset='50%' stopColor='#ff0000' />
-                        <stop offset='58.33%' stopColor='#ff7f00' />
-                        <stop offset='66.66%' stopColor='#ffff00' />
-                        <stop offset='75%' stopColor='#00ff00' />
-                        <stop offset='83.33%' stopColor='#0000ff' />
-                        <stop offset='91.66%' stopColor='#8b00ff' />
-                        <stop offset='100%' stopColor='#ff0000' />
-                      </linearGradient>
-                    </defs>
-                    <path d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z' />
-                  </svg>
-                  <span className='absolute text-lg font-bold text-black'>推し</span>
+                  />
                 </button>
               </div>
             )}

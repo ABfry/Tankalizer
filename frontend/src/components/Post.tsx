@@ -9,7 +9,7 @@ import ImageModal from '@/components/ImageModal';
 import MiyabiButton from '@/components/MiyabiButton';
 import DropDownButton from './DropDownButton';
 import { formatDateKanji, toKanjiNumber } from '@/app/(main)/timeline/utils/kanjiNumber';
-import { MdDeleteForever, MdShare } from 'react-icons/md';
+import { MdDeleteForever, MdShare, MdReport } from 'react-icons/md';
 import { useSession } from 'next-auth/react';
 import Dialog from '@/components/Dialog';
 import LoginDialog from './LoginDialog';
@@ -18,6 +18,7 @@ import deletePost from '@/app/(main)/timeline/actions/deletePost';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getImageUrl } from '@/lib/utils';
+import ReportDialog from './ReportDialog';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 
@@ -48,6 +49,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   // 削除確認ダイアログの表示状態
   const [dialogOpen, setDialogOpen] = useState(false);
+  // 通報ダイアログの表示状態
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   // コピートーストの表示状態
   const [toastOpen, setToastOpen] = useState(false);
   // 削除失敗ダイアログの表示状態
@@ -58,7 +61,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const dropDownItems = [];
   // ドロップダウンメニューの投稿共有ボタン
   const dropDownShareButton = {
-    label: '投稿を共有',
+    label: '短歌を共有',
     onClick: async () => {
       const link = `${baseUrl}/post/${post.id}`;
       try {
@@ -75,7 +78,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   };
   // ドロップダウンメニューの投稿削除ボタン
   const dropDownDeleteButton = {
-    label: '投稿を削除',
+    label: '短歌を削除',
     onClick: () => setDialogOpen(true),
     className: '',
     icon: <MdDeleteForever />,
@@ -86,6 +89,18 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   // 自分の投稿ならドロップダウンに削除ボタン追加
   if (isMyPost) {
     dropDownItems.push(dropDownDeleteButton);
+  }
+  // ドロップダウンメニューの投稿通報ボタン
+  const dropDownReportButton = {
+    label: '短歌を通報',
+    onClick: () => setReportDialogOpen(true),
+    className: '',
+    icon: <MdReport />,
+    color: 'red',
+  };
+  // 自分の投稿でないならドロップダウンに共有ボタン追加
+  if (!isMyPost) {
+    dropDownItems.push(dropDownReportButton);
   }
   // セッションの取得
   const session = useSession();
@@ -113,6 +128,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
     }
   };
 
+  const [nameLine1, nameLine2] = splitName(post.user.name);
+
   return (
     <div className={`${className} p-4 ${getRankBackground(post.rank)}`}>
       {/* 雅ランキングでの順位表記 */}
@@ -132,7 +149,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         <div className='ml-2 cursor-pointer items-center'>
           <p
             onClick={() => router.push(`/profile/${post.user.userId}`)}
-            className='text-lg text-black hover:underline'
+            className='select-none text-lg text-black hover:underline'
           >
             {post.user.name}
           </p>
@@ -141,8 +158,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         {post.isDeveloper && (
           <Image
             src='/developer.png'
-            height={40}
-            width={40}
+            height={30}
+            width={30}
             alt='Developer Badge'
             className='ml-2'
           />
@@ -169,14 +186,20 @@ const Post = ({ post, className, onDelete }: PostProps) => {
           <p
             className={`self-end font-shinryu ${
               hasImage ? 'text-white' : 'text-black'
-            } mr-3 text-base [text-orientation:upright] [writing-mode:vertical-rl] lg:text-lg`}
+            } mr-3 text-sm [text-orientation:upright] [writing-mode:vertical-rl] sm:text-sm md:text-base lg:text-lg`}
           >
-            {post.user.name}
+            {nameLine1}
+            {nameLine2 && (
+              <>
+                <br />
+                {'\n\u3000' + nameLine2}
+              </>
+            )}
           </p>
           <p
             className={`inline-block align-top font-shinryu ${
               hasImage ? 'text-white' : 'text-black'
-            } whitespace-pre-line text-2xl [text-orientation:upright] [writing-mode:vertical-rl] lg:text-3xl`}
+            } whitespace-pre-line text-xl [text-orientation:upright] [writing-mode:vertical-rl] sm:text-xl md:text-2xl lg:text-3xl`}
           >
             {tanka}
           </p>
@@ -216,8 +239,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       {/* 削除確認ダイアログ表示が有効の場合，ダイアログを表示する */}
       <Dialog
         isOpen={dialogOpen}
-        title='投稿の削除'
-        description='この投稿を削除しますか？'
+        title='短歌の削除'
+        description='この短歌を削除しますか？'
         yesCallback={async () => {
           console.log('はい');
           setDialogOpen(false);
@@ -239,13 +262,15 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       <Dialog
         isOpen={deleteFailedDialogOpen}
         title='エラー'
-        description='投稿の削除に失敗しました。時間をおいてやり直してみてください。'
+        description='短歌の削除に失敗しました。時間をおいてやり直してみてください。'
         yesCallback={() => {
           setDeleteFailedDialogOpen(false);
         }}
         yesText='はい'
         isOnlyOK
       />
+      {/* 通報ダイアログ表示が有効の場合，ダイアログを表示する */}
+      <ReportDialog isOpen={reportDialogOpen} setIsOpen={setReportDialogOpen} post={post} />
       {/* リンクをコピーした場合，トーストを表示する */}
       <AnimatePresence mode='wait'>
         {toastOpen && (
@@ -275,6 +300,29 @@ const Post = ({ post, className, onDelete }: PostProps) => {
 const parseTanka = (tanka: Array<string>): string => {
   const parsedTanka: string = `${tanka[0]}\n\u3000${tanka[1]}\n\u3000\u3000${tanka[2]}\n${tanka[3]}\n\u3000${tanka[4]}`;
   return parsedTanka;
+};
+
+/**
+ * 名前を適切な位置で二行に分割する．
+ * 半角空白があればそこを区切りとし，なければ文字数の中央で分割。
+ * @function splitName
+ * @param {string} name - 分割する名前
+ * @return {[string, string]} 分割された名前の配列
+ */
+const splitName = (name: string): [string, string] => {
+  // 名前が10文字以下ならそのまま返す
+  if (name.length <= 10) {
+    return [name, ''];
+  }
+  // 空白で分割できる場合
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    // 最後の要素を第二行，それ以前を第一行として結合
+    return [parts.slice(0, parts.length - 1).join(' '), parts[parts.length - 1]];
+  }
+  // 空白なしなら二分割
+  const mid = Math.floor(name.length / 2);
+  return [name.slice(0, mid), name.slice(mid)];
 };
 
 export default Post;

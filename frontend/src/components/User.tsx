@@ -16,7 +16,6 @@ import { follow, unfollow } from '@/app/(main)/profile/[userId]/actions/Followun
 interface UserProps {
   profile: ProfileTypes;
   className?: string;
-  onDelete?: (userId: string) => void;
 }
 
 /**
@@ -25,7 +24,7 @@ interface UserProps {
  * @param {UserProps} props - ユーザデータを含むオブジェクト
  * @return {JSX.Element} 投稿を表示するReactコンポーネント
  */
-const User = ({ profile, className, onDelete }: UserProps) => {
+const User = ({ profile, className }: UserProps) => {
   // ユーザアイコン
   const userIconUrl = getImageUrl(profile.iconUrl ?? '');
   // 推し解除確認ダイアログの表示状態
@@ -40,11 +39,6 @@ const User = ({ profile, className, onDelete }: UserProps) => {
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   // 自分自身かどうかの判定
   const isMyProfile = session.data?.user_id === profile.userId;
-  // 親の持つPostsから自身を削除する
-  const handleDelete = () => {
-    if (!isMyProfile) return;
-    onDelete?.(profile.userId);
-  };
 
   const router = useRouter();
 
@@ -64,12 +58,12 @@ const User = ({ profile, className, onDelete }: UserProps) => {
           className='ml-2 flex min-w-0 flex-1 cursor-pointer items-center'
           onClick={() => router.push(`/profile/${profile.userId}`)}
         >
-          <p className='truncate text-lg text-black hover:underline'>{profile.name}</p>
+          <p className='select-none truncate text-lg text-black hover:underline'>{profile.name}</p>
           {profile.isDeveloper && (
             <Image
               src='/developer.png'
-              height={40}
-              width={40}
+              height={30}
+              width={30}
               alt='Developer Badge'
               className='ml-2'
             />
@@ -117,12 +111,12 @@ const User = ({ profile, className, onDelete }: UserProps) => {
             followerId: session.data?.user_id ?? '',
             followeeId: profile.userId,
           });
-          if (!result) setUnfollowFailedDialogOpen(true);
-          else {
+          if (!result) {
+            setUnfollowFailedDialogOpen(true);
+          } else {
             setIsFollowing(false);
-            handleDelete();
-            setDialogOpen(false);
           }
+          setDialogOpen(false);
         }}
         noCallback={() => {
           console.log('いいえ');

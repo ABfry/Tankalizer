@@ -96,11 +96,6 @@ const UserList = ({ profile, limit, max, mode = 'mutuals', className }: UserList
     isFetchingRef.current = false;
   }, [session.status, session.data?.user_id, mode, limit, profile.userId, max]);
 
-  // 見かけ上のユーザを削除する関数
-  const deleteUser = (userId: string) => {
-    setUsers((prevUsers) => prevUsers.filter((user) => user.userId !== userId));
-  };
-
   return (
     <ScrollableList
       items={users}
@@ -112,7 +107,7 @@ const UserList = ({ profile, limit, max, mode = 'mutuals', className }: UserList
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <User profile={user} className='' onDelete={deleteUser} />
+          <User profile={user} className='' />
         </motion.div>
       )}
       loadMore={loadMoreUsers}
