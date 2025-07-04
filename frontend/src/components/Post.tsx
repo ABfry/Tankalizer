@@ -231,8 +231,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       {/* 削除確認ダイアログ表示が有効の場合，ダイアログを表示する */}
       <Dialog
         isOpen={dialogOpen}
-        title='投稿の削除'
-        description='この投稿を削除しますか？'
+        title='短歌の削除'
+        description='この短歌を削除しますか？'
         yesCallback={async () => {
           console.log('はい');
           setDialogOpen(false);
@@ -254,7 +254,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       <Dialog
         isOpen={deleteFailedDialogOpen}
         title='エラー'
-        description='投稿の削除に失敗しました。時間をおいてやり直してみてください。'
+        description='短歌の削除に失敗しました。時間をおいてやり直してみてください。'
         yesCallback={() => {
           setDeleteFailedDialogOpen(false);
         }}
