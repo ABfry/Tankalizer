@@ -4,6 +4,9 @@ import * as Dialog from '@radix-ui/react-dialog';
 import CustomDialog from '@/components/Dialog';
 import { PostTypes } from '@/types/postTypes';
 import reportToDiscord from '@/app/(main)/timeline/actions/reportToDiscord';
+import fetchProfile from '@/app/(main)/profile/[userId]/actions/fetchProfile';
+import { useSession } from 'next-auth/react';
+import { ProfileTypes } from '@/types/profileTypes';
 
 interface ReportDialogProps {
   className?: string;
@@ -24,6 +27,12 @@ const ReportDialog = ({ className, isOpen, setIsOpen, post }: ReportDialogProps)
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false); // 通報成功のダイアログの表示状態
   const MAX_REPORT_LENGTH = 255; // 通報内容の最大文字数
   const MIN_REPORT_LENGTH = 10; // 通報内容の最小文字数
+  // セッションの取得
+  const session = useSession();
+  // ログイン状態
+  const isLoggedIn = session.status === 'authenticated';
+  const userId = isLoggedIn ? session.data?.user_id : undefined;
+  const [profile, setProfile] = useState<ProfileTypes | undefined>(undefined);
 
   // ダイアログが開かれるたびにフォームをリセット
   useEffect(() => {
@@ -32,15 +41,28 @@ const ReportDialog = ({ className, isOpen, setIsOpen, post }: ReportDialogProps)
     }
   }, [isOpen]);
 
+  // ユーザIDからプロフィールをFetchする
+  useEffect(() => {
+    const getProfile = async () => {
+      if (!userId) return;
+      const data = await fetchProfile({
+        targetUserId: userId as string,
+        userId: session.data?.user_id ?? '',
+      });
+      setProfile(data);
+    };
+    getProfile();
+  }, [userId, session.data?.user_id]);
+
   const handleReport = useCallback(async () => {
     try {
-      await reportToDiscord({ message: report, post: post });
+      await reportToDiscord({ message: report, post: post, user: profile });
       setIsSuccessDialogOpen(true);
     } catch (error) {
       setIsErrorDialogOpen(true);
       console.error('通報中にエラーが発生しました:', error);
     }
-  }, [report, post]);
+  }, [report, post, profile]);
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => setIsOpen?.(open)}>
@@ -98,7 +120,7 @@ const ReportDialog = ({ className, isOpen, setIsOpen, post }: ReportDialogProps)
             <button
               className='rounded-md bg-red-400 px-4 py-2 text-sm text-white shadow hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50'
               onClick={handleReport}
-              disabled={report.length < MIN_REPORT_LENGTH}
+              disabled={report.length < MIN_REPORT_LENGTH || !profile}
             >
               通報
             </button>

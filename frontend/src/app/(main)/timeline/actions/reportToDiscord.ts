@@ -2,11 +2,20 @@
 
 import { getImageUrl } from '@/lib/utils';
 import { PostTypes } from '@/types/postTypes';
+import { Profile } from 'next-auth';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
-const reportToDiscord = async ({ message, post }: { message: string; post: PostTypes }) => {
+const reportToDiscord = async ({
+  message,
+  post,
+  user,
+}: {
+  message: string;
+  post: PostTypes;
+  user: Profile | undefined;
+}) => {
   if (!webhookUrl) {
     console.log('Discord webhook URLが設定されていません。');
     return;
@@ -19,7 +28,6 @@ const reportToDiscord = async ({ message, post }: { message: string; post: PostT
   type DiscordEmbed = {
     title: string;
     color: number;
-    description: string;
     fields: { name: string; value: string; inline: boolean }[];
     timestamp: string;
     image?: { url: string };
@@ -29,11 +37,17 @@ const reportToDiscord = async ({ message, post }: { message: string; post: PostT
   const embed: DiscordEmbed = {
     title: `Tankalizerで通報がありました！`,
     color: 0xff0000,
-    description: message,
     fields: [
+      { name: '通報者', value: user?.name ?? '取得できませんでした。', inline: false },
+      {
+        name: '通報者ID',
+        value: user?.userId?.toString() ?? '取得できませんでした。',
+        inline: false,
+      },
+      { name: '通報内容', value: message, inline: false },
       { name: 'ポストID', value: post.id.toString(), inline: false },
-      { name: 'ユーザー名', value: post.user.name, inline: false },
-      { name: 'ユーザーID', value: post.user.userId.toString(), inline: false },
+      { name: '投稿者', value: post.user.name, inline: false },
+      { name: '投稿者ID', value: post.user.userId.toString(), inline: false },
       { name: '短歌', value: post.tanka.toString(), inline: false },
       { name: '原文', value: post.original, inline: false },
       { name: '投稿リンク', value: shareLink, inline: false },
