@@ -11,6 +11,7 @@ const printLine = (): void => {
 const postNews = async (requestApiKey: string) => {
   if (requestApiKey !== env.NEWS_POST_API_KEY) {
     return {
+      isAuthorized: false,
       isSuccess: false,
       tanka: {
         line0: 'APIキーが間違っています',
@@ -27,6 +28,7 @@ const postNews = async (requestApiKey: string) => {
   // ニュースの取得に失敗した場合
   if (!newsResponse.isSuccess || !newsResponse.news) {
     return {
+      isAuthorized: true,
       isSuccess: false,
       tanka: {
         line0: 'ニュースの取得に失敗しました',
@@ -48,10 +50,9 @@ const postNews = async (requestApiKey: string) => {
   try {
     const formData = new FormData();
     formData.append('original', originalText);
-    formData.append('user_icon', `https://avatars.githubusercontent.com/u/${env.NEWS_USER_ID}?v=4`);
-    formData.append('user_name', '風聞');
+    formData.append('user_id', env.NEWS_USER_ID);
 
-    const postResponse = await fetch(`http://localhost:8080/post`, {
+    const postResponse = await fetch(`http://localhost:8080/v2/post`, {
       method: 'POST',
       body: formData,
     });
@@ -60,6 +61,7 @@ const postNews = async (requestApiKey: string) => {
 
     if (!postResponse.ok) {
       return {
+        isAuthorized: true,
         isSuccess: false,
         tanka: {
           line0: '',
@@ -74,12 +76,14 @@ const postNews = async (requestApiKey: string) => {
     const json = await postResponse.json();
 
     return {
+      isAuthorized: true,
       isSuccess: true,
       tanka: json.tanka,
     };
   } catch (error) {
     console.error(error);
     return {
+      isAuthorized: true,
       isSuccess: false,
       tanka: {
         line0: '投稿に失敗しました',

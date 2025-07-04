@@ -1,0 +1,70 @@
+{
+  "name": "Tankalizer DevContainer",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/app",
+  "mounts": [
+    // ローカルのワークスペースフォルダをコンテナの/appにマウント
+    "source=${localWorkspaceFolder},target=/app,type=bind",
+    // node_modulesとnextフォルダを除外
+    "source=tankalizer-frontend-node_modules,target=/app/frontend/node_modules,type=volume",
+    "source=tankalizer-frontend-next,target=/app/frontend/.next,type=volume",
+    "source=tankalizer-backend-node_modules,target=/app/backend/node_modules,type=volume"
+  ],
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "TZ": "Asia/Tokyo",
+    "WATCHPACK_POLLING": "true",
+    "CHOKIDAR_USEPOLLING": "true"
+  },
+  "runArgs": ["--network=host", "--name=Tankalizer"],
+  "forwardPorts": [3000, 8080],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "eslint.alwaysShowStatus": true,
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "tasks": {
+          "version": "2.0.0",
+          "tasks": [
+            {
+              "label": "frontend",
+              "type": "shell",
+              "command": "unset PORT && npm run dev",
+              "options": { "cwd": "${workspaceFolder}/frontend" },
+              "presentation": {
+                "group": "group"
+              },
+              "runOptions": {
+                "runOn": "folderOpen"
+              }
+            },
+            {
+              "label": "backend",
+              "type": "shell",
+              "command": "npm run dev",
+              "options": { "cwd": "${workspaceFolder}/backend" },
+              "presentation": {
+                "group": "group"
+              },
+              "runOptions": {
+                "runOn": "folderOpen"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

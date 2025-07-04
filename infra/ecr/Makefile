@@ -1,5 +1,11 @@
 # ECR
 
+# --- 変数定義 ---
+AWS_REGION := ap-northeast-1
+AWS_ACCOUNT_ID := $(shell aws sts get-caller-identity --query Account --output text)
+FRONT_IMAGE_NAME := tanka/frontend
+BACK_IMAGE_NAME := tanka/backend
+TAG := latest
 
 # ECR URLの定義
 FRONT_ECR_URL := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(FRONT_IMAGE_NAME)
@@ -10,10 +16,10 @@ login-ecr:
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 
 build-ecr-front: 
-	docker build --platform linux/amd64 -t $(FRONT_IMAGE_NAME) -f ./frontend/Dockerfile ./frontend
+	docker build --platform linux/amd64 -t $(FRONT_IMAGE_NAME) -f ../../frontend/Dockerfile ../../frontend
 
 build-ecr-back: 
-	docker build --platform linux/amd64 -t $(BACK_IMAGE_NAME) -f ./backend/Dockerfile ./backend
+	docker build --platform linux/amd64 -t $(BACK_IMAGE_NAME) -f ../../backend/Dockerfile ../../backend
 
 tag-ecr: build-ecr-front build-ecr-back
 	docker tag $(FRONT_IMAGE_NAME):$(TAG) $(FRONT_ECR_URL):$(TAG)

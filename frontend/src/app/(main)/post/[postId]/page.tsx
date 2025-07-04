@@ -1,4 +1,5 @@
 import React from 'react';
+import { auth } from '@/auth/config';
 import fetchOnePost from './actions/fetchOnePost';
 import PostPage from './PostPage';
 import { notFound } from 'next/navigation';
@@ -11,8 +12,8 @@ export const generateMetadata = async (context: { params: Promise<{ postId: stri
   const params = await context.params;
 
   const post = await fetchOnePost({
+    userId: '',
     postId: params.postId,
-    iconUrl: '',
   });
 
   if (!post) return { title: '投稿が見つかりません' };
@@ -22,6 +23,7 @@ export const generateMetadata = async (context: { params: Promise<{ postId: stri
     description: tankaToString(post.tanka),
   };
 };
+
 /**
  * 指定されたIDの投稿を表示する．
  * @async
@@ -30,10 +32,11 @@ export const generateMetadata = async (context: { params: Promise<{ postId: stri
  */
 const Page = async (context: { params: Promise<{ postId: string }> }) => {
   const params = await context.params;
+  const session = await auth();
 
   const post = await fetchOnePost({
+    userId: session?.user_id ?? '',
     postId: params.postId,
-    iconUrl: '',
   });
 
   if (!post) notFound();

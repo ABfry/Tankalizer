@@ -17,6 +17,7 @@ import { addMiyabi, removeMiyabi } from '@/app/(main)/timeline/actions/countMiya
 import deletePost from '@/app/(main)/timeline/actions/deletePost';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getImageUrl } from '@/lib/utils';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 
@@ -38,6 +39,9 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const tanka = parseTanka(post.tanka);
   // 投稿に画像が含まれるか
   const hasImage = Boolean(post.imageUrl);
+  const imageUrl = getImageUrl(post.imageUrl);
+  // ユーザアイコン
+  const userIconUrl = getImageUrl(post.user.iconUrl);
   // 雅カウントの状態
   const [miyabiCount, setMiyabiCount] = useState(post.miyabiCount);
   // 画像の拡大表示状態
@@ -48,8 +52,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const [toastOpen, setToastOpen] = useState(false);
   // 削除失敗ダイアログの表示状態
   const [deleteFailedDialogOpen, setDeleteFailedDialogOpen] = useState(false);
-  // ユーザアイコンURLが一致するなら自分の投稿
-  const isMyPost = useSession().data?.user?.image === post.user.iconUrl;
+  // ユーザIDが一致するなら自分の投稿
+  const isMyPost = useSession().data?.user_id === post.user.userId;
   // ドロップダウンメニューの要素
   const dropDownItems = [];
   // ドロップダウンメニューの投稿共有ボタン
@@ -118,7 +122,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
       {/* プロフィールアイコン */}
       <div className='mb-3 flex items-center'>
         <Image
-          src={post.user.iconUrl !== '' ? post.user.iconUrl : '/iconDefault.png'}
+          src={userIconUrl !== '' ? userIconUrl : '/iconDefault.png'}
           height={40}
           width={40}
           alt='Icon'
@@ -133,6 +137,16 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             {post.user.name}
           </p>
         </div>
+        {/* 開発者バッジ */}
+        {post.isDeveloper && (
+          <Image
+            src='/developer.png'
+            height={40}
+            width={40}
+            alt='Developer Badge'
+            className='ml-2'
+          />
+        )}
         <DropDownButton className='ml-auto flex' items={dropDownItems}></DropDownButton>
       </div>
       {/* アイコン以外 */}
@@ -146,7 +160,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         }}
       >
         <Image
-          src={post.imageUrl !== '' ? post.imageUrl : '/imageDefault.png'}
+          src={imageUrl}
           fill
           alt='Image'
           className={`rounded-xl object-cover ${hasImage ? 'brightness-50' : ''}`}
@@ -178,7 +192,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onClick={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => ++count);
-                await addMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await addMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -186,7 +200,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
             onCancel={async () => {
               if (isLoggedIn) {
                 setMiyabiCount((count) => --count);
-                await removeMiyabi({ postId: post.id, iconUrl: session.data?.user?.image ?? '' });
+                await removeMiyabi({ userId: session.data?.user_id ?? '', postId: post.id });
               } else {
                 setLoginDialogOpen(true);
               }
@@ -198,7 +212,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         </div>
       </div>
       {/* 拡大表示が有効の場合，モーダルを表示する */}
-      {modalOpen && <ImageModal imageUrl={post.imageUrl} setModalOpen={setModalOpen} />}
+      {modalOpen && <ImageModal imageUrl={imageUrl} setModalOpen={setModalOpen} />}
       {/* 削除確認ダイアログ表示が有効の場合，ダイアログを表示する */}
       <Dialog
         isOpen={dialogOpen}
@@ -208,8 +222,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
           console.log('はい');
           setDialogOpen(false);
           const result = await deletePost({
+            userId: session.data?.user_id ?? '',
             postId: post.id,
-            iconUrl: session.data?.user?.image ?? '',
           });
           if (!result) setDeleteFailedDialogOpen(true);
           else handleDelete();

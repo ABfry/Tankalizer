@@ -47,21 +47,43 @@ class DatabaseUtility {
     });
   }
 
-  private async sendQueries(
-    dbc: mysql.Connection,
-    queries: Array<{ query: string; option?: any }>
-  ) {
-    for (var i = 0; i < queries.length; i++) {
-      await this.sendQuery(dbc, queries[i].query, queries[i].option);
-    }
-  }
-
-  query(query: string, option?: any): Promise<any> {
+  query<T = any>(query: string, option?: any): Promise<T[]> {
     return this.connect((dbc: mysql.Connection) => this.sendQuery(dbc, query, option));
   }
 
-  queries(queries: Array<{ query: string; option?: any }>): Promise<any> {
-    return this.connect((dbc: mysql.Connection) => this.sendQueries(dbc, queries));
+  /**
+   * 既存の接続を使ってクエリを実行する（トランザクション用）
+   * @param dbc トランザクションで使っている接続オブジェクト
+   * @param query 実行するクエリ
+   * @param option クエリのオプション
+   */
+  queryOnConnection<T = any>(dbc: mysql.Connection, query: string, option?: any): Promise<T[]> {
+    return this.sendQuery(dbc, query, option);
+  }
+
+  /**
+   * トランザクションを実行する
+   * @param callback トランザクション内で実行したい処理を記述した関数
+   * @returns コールバック関数の実行結果
+   */
+  async transaction<T>(callback: (dbc: mysql.Connection) => Promise<T>): Promise<T> {
+    return this.connect(async (dbc: mysql.Connection) => {
+      try {
+        // 開始
+        await this.sendQuery(dbc, 'BEGIN');
+
+        // 引数で受け取ったコールバック関数を実行
+        const result = await callback(dbc);
+
+        // コミット
+        await this.sendQuery(dbc, 'COMMIT');
+        return result;
+      } catch (error) {
+        // 失敗したらロールバック
+        await this.sendQuery(dbc, 'ROLLBACK');
+        throw error;
+      }
+    });
   }
 }
 

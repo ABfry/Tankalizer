@@ -1,6 +1,6 @@
 import { z, type RouteHandler } from '@hono/zod-openapi';
 import type { Context } from 'hono';
-import db from '../db.js';
+import db from '../../lib/db.js';
 import { deletePostSchema } from '../../schema/Post/deletePostSchema.js';
 import type { deletePostRoute } from '../../routes/Post/deletePostRoute.js';
 import { env } from '../../config/env.js';
