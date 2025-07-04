@@ -113,6 +113,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
     }
   };
 
+  const [nameLine1, nameLine2] = splitName(post.user.name);
+
   return (
     <div className={`${className} p-4 ${getRankBackground(post.rank)}`}>
       {/* 雅ランキングでの順位表記 */}
@@ -171,7 +173,13 @@ const Post = ({ post, className, onDelete }: PostProps) => {
               hasImage ? 'text-white' : 'text-black'
             } mr-3 text-sm [text-orientation:upright] [writing-mode:vertical-rl] sm:text-sm md:text-base lg:text-lg`}
           >
-            {post.user.name}
+            {nameLine1}
+            {nameLine2 && (
+              <>
+                <br />
+                {'\n\u3000' + nameLine2}
+              </>
+            )}
           </p>
           <p
             className={`inline-block align-top font-shinryu ${
@@ -275,6 +283,29 @@ const Post = ({ post, className, onDelete }: PostProps) => {
 const parseTanka = (tanka: Array<string>): string => {
   const parsedTanka: string = `${tanka[0]}\n\u3000${tanka[1]}\n\u3000\u3000${tanka[2]}\n${tanka[3]}\n\u3000${tanka[4]}`;
   return parsedTanka;
+};
+
+/**
+ * 名前を適切な位置で二行に分割する．
+ * 半角空白があればそこを区切りとし，なければ文字数の中央で分割。
+ * @function splitName
+ * @param {string} name - 分割する名前
+ * @return {[string, string]} 分割された名前の配列
+ */
+const splitName = (name: string): [string, string] => {
+  // 名前が10文字以下ならそのまま返す
+  if (name.length <= 10) {
+    return [name, ''];
+  }
+  // 空白で分割できる場合
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    // 最後の要素を第二行，それ以前を第一行として結合
+    return [parts.slice(0, parts.length - 1).join(' '), parts[parts.length - 1]];
+  }
+  // 空白なしなら二分割
+  const mid = Math.floor(name.length / 2);
+  return [name.slice(0, mid), name.slice(mid)];
 };
 
 export default Post;
