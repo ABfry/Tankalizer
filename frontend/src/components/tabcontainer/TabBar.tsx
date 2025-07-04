@@ -19,8 +19,8 @@ const TabBar = ({ items, callbackTabClick, activeIndex }: TabBarProps) => {
             <li
               key={index}
               className={`
-                relative flex-1 cursor-pointer rounded-md py-2
-                text-center transition-colors duration-300 hover:bg-black/5
+                relative flex-1 cursor-pointer select-none rounded-md
+                py-2 text-center transition-colors duration-300 hover:bg-black/5
                 ${isActive ? 'font-bold text-gray-900' : 'text-gray-500 hover:text-gray-700'}
               `}
               onClick={() => callbackTabClick(index)}
