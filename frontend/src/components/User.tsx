@@ -36,10 +36,13 @@ const User = ({ profile, className, onDelete }: UserProps) => {
   const session = useSession();
   // ログイン促進ダイアログの開閉状態
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  // フォロー状態
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
+  // 自分自身かどうかの判定
+  const isMyProfile = session.data?.user_id === profile.userId;
   // 親の持つPostsから自身を削除する
   const handleDelete = () => {
-    if (profile.userId !== session.data?.user_id) return;
+    if (!isMyProfile) return;
     onDelete?.(profile.userId);
   };
 
@@ -72,33 +75,35 @@ const User = ({ profile, className, onDelete }: UserProps) => {
             />
           )}
         </div>
-        <button
-          className={`ml-auto shrink-0 rounded-full px-4 py-2 ${
-            isFollowing
-              ? 'bg-orange-400 text-white hover:bg-orange-500'
-              : 'border border-gray-300 bg-white/70 text-black hover:bg-gray-100/70'
-          }`}
-          onClick={async () => {
-            if (session.status !== 'authenticated') {
-              setLoginDialogOpen(true);
-              return;
-            }
-            // ログイン済みなら，推し登録・解除の処理を行う
-            if (isFollowing) {
-              setDialogOpen(true);
-            } else {
-              const result = await follow({
-                followerId: session.data?.user_id ?? '',
-                followeeId: profile.userId,
-              });
-              if (result) {
-                setIsFollowing(true);
+        {!isMyProfile && (
+          <button
+            className={`ml-auto shrink-0 rounded-full px-4 py-2 ${
+              isFollowing
+                ? 'bg-orange-400 text-white hover:bg-orange-500'
+                : 'border border-gray-300 bg-white/70 text-black hover:bg-gray-100/70'
+            }`}
+            onClick={async () => {
+              if (session.status !== 'authenticated') {
+                setLoginDialogOpen(true);
+                return;
               }
-            }
-          }}
-        >
-          {isFollowing ? '推し解除' : '推す！'}
-        </button>
+              // ログイン済みなら，推し登録・解除の処理を行う
+              if (isFollowing) {
+                setDialogOpen(true);
+              } else {
+                const result = await follow({
+                  followerId: session.data?.user_id ?? '',
+                  followeeId: profile.userId,
+                });
+                if (result) {
+                  setIsFollowing(true);
+                }
+              }
+            }}
+          >
+            {isFollowing ? '推し解除' : '推す！'}
+          </button>
+        )}
       </div>
       <p className='ml-[58px] text-gray-600'>{profile.bio}</p>
       {/* 推し解除確認ダイアログ表示が有効の場合，ダイアログを表示する */}
