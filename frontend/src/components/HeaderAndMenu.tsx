@@ -32,7 +32,7 @@ const HeaderAndMenu = () => {
           onClick={() => {
             router.push('/');
           }}
-          className='hover:cursor-pointer hover:underline'
+          className='select-none hover:cursor-pointer hover:underline'
         >
           Tankalizer
         </div>

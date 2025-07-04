@@ -58,12 +58,12 @@ const User = ({ profile, className }: UserProps) => {
           className='ml-2 flex min-w-0 flex-1 cursor-pointer items-center'
           onClick={() => router.push(`/profile/${profile.userId}`)}
         >
-          <p className='truncate text-lg text-black hover:underline'>{profile.name}</p>
+          <p className='select-none truncate text-lg text-black hover:underline'>{profile.name}</p>
           {profile.isDeveloper && (
             <Image
               src='/developer.png'
-              height={40}
-              width={40}
+              height={30}
+              width={30}
               alt='Developer Badge'
               className='ml-2'
             />
