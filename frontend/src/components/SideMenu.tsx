@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import fetchProfile from '@/app/(main)/profile/[userId]/actions/fetchProfile';
 import { ProfileTypes } from '@/types/profileTypes';
 import { getImageUrl } from '@/lib/utils';
+import { useTransition } from '@/contexts/TransitionContext';
 
 // props の型定義
 interface SideMenuProps {
@@ -48,6 +49,7 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
   const userId = isLoggedIn ? session.data?.user_id : undefined;
   const [profile, setProfile] = useState<ProfileTypes | undefined>(undefined);
   const iconUrl = getImageUrl(profile?.iconUrl ?? '');
+  const { isTransitioning } = useTransition();
 
   // ユーザIDからプロフィールをFetchする
   useEffect(() => {
@@ -66,12 +68,13 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
     <div className={`${className} z-10 w-40 space-y-3`} style={style}>
       <div
         onClick={() => {
+          if (isTransitioning) return;
           if (setIsOpen) setIsOpen(false);
           router.push(PATHNAME.HOME);
         }}
-        className={`flex items-center rounded-lg hover:cursor-pointer hover:bg-black/5 ${
-          pathname === PATHNAME.HOME ? 'bg-orange-200' : 'bg-transparent'
-        }`}
+        className={`flex items-center rounded-lg hover:cursor-pointer ${
+          isTransitioning ? 'opacity-50' : 'hover:bg-black/5'
+        } ${pathname === PATHNAME.HOME ? 'bg-orange-200' : 'bg-transparent'}`}
       >
         <CiClock2 size={28} />
         <a className={`pl-1 text-xl ${pathname === PATHNAME.HOME ? 'font-bold' : ''}`}>
@@ -81,13 +84,14 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
       {isLoggedIn && (
         <div
           onClick={() => {
+            if (isTransitioning) return;
             if (setIsOpen) setIsOpen(false);
             if (!userId) return;
             router.push(`${PATHNAME.PROFILE}/${userId}`);
           }}
-          className={`flex items-center rounded-lg hover:cursor-pointer hover:bg-black/5 ${
-            pathname === `${PATHNAME.PROFILE}/${userId}` ? 'bg-orange-200' : 'bg-transparent'
-          }`}
+          className={`flex items-center rounded-lg hover:cursor-pointer ${
+            isTransitioning ? 'opacity-50' : 'hover:bg-black/5'
+          } ${pathname === `${PATHNAME.PROFILE}/${userId}` ? 'bg-orange-200' : 'bg-transparent'}`}
         >
           <CiUser size={28} />
           <a
@@ -101,12 +105,13 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
       )}
       <div
         onClick={() => {
+          if (isTransitioning) return;
           if (setIsOpen) setIsOpen(false);
           router.push(PATHNAME.RANKING);
         }}
-        className={`flex items-center rounded-lg hover:cursor-pointer hover:bg-black/5 ${
-          pathname === PATHNAME.RANKING ? 'bg-orange-200' : 'bg-transparent'
-        }`}
+        className={`flex items-center rounded-lg hover:cursor-pointer ${
+          isTransitioning ? 'opacity-50' : 'hover:bg-black/5'
+        } ${pathname === PATHNAME.RANKING ? 'bg-orange-200' : 'bg-transparent'}`}
       >
         <PiRankingLight size={28} />
         <a className={`pl-1 text-xl ${pathname === PATHNAME.RANKING ? 'font-bold' : ''}`}>
@@ -115,8 +120,13 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
       </div>
       {!isLoggedIn && (
         <div
-          onClick={() => signIn()}
-          className='flex items-center rounded-lg bg-transparent hover:cursor-pointer hover:bg-black/5'
+          onClick={() => {
+            if (isTransitioning) return;
+            signIn();
+          }}
+          className={`flex items-center rounded-lg bg-transparent hover:cursor-pointer ${
+            isTransitioning ? 'opacity-50' : 'hover:bg-black/5'
+          }`}
         >
           <CiLogin size={28} />
           <a className='pl-1 text-xl'>ログイン</a>
@@ -124,8 +134,13 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
       )}
       {isLoggedIn && (
         <div
-          onClick={() => setLogoutDialogOpen(true)}
-          className='flex items-center rounded-lg bg-transparent hover:cursor-pointer hover:bg-black/5'
+          onClick={() => {
+            if (isTransitioning) return;
+            setLogoutDialogOpen(true);
+          }}
+          className={`flex items-center rounded-lg bg-transparent hover:cursor-pointer ${
+            isTransitioning ? 'opacity-50' : ' hover:bg-black/5'
+          }`}
         >
           <CiLogout size={28} />
           <a className='pl-1 text-xl'>ログアウト</a>
