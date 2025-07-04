@@ -14,6 +14,17 @@ const newsTankaHandler: RouteHandler<typeof newsTankaRoute, {}> = async (c: Cont
   const response = await postNews(apiKey);
   console.log(response);
 
+  if (!response.isAuthorized) {
+    return c.json({ message: 'APIキーが間違っています', statusCode: 403, error: 'Forbidden' }, 403);
+  }
+
+  if (!response.isSuccess) {
+    return c.json(
+      { message: '短歌の生成に失敗しました', statusCode: 500, error: 'Internal Server Error' },
+      500
+    );
+  }
+
   // レスポンス
   return c.json(response, 200);
 };

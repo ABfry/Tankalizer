@@ -28,11 +28,35 @@ export const newsTankaRoute = createRoute({
       },
       description: 'Successful response',
     },
+    403: {
+      content: {
+        'application/json': {
+          schema: errorResponseSchema,
+        },
+      },
+      description: 'Forbidden',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: errorResponseSchema,
+        },
+      },
+      description: 'Internal Server Error',
+    },
   },
 });
 
 export type NewsTankaRouteResponse200 = z.infer<
   (typeof newsTankaRoute.responses)['200']['content']['application/json']['schema']
+>;
+
+export type NewsTankaRouteResponse403 = z.infer<
+  (typeof newsTankaRoute.responses)['403']['content']['application/json']['schema']
+>;
+
+export type NewsTankaRouteResponse500 = z.infer<
+  (typeof newsTankaRoute.responses)['500']['content']['application/json']['schema']
 >;
 
 export type NewsTankaRouteResponseError = z.infer<typeof errorResponseSchema>;
