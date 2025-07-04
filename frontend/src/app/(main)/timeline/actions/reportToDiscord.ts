@@ -3,14 +3,17 @@
 import { getImageUrl } from '@/lib/utils';
 import { PostTypes } from '@/types/postTypes';
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+
 const reportToDiscord = async ({ message, post }: { message: string; post: PostTypes }) => {
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) {
     console.log('Discord webhook URLが設定されていません。');
     return;
   }
 
   const imageUrl = getImageUrl(post.imageUrl);
+  const shareLink = `${baseUrl}/post/${post.id}`;
 
   // DiscordのEmbed形式に合わせたオブジェクトを作成
   type DiscordEmbed = {
@@ -33,6 +36,7 @@ const reportToDiscord = async ({ message, post }: { message: string; post: PostT
       { name: 'ユーザーID', value: post.user.userId.toString(), inline: false },
       { name: '短歌', value: post.tanka.toString(), inline: false },
       { name: '原文', value: post.original, inline: false },
+      { name: '投稿リンク', value: shareLink, inline: false },
     ],
     timestamp: new Date().toISOString(),
   };
