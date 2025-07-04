@@ -141,8 +141,8 @@ const Post = ({ post, className, onDelete }: PostProps) => {
         {post.isDeveloper && (
           <Image
             src='/developer.png'
-            height={40}
-            width={40}
+            height={30}
+            width={30}
             alt='Developer Badge'
             className='ml-2'
           />
