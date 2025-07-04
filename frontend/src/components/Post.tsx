@@ -61,7 +61,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   const dropDownItems = [];
   // ドロップダウンメニューの投稿共有ボタン
   const dropDownShareButton = {
-    label: '投稿を共有',
+    label: '短歌を共有',
     onClick: async () => {
       const link = `${baseUrl}/post/${post.id}`;
       try {
@@ -78,7 +78,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   };
   // ドロップダウンメニューの投稿削除ボタン
   const dropDownDeleteButton = {
-    label: '投稿を削除',
+    label: '短歌を削除',
     onClick: () => setDialogOpen(true),
     className: '',
     icon: <MdDeleteForever />,
@@ -92,7 +92,7 @@ const Post = ({ post, className, onDelete }: PostProps) => {
   }
   // ドロップダウンメニューの投稿通報ボタン
   const dropDownReportButton = {
-    label: '投稿を通報',
+    label: '短歌を通報',
     onClick: () => setReportDialogOpen(true),
     className: '',
     icon: <MdReport />,
