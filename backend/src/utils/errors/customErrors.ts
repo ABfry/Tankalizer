@@ -56,6 +56,36 @@ export class BusinessLogicError extends ClientError {
 }
 
 /**
+ * リソースが存在しないエラー
+ */
+export class NotFoundError extends ClientError {
+  constructor(message: string) {
+    super(message, 404);
+    this.name = 'NotFoundError';
+  }
+}
+
+/**
+ * 重複・競合エラー
+ */
+export class ConflictError extends ClientError {
+  constructor(message: string) {
+    super(message, 409);
+    this.name = 'ConflictError';
+  }
+}
+
+/**
+ * 権限・認可エラー
+ */
+export class ForbiddenError extends ClientError {
+  constructor(message: string) {
+    super(message, 403);
+    this.name = 'ForbiddenError';
+  }
+}
+
+/**
  * データベースエラー
  */
 export class DatabaseError extends ServerError {

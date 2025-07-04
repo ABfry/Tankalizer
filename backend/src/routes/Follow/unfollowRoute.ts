@@ -30,7 +30,16 @@ export const unfollowRoute = createRoute({
       description: 'アンフォロー成功',
     },
     400: {
-      description: 'エラー',
+      description: 'バリデーションエラー',
+    },
+    404: {
+      description: 'ユーザーが存在しない',
+    },
+    409: {
+      description: '競合エラー（フォローしていないなど）',
+    },
+    500: {
+      description: 'サーバー内部エラー',
     },
   },
 });

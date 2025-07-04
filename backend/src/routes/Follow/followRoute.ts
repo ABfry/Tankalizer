@@ -30,7 +30,19 @@ export const followRoute = createRoute({
       description: 'フォロー成功',
     },
     400: {
-      description: 'エラー',
+      description: 'バリデーションエラー',
+    },
+    403: {
+      description: '禁止された操作（自分自身のフォローなど）',
+    },
+    404: {
+      description: 'ユーザーが存在しない',
+    },
+    409: {
+      description: '競合エラー（既にフォロー済みなど）',
+    },
+    500: {
+      description: 'サーバー内部エラー',
     },
   },
 });

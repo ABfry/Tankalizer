@@ -4,10 +4,8 @@ import type { Context } from 'hono';
 import type { unfollowRoute } from '../../routes/Follow/unfollowRoute.js';
 import { FollowService } from '../../services/follow/followService.js';
 import { FollowRepository } from '../../repositories/follow/followRepository.js';
-import { UserRepository } from '../../repositories/user/userRepository.js';
 import type { IFollowService } from '../../services/follow/iFollowService.js';
 import type { IFollowRepository } from '../../repositories/follow/iFollowRepository.js';
-import type { IUserRepository } from '../../repositories/user/iUserRepository.js';
 import { isClientError, isServerError } from '../../utils/errors/customErrors.js';
 
 /**
@@ -19,8 +17,7 @@ import { isClientError, isServerError } from '../../utils/errors/customErrors.js
 
 // 依存性注入：リポジトリとサービスのインスタンスを作成
 const followRepository: IFollowRepository = new FollowRepository();
-const userRepository: IUserRepository = new UserRepository();
-const followService: IFollowService = new FollowService(followRepository, userRepository);
+const followService: IFollowService = new FollowService(followRepository);
 
 /**
  * アンフォロー処理のハンドラー関数
