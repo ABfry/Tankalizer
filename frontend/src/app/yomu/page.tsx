@@ -175,7 +175,7 @@ const SignedInPage = (): React.ReactNode => {
         targetUserId: session.data?.user_id ?? '',
         userId: session.data?.user_id ?? '',
       });
-      setProfile(data);
+      setProfile(data ?? null);
     };
     getProfile();
   }, [session.data?.user_id]);
