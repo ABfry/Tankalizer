@@ -89,11 +89,13 @@
 
 ### インフラ・その他ツール
 
-- AWS (EC2, S3 など)
+- AWS (ECS, Fargate, S3, Lambda など)
+- Docker
 - Gemini API
 - MySQL
 - Adobe AfterEffects (雅リアクションのボタンアニメーション)
-![CleanShot 2025-02-24 at 00 30 20](https://github.com/user-attachments/assets/60c510e3-5ff5-4708-856a-988799a393ac)
+![IH-ScreenShot 2025-07-04 at 16 49 06](https://github.com/user-attachments/assets/3940eb5a-892d-4d47-83fd-850e3b439ec3)
+
 
 <!-- 使用技術を入力してください -->
 
