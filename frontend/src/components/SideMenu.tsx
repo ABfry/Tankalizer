@@ -140,7 +140,7 @@ const SideMenu = ({ className, style, setIsOpen }: SideMenuProps) => {
             alt='Icon'
             className='rounded-full'
           />
-          <a className='pl-1 text-xl'>{profile?.name ?? '歌人A'}</a>
+          <a className='pl-1 text-xl'>{profile?.name ?? '再ログインお願いします'}</a>
         </div>
       )}
       {/* ログアウト確認ダイアログ表示が有効の場合，ダイアログを表示する */}
