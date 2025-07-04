@@ -7,7 +7,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <HeaderAndMenu />
-      <MotionWrapper>{children}</MotionWrapper>
+      {/* <MotionWrapper>{children}</MotionWrapper> */}
+      {children}
       <YomuButton />
     </>
   );
