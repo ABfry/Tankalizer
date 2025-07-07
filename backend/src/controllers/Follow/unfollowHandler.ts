@@ -6,6 +6,7 @@ import { FollowService } from '../../services/follow/followService.js';
 import { FollowRepository } from '../../repositories/follow/followRepository.js';
 import type { IFollowService } from '../../services/follow/iFollowService.js';
 import type { IFollowRepository } from '../../repositories/follow/iFollowRepository.js';
+import { isClientError, isServerError } from '../../utils/errors/customErrors.js';
 
 /**
  * アンフォロー機能のハンドラー
@@ -42,15 +43,43 @@ const unfollowHandler: RouteHandler<typeof unfollowRoute, {}> = async (c: Contex
       200
     );
   } catch (err: any) {
-    // エラーが発生した場合の処理
     console.error('[Handler] アンフォロー処理中にエラーが発生しました:', err);
+
+    // ユーザ側エラーの場合
+    if (isClientError(err)) {
+      return c.json(
+        {
+          message: err.message,
+          statusCode: err.statusCode,
+          error: 'Client Error',
+          errorType: 'client',
+        },
+        err.statusCode as 400
+      );
+    }
+
+    // サーバ側エラーの場合
+    if (isServerError(err)) {
+      return c.json(
+        {
+          message: 'サーバ内部エラーが発生しました',
+          statusCode: 500,
+          error: 'Internal Server Error',
+          errorType: 'server',
+        },
+        500
+      );
+    }
+
+    // 未知のエラーの場合
     return c.json(
       {
-        message: err.message,
-        statusCode: 400,
-        error: 'Bad Request',
+        message: '予期しないエラーが発生しました',
+        statusCode: 500,
+        error: 'Internal Server Error',
+        errorType: 'server',
       },
-      400
+      500
     );
   }
 };
