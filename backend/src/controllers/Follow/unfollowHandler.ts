@@ -5,6 +5,7 @@ import type { unfollowRoute } from '../../routes/Follow/unfollowRoute.js';
 import { FollowService } from '../../services/follow/followService.js';
 import { FollowRepository } from '../../repositories/follow/followRepository.js';
 import type { IFollowService } from '../../services/follow/iFollowService.js';
+import { FollowError } from '../../services/follow/iFollowService.js';
 import type { IFollowRepository } from '../../repositories/follow/iFollowRepository.js';
 
 /**
@@ -23,17 +24,17 @@ const followService: IFollowService = new FollowService(followRepository);
  * POST /unfollow のリクエストを処理
  */
 const unfollowHandler: RouteHandler<typeof unfollowRoute, {}> = async (c: Context) => {
-  try {
-    // リクエストボディからデータを取得
-    const { followerId, followeeId } = await c.req.json();
+  // リクエストボディからデータを取得
+  const { followerId, followeeId } = await c.req.json();
 
-    console.log(`[Handler] アンフォローリクエストを受け付けました: ${followerId} -> ${followeeId}`);
+  console.log(`[Handler] アンフォローリクエストを受け付けました: ${followerId} -> ${followeeId}`);
 
-    // サービスを呼び出してアンフォロー処理を実行
-    await followService.unfollowUser(followerId, followeeId);
+  // サービスを呼び出してアンフォロー処理を実行
+  const result = await followService.unfollowUser(followerId, followeeId);
 
+  if (result.success) {
     console.log(`[Handler] アンフォロー処理が正常に完了しました: ${followerId} -> ${followeeId}`);
-
+    
     // 成功レスポンスを返す
     return c.json(
       {
@@ -41,18 +42,34 @@ const unfollowHandler: RouteHandler<typeof unfollowRoute, {}> = async (c: Contex
       },
       200
     );
-  } catch (err: any) {
-    console.error('[Handler] アンフォロー処理中にエラーが発生しました:', err);
+  }
 
-    return c.json(
-      {
-        message: err.message,
-        statusCode: 500,
-        error: 'Internal Server Error',
-        errorType: 'server',
-      },
-      500
-    );
+  // エラーレスポンスを返す
+  console.error(`[Handler] アンフォロー処理でエラーが発生しました: ${result.error} - ${result.message}`);
+  
+  // エラータイプに応じて適切なステータスコードを返す
+  switch (result.error) {
+    case FollowError.NOT_FOLLOWING:
+      return c.json(
+        {
+          message: result.message,
+          statusCode: 409,
+          error: 'Conflict',
+          errorType: 'conflict',
+        },
+        409
+      );
+    case FollowError.DATABASE_ERROR:
+    default:
+      return c.json(
+        {
+          message: result.message,
+          statusCode: 500,
+          error: 'Internal Server Error',
+          errorType: 'server',
+        },
+        500
+      );
   }
 };
 
