@@ -133,7 +133,7 @@ export class MiyabiRepository implements IMiyabiRepository {
         ${env.MIYABI_TABLE_NAME} AS m ON p.id = m.post_id
       WHERE
         -- 直近7日間の投稿に絞る
-        m.created_at >= (NOW() - INTERVAL 7 DAY)
+        p.created_at >= (NOW() - INTERVAL 7 DAY)
         AND p.is_deleted = FALSE
       GROUP BY
         p.id, u.id
