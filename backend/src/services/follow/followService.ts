@@ -1,5 +1,5 @@
-import type { IFollowService, FollowResult, UnfollowResult, FollowError } from './iFollowService.js';
-import { FollowError as FollowErrorEnum } from './iFollowService.js';
+import type { IFollowService, FollowResult, UnfollowResult } from './iFollowService.js';
+import { FollowError } from './iFollowService.js';
 import type { IFollowRepository } from '../../repositories/follow/iFollowRepository.js';
 
 // フォロー機能のサービス実装クラス
@@ -19,8 +19,8 @@ export class FollowService implements IFollowService {
       if (followerId === followeeId) {
         return {
           success: false,
-          error: FollowErrorEnum.SELF_FOLLOW,
-          message: '自分自身をフォローすることはできません'
+          error: FollowError.SELF_FOLLOW,
+          message: '自分自身をフォローすることはできません',
         };
       }
 
@@ -29,8 +29,8 @@ export class FollowService implements IFollowService {
       if (isAlreadyFollowing) {
         return {
           success: false,
-          error: FollowErrorEnum.ALREADY_FOLLOWING,
-          message: '既にフォローしています'
+          error: FollowError.ALREADY_FOLLOWING,
+          message: '既にフォローしています',
         };
       }
 
@@ -39,21 +39,25 @@ export class FollowService implements IFollowService {
       return { success: true };
     } catch (error: any) {
       console.error(error);
-      
+
       // MySQL外部キー制約エラーの場合
-      if (error.code === 'ER_NO_REFERENCED_ROW_2' || error.errno === 1452) {
+      if (
+        error.code === 'ER_NO_REFERENCED_ROW_2' ||
+        error.errno === 1452 ||
+        (error.message && error.message.includes('foreign key constraint fails'))
+      ) {
         return {
           success: false,
-          error: FollowErrorEnum.USER_NOT_FOUND,
-          message: 'ユーザーが見つかりません'
+          error: FollowError.USER_NOT_FOUND,
+          message: 'ユーザーが見つかりません',
         };
       }
-      
+
       // その他のデータベースエラー
       return {
         success: false,
-        error: FollowErrorEnum.DATABASE_ERROR,
-        message: 'データベースエラーが発生しました'
+        error: FollowError.DATABASE_ERROR,
+        message: 'データベースエラーが発生しました',
       };
     }
   }
@@ -69,8 +73,8 @@ export class FollowService implements IFollowService {
       if (!isFollowing) {
         return {
           success: false,
-          error: FollowErrorEnum.NOT_FOLLOWING,
-          message: 'フォロー関係が存在しません'
+          error: FollowError.NOT_FOLLOWING,
+          message: 'フォロー関係が存在しません',
         };
       }
 
@@ -79,12 +83,12 @@ export class FollowService implements IFollowService {
       return { success: true };
     } catch (error: any) {
       console.error(error);
-      
+
       // その他のデータベースエラー
       return {
         success: false,
-        error: FollowErrorEnum.DATABASE_ERROR,
-        message: 'データベースエラーが発生しました'
+        error: FollowError.DATABASE_ERROR,
+        message: 'データベースエラーが発生しました',
       };
     }
   }

@@ -34,7 +34,7 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
 
   if (result.success) {
     console.log(`[Handler] フォロー処理が正常に完了しました: ${followerId} -> ${followeeId}`);
-    
+
     // 成功レスポンスを返す
     return c.json(
       {
@@ -45,8 +45,10 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
   }
 
   // エラーレスポンスを返す
-  console.error(`[Handler] フォロー処理でエラーが発生しました: ${result.error} - ${result.message}`);
-  
+  console.error(
+    `[Handler] フォロー処理でエラーが発生しました: ${result.error} - ${result.message}`
+  );
+
   // エラータイプに応じて適切なステータスコードを返す
   switch (result.error) {
     case FollowError.SELF_FOLLOW:
@@ -55,7 +57,6 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
           message: result.message,
           statusCode: 400,
           error: 'Bad Request',
-          errorType: 'validation',
         },
         400
       );
@@ -65,7 +66,6 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
           message: result.message,
           statusCode: 409,
           error: 'Conflict',
-          errorType: 'conflict',
         },
         409
       );
@@ -75,7 +75,6 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
           message: result.message,
           statusCode: 404,
           error: 'Not Found',
-          errorType: 'not_found',
         },
         404
       );
@@ -86,7 +85,6 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
           message: result.message,
           statusCode: 500,
           error: 'Internal Server Error',
-          errorType: 'server',
         },
         500
       );

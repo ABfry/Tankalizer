@@ -34,7 +34,7 @@ const unfollowHandler: RouteHandler<typeof unfollowRoute, {}> = async (c: Contex
 
   if (result.success) {
     console.log(`[Handler] アンフォロー処理が正常に完了しました: ${followerId} -> ${followeeId}`);
-    
+
     // 成功レスポンスを返す
     return c.json(
       {
@@ -45,8 +45,10 @@ const unfollowHandler: RouteHandler<typeof unfollowRoute, {}> = async (c: Contex
   }
 
   // エラーレスポンスを返す
-  console.error(`[Handler] アンフォロー処理でエラーが発生しました: ${result.error} - ${result.message}`);
-  
+  console.error(
+    `[Handler] アンフォロー処理でエラーが発生しました: ${result.error} - ${result.message}`
+  );
+
   // エラータイプに応じて適切なステータスコードを返す
   switch (result.error) {
     case FollowError.NOT_FOLLOWING:
@@ -55,18 +57,15 @@ const unfollowHandler: RouteHandler<typeof unfollowRoute, {}> = async (c: Contex
           message: result.message,
           statusCode: 409,
           error: 'Conflict',
-          errorType: 'conflict',
         },
         409
       );
-    case FollowError.DATABASE_ERROR:
     default:
       return c.json(
         {
           message: result.message,
           statusCode: 500,
           error: 'Internal Server Error',
-          errorType: 'server',
         },
         500
       );
