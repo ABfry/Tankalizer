@@ -1,12 +1,6 @@
-import type { IFollowService } from './iFollowService.js';
+import type { IFollowService, FollowResult, UnfollowResult } from './iFollowService.js';
+import { FollowError } from './iFollowService.js';
 import type { IFollowRepository } from '../../repositories/follow/iFollowRepository.js';
-import {
-  ClientError,
-  DatabaseError,
-  NotFoundError,
-  ConflictError,
-  ForbiddenError,
-} from '../../utils/errors/customErrors.js';
 
 // フォロー機能のサービス実装クラス
 
@@ -19,41 +13,52 @@ export class FollowService implements IFollowService {
    * ・自分自身のフォローは禁止
    * ・重複フォローは禁止
    */
-  async followUser(followerId: string, followeeId: string): Promise<void> {
+  async followUser(followerId: string, followeeId: string): Promise<FollowResult> {
     try {
       // 自分自身のフォローをチェック
       if (followerId === followeeId) {
-        throw new ForbiddenError('自分自身をフォローすることはできません');
+        return {
+          success: false,
+          error: FollowError.SELF_FOLLOW,
+          message: '自分自身をフォローすることはできません',
+        };
       }
 
       // 既にフォローしているかチェック
       const isAlreadyFollowing = await this.followRepository.isFollowing(followerId, followeeId);
       if (isAlreadyFollowing) {
-        throw new ConflictError('既にフォローしています');
+        return {
+          success: false,
+          error: FollowError.ALREADY_FOLLOWING,
+          message: '既にフォローしています',
+        };
       }
 
       // フォロー関係を作成（FOREIGN KEY制約でユーザー存在チェックされる）
       await this.followRepository.createFollow(followerId, followeeId);
-    } catch (error) {
-      // クライアントエラーはそのまま再スロー
-      if (error instanceof ClientError) {
-        throw error;
+      return { success: true };
+    } catch (error: any) {
+      console.error(error);
+
+      // MySQL外部キー制約エラーの場合
+      if (
+        error.code === 'ER_NO_REFERENCED_ROW_2' ||
+        error.errno === 1452 ||
+        (error.message && error.message.includes('foreign key constraint fails'))
+      ) {
+        return {
+          success: false,
+          error: FollowError.USER_NOT_FOUND,
+          message: 'ユーザーが見つかりません',
+        };
       }
 
-      // SQLエラーをチェックして適切なエラーに変換
-      if (error && typeof error === 'object' && 'message' in error) {
-        const errorMessage = String(error.message);
-        // MySQLのFOREIGN KEY制約エラーをメッセージから判定
-        if (
-          errorMessage.includes('foreign key constraint fails') &&
-          errorMessage.includes('REFERENCES `users`')
-        ) {
-          throw new NotFoundError('指定されたユーザーが存在しません');
-        }
-      }
-
-      // その他のエラーはデータベースエラーとして扱う
-      throw new DatabaseError('フォロー処理中にサーバエラーが発生しました');
+      // その他のデータベースエラー
+      return {
+        success: false,
+        error: FollowError.DATABASE_ERROR,
+        message: 'データベースエラーが発生しました',
+      };
     }
   }
 
@@ -61,25 +66,30 @@ export class FollowService implements IFollowService {
    * ユーザのフォローを解除する処理
    * ・フォローしていない場合は解除できない
    */
-  async unfollowUser(followerId: string, followeeId: string): Promise<void> {
+  async unfollowUser(followerId: string, followeeId: string): Promise<UnfollowResult> {
     try {
       // フォローしているかチェック
       const isFollowing = await this.followRepository.isFollowing(followerId, followeeId);
       if (!isFollowing) {
-        // フォローしていない（ユーザー存在有無に関わらず同じエラー）
-        throw new ConflictError('フォロー関係が存在しません');
+        return {
+          success: false,
+          error: FollowError.NOT_FOLLOWING,
+          message: 'フォロー関係が存在しません',
+        };
       }
 
       // フォロー関係を削除
       await this.followRepository.deleteFollow(followerId, followeeId);
-    } catch (error) {
-      // クライアントエラーはそのまま再スロー
-      if (error instanceof ClientError) {
-        throw error;
-      }
+      return { success: true };
+    } catch (error: any) {
+      console.error(error);
 
-      // その他のエラーはデータベースエラーとして扱う
-      throw new DatabaseError('アンフォロー処理中にサーバエラーが発生しました');
+      // その他のデータベースエラー
+      return {
+        success: false,
+        error: FollowError.DATABASE_ERROR,
+        message: 'データベースエラーが発生しました',
+      };
     }
   }
 }

@@ -5,8 +5,8 @@ import type { followRoute } from '../../routes/Follow/followRoute.js';
 import { FollowService } from '../../services/follow/followService.js';
 import { FollowRepository } from '../../repositories/follow/followRepository.js';
 import type { IFollowService } from '../../services/follow/iFollowService.js';
+import { FollowError } from '../../services/follow/iFollowService.js';
 import type { IFollowRepository } from '../../repositories/follow/iFollowRepository.js';
-import { isClientError, isServerError } from '../../utils/errors/customErrors.js';
 
 /**
  * フォロー機能のハンドラー
@@ -24,15 +24,15 @@ const followService: IFollowService = new FollowService(followRepository);
  * POST /follow のリクエストを処理
  */
 const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) => {
-  try {
-    // リクエストボディからデータを取得
-    const { followerId, followeeId } = await c.req.json();
+  // リクエストボディからデータを取得
+  const { followerId, followeeId } = await c.req.json();
 
-    console.log(`[Handler] フォローリクエストを受け付けました: ${followerId} -> ${followeeId}`);
+  console.log(`[Handler] フォローリクエストを受け付けました: ${followerId} -> ${followeeId}`);
 
-    // サービスを呼び出してフォロー処理を実行
-    await followService.followUser(followerId, followeeId);
+  // サービスを呼び出してフォロー処理を実行
+  const result = await followService.followUser(followerId, followeeId);
 
+  if (result.success) {
     console.log(`[Handler] フォロー処理が正常に完了しました: ${followerId} -> ${followeeId}`);
 
     // 成功レスポンスを返す
@@ -42,45 +42,52 @@ const followHandler: RouteHandler<typeof followRoute, {}> = async (c: Context) =
       },
       200
     );
-  } catch (err: any) {
-    console.error('[Handler] フォロー処理中にエラーが発生しました:', err);
+  }
 
-    // ユーザ側エラーの場合
-    if (isClientError(err)) {
+  // エラーレスポンスを返す
+  console.error(
+    `[Handler] フォロー処理でエラーが発生しました: ${result.error} - ${result.message}`
+  );
+
+  // エラータイプに応じて適切なステータスコードを返す
+  switch (result.error) {
+    case FollowError.SELF_FOLLOW:
       return c.json(
         {
-          message: err.message,
-          statusCode: err.statusCode,
-          error: 'Client Error',
-          errorType: 'client',
+          message: result.message,
+          statusCode: 400,
+          error: 'Bad Request',
         },
-        err.statusCode as 400
+        400
       );
-    }
-
-    // サーバ側エラーの場合
-    if (isServerError(err)) {
+    case FollowError.ALREADY_FOLLOWING:
       return c.json(
         {
-          message: 'サーバ内部エラーが発生しました',
+          message: result.message,
+          statusCode: 409,
+          error: 'Conflict',
+        },
+        409
+      );
+    case FollowError.USER_NOT_FOUND:
+      return c.json(
+        {
+          message: result.message,
+          statusCode: 404,
+          error: 'Not Found',
+        },
+        404
+      );
+    case FollowError.DATABASE_ERROR:
+    default:
+      return c.json(
+        {
+          message: result.message,
           statusCode: 500,
           error: 'Internal Server Error',
-          errorType: 'server',
         },
         500
       );
-    }
-
-    // 未知のエラーの場合
-    return c.json(
-      {
-        message: '予期しないエラーが発生しました',
-        statusCode: 500,
-        error: 'Internal Server Error',
-        errorType: 'server',
-      },
-      500
-    );
   }
 };
 
