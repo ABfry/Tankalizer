@@ -29,7 +29,7 @@ interface TimelineProps {
  */
 const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: TimelineProps) => {
   // 投稿データの配列
-  const [posts, setPosts] = useState<PostTypes[]>([]);
+  const [, setPosts] = useState<PostTypes[]>([]);
   // タイムライン項目（投稿+広告）の配列
   const [timelineItems, setTimelineItems] = useState<TimelineItemType[]>([]);
   // 投稿取得時のオフセットID
@@ -137,7 +137,7 @@ const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: Ti
       setHasMore(false);
     }
     isFetchingRef.current = false;
-  }, [limit, max, targetUserId, mode, session.status, session.data?.user_id]);
+  }, [limit, max, targetUserId, mode, session.status, session.data?.user_id, insertAdsInPosts]);
 
   // 見かけ上の投稿を削除する関数
   const deletePost = (postId: string) => {
