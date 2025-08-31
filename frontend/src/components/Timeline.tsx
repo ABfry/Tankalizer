@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { PostTypes } from '@/types/postTypes';
+import { AdType, TimelineItemType } from '@/types/adTypes';
 import PostList from '@/components/PostList';
 import ScrollableList from '@/components/ScrollableList';
 import {
@@ -29,6 +30,8 @@ interface TimelineProps {
 const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: TimelineProps) => {
   // 投稿データの配列
   const [posts, setPosts] = useState<PostTypes[]>([]);
+  // タイムライン項目（投稿+広告）の配列
+  const [timelineItems, setTimelineItems] = useState<TimelineItemType[]>([]);
   // 投稿取得時のオフセットID
   const offsetIdRef = useRef('');
   // これ以上取得できる投稿があるかのフラグ
@@ -43,6 +46,36 @@ const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: Ti
     loading: '短歌を取得中...',
     noMore: 'これ以上短歌を取得できません。',
     toTop: '最新の短歌に戻る',
+  };
+
+  // 広告を生成する関数
+  const generateAd = (): AdType => {
+    const adSlots = ['7312785637'];
+    const randomSlot = adSlots[Math.floor(Math.random() * adSlots.length)];
+
+    return {
+      id: `ad-${Date.now()}-${Math.random()}`,
+      type: 'ad',
+      adSlot: randomSlot,
+      format: 'auto',
+      style: { display: 'block' },
+    };
+  };
+
+  // 投稿配列に広告をランダム挿入する関数
+  const insertAdsInPosts = (posts: PostTypes[]): TimelineItemType[] => {
+    const result: TimelineItemType[] = [];
+
+    posts.forEach((post, index) => {
+      result.push(post);
+
+      // 3-7投稿ごとに広告を挿入（ランダム間隔）
+      if ((index + 1) % (Math.floor(Math.random() * 4) + 3) === 0) {
+        result.push(generateAd());
+      }
+    });
+
+    return result;
   };
 
   /**
@@ -87,6 +120,13 @@ const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: Ti
         }
         return updatedPosts;
       });
+
+      // 新しい投稿に広告を挿入してタイムライン項目に追加
+      setTimelineItems((prevItems) => {
+        const newItemsWithAds = insertAdsInPosts(newPosts);
+        return [...prevItems, ...newItemsWithAds];
+      });
+
       offsetIdRef.current = newPosts[newPosts.length - 1].id;
       // 取得した投稿数がlimit未満の場合は，これ以上取得できる投稿は無い．
       if (newPosts.length < limit) {
@@ -102,12 +142,15 @@ const Timeline = ({ limit, max, targetUserId, mode = 'timeline', className }: Ti
   // 見かけ上の投稿を削除する関数
   const deletePost = (postId: string) => {
     setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+    setTimelineItems((prevItems) =>
+      prevItems.filter((item) => ('type' in item && item.type === 'ad' ? true : item.id !== postId))
+    );
   };
 
   return (
     <ScrollableList
-      items={posts}
-      renderItem={(post) => <PostList key={post.id} posts={[post]} onDelete={deletePost} />}
+      items={timelineItems}
+      renderItem={(item) => <PostList key={item.id} posts={[item]} onDelete={deletePost} />}
       loadMore={loadMorePosts}
       hasMore={hasMore}
       labels={LABELS}
