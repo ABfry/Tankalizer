@@ -171,7 +171,7 @@ const generateTanka = async (originalText: string, image: File | null = null): P
       let result;
       try {
         result = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
+          model: 'gemini-3-flash-preview',
           contents: contents,
           config: {
             systemInstruction: systemInstruction,
