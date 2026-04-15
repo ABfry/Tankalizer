@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { env } from '../config/env.js';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenAI, Type, ApiError } from '@google/genai';
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -28,59 +28,59 @@ const generateTanka = async (originalText: string, image: File | null = null): P
     const promptPath = join(__dirname, 'prompt.txt');
     const systemInstruction = await readFile(promptPath, 'utf-8');
 
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const ai = new GoogleGenAI({ apiKey });
 
     const schema = {
       description: '生成される短歌のオブジェクト',
-      type: SchemaType.OBJECT,
+      type: Type.OBJECT,
       properties: {
         line0: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の1句目, 日本語で5音節程度',
           nullable: false,
         },
         line1: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の2句目, 日本語で7音節程度',
           nullable: false,
         },
         line2: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の3句目, 日本語で5音節程度',
           nullable: false,
         },
         line3: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の4句目, 日本語で7音節程度',
           nullable: false,
         },
         line4: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の5句目, 日本語で7音節程度',
           nullable: false,
         },
         yomi0: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の1句目のふりがな',
           nullable: false,
         },
         yomi1: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の2句目のふりがな',
           nullable: false,
         },
         yomi2: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の3句目のふりがな',
           nullable: false,
         },
         yomi3: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の4句目のふりがな',
           nullable: false,
         },
         yomi4: {
-          type: SchemaType.STRING,
+          type: Type.STRING,
           description: '短歌の5句目のふりがな',
           nullable: false,
         },
@@ -98,15 +98,6 @@ const generateTanka = async (originalText: string, image: File | null = null): P
         'yomi4',
       ],
     };
-
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction: systemInstruction,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-      },
-    });
 
     // 短歌の各句の文字数をチェックする関数
     const isValidTanka = (tankaObject: any): boolean => {
@@ -179,18 +170,28 @@ const generateTanka = async (originalText: string, image: File | null = null): P
 
       let result;
       try {
-        // 画像がある場合はマルチモーダル、ない場合はテキストのみ
-        result = await model.generateContent(contents);
-      } catch (error: any) {
+        result = await ai.models.generateContent({
+          model: 'gemini-2.0-flash',
+          contents: contents,
+          config: {
+            systemInstruction: systemInstruction,
+            responseMimeType: 'application/json',
+            responseJsonSchema: schema,
+          },
+        });
+      } catch (error) {
         console.error(error);
 
-        if (error.message.includes('[429 Too Many Requests]')) {
+        if (error instanceof ApiError && error.status === 429) {
           throw new Error('Gemini API のリクエスト数が上限に達しました。');
         }
         throw new Error('Gemini API でエラーが発生しました。');
       }
 
-      const tankaObject = JSON.parse(result.response.text());
+      if (!result.text) {
+        throw new Error('Gemini API からの応答が空でした。');
+      }
+      const tankaObject = JSON.parse(result.text);
       console.log(tankaObject);
 
       if (isValidTanka(tankaObject)) {
