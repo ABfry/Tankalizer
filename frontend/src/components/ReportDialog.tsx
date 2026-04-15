@@ -43,6 +43,7 @@ const ReportDialog = ({ className, isOpen, setIsOpen, post }: ReportDialogProps)
 
   // ユーザIDからプロフィールをFetchする
   useEffect(() => {
+    if (!isOpen) return;
     const getProfile = async () => {
       if (!userId) return;
       const data = await fetchProfile({
@@ -52,7 +53,7 @@ const ReportDialog = ({ className, isOpen, setIsOpen, post }: ReportDialogProps)
       setProfile(data);
     };
     getProfile();
-  }, [userId, session.data?.user_id]);
+  }, [isOpen, userId, session.data?.user_id]);
 
   const handleReport = useCallback(async () => {
     try {
