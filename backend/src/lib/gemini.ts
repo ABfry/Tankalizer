@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { env } from '../config/env.js';
-import { GoogleGenAI, Type, ApiError } from '@google/genai';
+import { GoogleGenAI, Type, ApiError, ThinkingLevel } from '@google/genai';
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -177,6 +177,9 @@ const generateTanka = async (originalText: string, image: File | null = null): P
             systemInstruction: systemInstruction,
             responseMimeType: 'application/json',
             responseJsonSchema: schema,
+            thinkingConfig: {
+              thinkingLevel: ThinkingLevel.LOW,
+            },
           },
         });
       } catch (error) {
