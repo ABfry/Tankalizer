@@ -1,13 +1,14 @@
 // クライアントコンポーネント
 'use client';
 
-import { PostTypes } from '@/types/postTypes';
+import { TimelineItemType, isAd } from '@/types/adTypes';
 import Post from '@/components/Post';
+import GoogleAds from '@/components/GoogleAds';
 import { motion } from 'framer-motion';
 
 // props の型定義
 interface PostListProps {
-  posts: PostTypes[];
+  posts: TimelineItemType[];
   className?: string;
   onDelete: (postId: string) => void;
 }
@@ -21,7 +22,7 @@ interface PostListProps {
 const PostList = ({ posts, className, onDelete }: PostListProps) => {
   return (
     <div>
-      {posts.map((post, i) => (
+      {posts.map((item, i) => (
         <motion.div
           key={i}
           initial={{ opacity: 0 }}
@@ -29,7 +30,11 @@ const PostList = ({ posts, className, onDelete }: PostListProps) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Post post={post} className={className} onDelete={onDelete} />
+          {isAd(item) ? (
+            <GoogleAds ad={item} />
+          ) : (
+            <Post post={item} className={className} onDelete={onDelete} />
+          )}
         </motion.div>
       ))}
     </div>

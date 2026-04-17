@@ -38,7 +38,7 @@ const HambergerButton = ({ onClick, isOpen, className }: HambergerButtonProps): 
     } else {
       closeMenuAnimation();
     }
-  }, [isOpen]);
+  }, [isOpen, openMenuAnimation, closeMenuAnimation]);
 
   return (
     <button
