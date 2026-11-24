@@ -9,10 +9,11 @@
     "@cf-wasm/photon": "^0.3.7",
     "@google/genai": "^1.50.1",
     "@hono/swagger-ui": "^0.5.0",
-    "@hono/zod-openapi": "^0.18.4",
+    "@hono/zod-openapi": "^1.6.3",
     "aws4fetch": "^1.0.20",
     "fast-xml-parser": "^5.10.1",
-    "hono": "^4.7.1"
+    "hono": "^4.11.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",

@@ -33,7 +33,18 @@ import { getProfileRouteV2 } from './Profile/getProfileRouteV2.js';
 import { updateProfileRouteV2 } from './Profile/updateProfileRouteV2.js';
 import { createUserRouteV2 } from './User/createUserRouteV2.js';
 
-const router = new OpenAPIHono<AppEnv>();
+// zod 4 の ZodError は JSON にすると issues が message（文字列）に潰れるため、
+// zod 3 のときと同じ { success: false, error: { issues, name } } の形で 400 を返す。
+const router = new OpenAPIHono<AppEnv>({
+  defaultHook: (result, c) => {
+    if (!result.success) {
+      return c.json(
+        { success: false, error: { issues: result.error.issues, name: result.error.name } },
+        400
+      );
+    }
+  },
+});
 
 export default router
   .openapi(newsTankaRoute, newsTankaHandler)
